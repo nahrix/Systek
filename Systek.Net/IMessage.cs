@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Systek.Net
 {
-    public class Class1
+    interface IMessage
     {
     }
 }
