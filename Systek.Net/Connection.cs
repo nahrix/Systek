@@ -15,32 +15,53 @@ namespace Systek.Net
 
         protected TcpClient Peer { get; set; }
         protected IPEndPoint Binding { get; set; }
-        protected NetworkStream Stream { get; set; }
+        protected NetworkStream NetStream { get; set; }
+        protected List<Message> Messages { get; set; }
+        protected Mutex MessageMutex { get; set; }
 
         public Connection(IPEndPoint binding)
         {
             Binding = binding;
+            MessageMutex = new Mutex();
         }
 
         public void Initialize()
         {
             Connect();
+            NetStream = new NetworkStream(Peer.Client);
             new Thread(new ThreadStart(_Receive)).Start();
         }
 
-        abstract protected void Connect();
-
-        public void Send(IMessage msg)
+        public void Send(Message msg)
         {
             
         }
 
-        private void _Receive()
+        public List<Message> GetMessages()
+        {
+            MessageMutex.WaitOne();
+
+            List<Message> messages = new List<Message>();
+            foreach (Message msg in Messages)
+            {
+                messages.Add(msg);
+            }
+            Messages.Clear();
+
+            MessageMutex.ReleaseMutex();
+
+            return messages;
+        }
+
+        protected void _Receive()
         {
             while(true)
             {
+                NetStream.
                 Thread.Sleep(100);
             }
         }
+
+        abstract protected void Connect();
     }
 }
