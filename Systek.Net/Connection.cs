@@ -14,25 +14,24 @@ namespace Systek.Net
 {
     abstract class Connection : IConnection
     {
-        public bool Active { get; protected set; }
+        public bool Active { get; private set; }
         public int Timeout { get; set; }
 
-        protected TcpClient Peer { get; set; }
-        protected IPEndPoint Binding { get; set; }
-        protected NetworkStream NetStream { get; set; }
-        protected List<Message> Messages { get; set; }
-        protected Mutex MessageMutex { get; set; }
+        private TcpClient Peer { get; set; }
+        private NetworkStream NetStream { get; set; }
+        private List<Message> Messages { get; set; }
+        private Mutex MessageMutex { get; set; }
 
-        public Connection(IPEndPoint binding)
+        public Connection(TcpClient peer)
         {
+            Peer = peer;
             Timeout = 5;
-            Binding = binding;
             MessageMutex = new Mutex();
         }
 
         public void Initialize()
         {
-            NetStream = new NetworkStream(Peer.Client, true);
+            NetStream = Peer.GetStream();
             new Thread(new ThreadStart(_Receive)).Start();
         }
 
@@ -42,11 +41,11 @@ namespace Systek.Net
             byte[] data;
             
             // Send the serialized header
-            data = Serialize(size);
+            data = _Serialize(size);
             NetStream.Write(data, 0, data.Length);
 
             // Send the serialized message
-            data = Serialize(msg);
+            data = _Serialize(msg);
             NetStream.Write(data, 0, data.Length);
         }
 
@@ -66,7 +65,7 @@ namespace Systek.Net
             return messages;
         }
 
-        protected void _Receive()
+        private void _Receive()
         {
             int bytesRead;
             int bytesToRead;
@@ -88,7 +87,7 @@ namespace Systek.Net
                 }
 
                 // Interpret the message size as a short, and reset the variables for another read
-                bytesToRead = (short)Deserialize(input);
+                bytesToRead = (short)_Deserialize(input);
                 bytesRead = 0;
                 Array.Clear(input, 0, headerSize);
                 
@@ -97,7 +96,7 @@ namespace Systek.Net
                 {
                     bytesRead += NetStream.Read(input, bytesRead, bytesToRead - bytesRead);
                 }
-                msg = (Message)Deserialize(input);
+                msg = (Message)_Deserialize(input);
 
                 // Add the message into the queue of messages to be read
                 MessageMutex.WaitOne();
@@ -107,7 +106,7 @@ namespace Systek.Net
         }
 
         // Serializes an object into a byte array
-        protected static byte[] Serialize(object input)
+        private static byte[] _Serialize(object input)
         {
             using (MemoryStream stream = new MemoryStream())
             {
@@ -117,7 +116,7 @@ namespace Systek.Net
         }
 
         // Deserialzes a byte array into an object
-        protected static object Deserialize(byte[] data)
+        private static object _Deserialize(byte[] data)
         {
             using (MemoryStream stream = new MemoryStream(data))
             {

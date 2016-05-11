@@ -9,5 +9,9 @@ namespace Systek.Net
     interface IConnection
     {
         bool Active { get; }
+
+        void Initialize();
+        void Send(Message msg);
+        List<Message> GetMessages();
     }
 }

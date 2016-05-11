@@ -5,6 +5,8 @@ VisualStudioVersion = 14.0.25123.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Systek.Net", "Systek.Net\Systek.Net.csproj", "{810835D9-FA05-462E-B135-B72EF09D2A9D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTests", "UnitTests\UnitTests.csproj", "{E5D9EB13-7EB8-43E8-B956-7953B49CD7F3}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{810835D9-FA05-462E-B135-B72EF09D2A9D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{810835D9-FA05-462E-B135-B72EF09D2A9D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{810835D9-FA05-462E-B135-B72EF09D2A9D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E5D9EB13-7EB8-43E8-B956-7953B49CD7F3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E5D9EB13-7EB8-43E8-B956-7953B49CD7F3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E5D9EB13-7EB8-43E8-B956-7953B49CD7F3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E5D9EB13-7EB8-43E8-B956-7953B49CD7F3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
