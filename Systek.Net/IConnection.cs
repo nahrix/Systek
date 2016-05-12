@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Systek.Net
 {
-    interface IConnection
+    public interface IConnection
     {
         bool Active { get; }
 

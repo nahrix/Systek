@@ -14,7 +14,7 @@ namespace Systek.Net
     };
 
     [Serializable]
-    struct Message
+    public struct Message
     {
         MessageType Type;
         int Sequence;

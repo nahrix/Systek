@@ -12,10 +12,11 @@ using System.Threading.Tasks;
 
 namespace Systek.Net
 {
-    abstract class Connection : IConnection
+    public class Connection : IConnection
     {
         public bool Active { get; private set; }
         public int Timeout { get; set; }
+        public Exception LastError { get; private set; }
 
         private TcpClient Peer { get; set; }
         private NetworkStream NetStream { get; set; }
@@ -51,16 +52,21 @@ namespace Systek.Net
 
         public List<Message> GetMessages()
         {
-            MessageMutex.WaitOne();
-
             List<Message> messages = new List<Message>();
-            foreach (Message msg in Messages)
-            {
-                messages.Add(msg);
-            }
-            Messages.Clear();
 
-            MessageMutex.ReleaseMutex();
+            try
+            {
+                MessageMutex.WaitOne();
+                foreach (Message msg in Messages)
+                {
+                    messages.Add(msg);
+                }
+                Messages.Clear();
+            }
+            finally
+            {
+                MessageMutex.ReleaseMutex();
+            }
 
             return messages;
         }
@@ -75,33 +81,54 @@ namespace Systek.Net
 
             while (true)
             {
-                bytesRead = 0;
-                bytesToRead = 0;
-                Array.Clear(input, 0, input.Length);
-                NetStream.ReadTimeout = System.Threading.Timeout.Infinite;
-
-                // Read the header, which currently is just a short declaring the size of the upcoming message, in bytes
-                while (bytesRead <= headerSize)
+                try
                 {
-                    bytesRead += NetStream.Read(input, bytesRead, headerSize - bytesRead);
+                    bytesRead = 0;
+                    bytesToRead = 0;
+                    Array.Clear(input, 0, input.Length);
+                    NetStream.ReadTimeout = System.Threading.Timeout.Infinite;
+
+                    // Read the header, which currently is just a short declaring the size of the upcoming message, in bytes
+                    while (bytesRead <= headerSize)
+                    {
+                        bytesRead += NetStream.Read(input, bytesRead, headerSize - bytesRead);
+                    }
+
+                    // Interpret the message size as a short, and reset the variables for another read
+                    bytesToRead = (short)_Deserialize(input);
+                    bytesRead = 0;
+                    Array.Clear(input, 0, headerSize);
+
+                    // Read the message
+                    while (bytesRead <= bytesToRead)
+                    {
+                        bytesRead += NetStream.Read(input, bytesRead, bytesToRead - bytesRead);
+                    }
+                    msg = (Message)_Deserialize(input);
+                }
+                catch (Exception e)
+                {
+                    LastError = e;
+                    Active = false;
+                    return;
                 }
 
-                // Interpret the message size as a short, and reset the variables for another read
-                bytesToRead = (short)_Deserialize(input);
-                bytesRead = 0;
-                Array.Clear(input, 0, headerSize);
-                
-                // Read the message
-                while (bytesRead <= bytesToRead)
+                try
                 {
-                    bytesRead += NetStream.Read(input, bytesRead, bytesToRead - bytesRead);
+                    // Add the message into the queue of messages to be read
+                    MessageMutex.WaitOne();
+                    Messages.Add(msg);
                 }
-                msg = (Message)_Deserialize(input);
-
-                // Add the message into the queue of messages to be read
-                MessageMutex.WaitOne();
-                Messages.Add(msg);
-                MessageMutex.ReleaseMutex();
+                catch (Exception e)
+                {
+                    LastError = e;
+                    Active = false;
+                    return;
+                }
+                finally
+                {
+                    MessageMutex.ReleaseMutex();
+                }
             }
         }
 
