@@ -22,7 +22,7 @@ namespace Systek.Net
     /// </remarks>
     public class Connection : IConnection
     {
-        public bool Active { get; private set; }            // Represents whether the connection is active or not
+        public bool Connected { get; private set; }         // Represents whether the connection is active or not
         public int Timeout { get; set; }                    // The time, in milliseconds, for how long to wait for an expected message before timing out
         public Exception LastError { get; private set; }    // The last exception thrown in the _Receive thread
 
@@ -44,6 +44,7 @@ namespace Systek.Net
             Peer = peer;
             Timeout = DEFAULT_TIMEOUT;
             MessageMutex = new Mutex();
+            Connected = Peer.Connected;
         }
 
         /// <summary>
@@ -61,15 +62,15 @@ namespace Systek.Net
         /// <param name="msg">The Message to send.</param>
         public void Send(Message msg)
         {
-            // Build the serialized header and message
+            // Build the serialized message and header
             byte[] messageData = _Serialize(msg);
+            byte[] headerData = BitConverter.GetBytes(messageData.Length);
 
+            // Validate message size
             if (messageData.Length > MESSAGE_MAX)
             {
-                throw new ArgumentOutOfRangeException("msg", "Message size is too large (> 65535 bytes).")
+                throw new ArgumentOutOfRangeException("msg", "Message size is too large (> 65535 bytes).");
             }
-
-            byte[] headerData = BitConverter.GetBytes(messageData.Length);
             
             // Send the header
             NetStream.Write(headerData, 0, headerData.Length);
@@ -142,6 +143,7 @@ namespace Systek.Net
                     bytesRead = 0;
                     Array.Clear(headerInput, 0, HEADER_SIZE);
                     messageInput = new byte[bytesToRead];  // Size of the incoming message is determined by the header
+                    NetStream.ReadTimeout = Timeout;
 
                     // Read the message, and translate into a Message object
                     while (bytesRead < bytesToRead)
@@ -152,8 +154,9 @@ namespace Systek.Net
                 }
                 catch (Exception e)
                 {
+                    // Save the exception as a property of this class, since it will be lost when the thread terminates
                     LastError = e;
-                    Active = false;
+                    Connected = false;
                     return;
                 }
 
@@ -165,8 +168,9 @@ namespace Systek.Net
                 }
                 catch (Exception e)
                 {
+                    // Save the exception as a property of this class, since it will be lost when the thread terminates
                     LastError = e;
-                    Active = false;
+                    Connected = false;
                     return;
                 }
                 finally

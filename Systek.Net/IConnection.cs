@@ -8,7 +8,7 @@ namespace Systek.Net
 {
     public interface IConnection
     {
-        bool Active { get; }
+        bool Connected { get; }
 
         void Initialize();
         void Send(Message msg);
