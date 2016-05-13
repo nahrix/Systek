@@ -34,10 +34,15 @@ namespace Systek.UnitTests
 
             Message msg = new Message();
             msg.Type = MessageType.COMMAND;
+            msg.Data = "test command";
             msg.Sequence = 0;
             msg.Parameters = new List<string> { "one", "two" };
 
             agentConnection.Send(msg);
+
+            Thread.Sleep(100);
+
+            List<Message> messages = serverConnection.GetMessages();
 
             Thread.Sleep(10000);
             Debug.WriteLine("End");
