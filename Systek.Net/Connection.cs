@@ -52,6 +52,7 @@ namespace Systek.Net
         /// </summary>
         public void Initialize()
         {
+            Messages = new List<Message>();
             NetStream = Peer.GetStream();
             new Thread(new ThreadStart(_Receive)).Start();
         }
