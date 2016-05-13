@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace Systek.Net
 {
     [Serializable]
-    enum MessageType
+    public enum MessageType
     {
         CONTROL = 1,
         COMMAND = 2
@@ -16,9 +16,9 @@ namespace Systek.Net
     [Serializable]
     public struct Message
     {
-        MessageType Type;
-        int Sequence;
-        String Command;
-        List<String> Parameters;
+        public MessageType Type;
+        public int Sequence;
+        public String Command;
+        public List<String> Parameters;
     }
 }

@@ -12,50 +12,85 @@ using System.Threading.Tasks;
 
 namespace Systek.Net
 {
+    /// <summary>
+    /// General representation of a connection, that handles sending and receiving IMessage objects.
+    /// </summary>
+    /// <remarks>
+    /// This class does not maintain its own connection.
+    /// It is the responsibility of the caller to pass in a TcpClient and check for connectivity.
+    /// If the connection is inactive, this object should be destroyed, and a new one created.
+    /// </remarks>
     public class Connection : IConnection
     {
-        public bool Active { get; private set; }
-        public int Timeout { get; set; }
-        public Exception LastError { get; private set; }
+        public bool Active { get; private set; }            // Represents whether the connection is active or not
+        public int Timeout { get; set; }                    // The time, in milliseconds, for how long to wait for an expected message before timing out
+        public Exception LastError { get; private set; }    // The last exception thrown in the _Receive thread
 
-        private TcpClient Peer { get; set; }
-        private NetworkStream NetStream { get; set; }
-        private List<Message> Messages { get; set; }
-        private Mutex MessageMutex { get; set; }
+        private TcpClient Peer { get; set; }                // The socket that this machine will be connected to
+        private NetworkStream NetStream { get; set; }       // The stream that will read/write data between agent and server
+        private List<Message> Messages { get; set; }        // The queue of messages that have already been read from the stream
+        private Mutex MessageMutex { get; set; }            // Lock for the Messages list, since it will be accessed by multiple threads
 
+        private const short HEADER_SIZE = sizeof(int);      // The size of the message header
+        private const int MESSAGE_MAX = 65535;              // The maximum possible size of a Message
+        private const int DEFAULT_TIMEOUT = 5000;           // The default value used for the Timeout property above
+
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="peer">Remote machine that this is connecting to.</param>
         public Connection(TcpClient peer)
         {
             Peer = peer;
-            Timeout = 5;
+            Timeout = DEFAULT_TIMEOUT;
             MessageMutex = new Mutex();
         }
 
+        /// <summary>
+        /// Starts the message listener.
+        /// </summary>
         public void Initialize()
         {
             NetStream = Peer.GetStream();
             new Thread(new ThreadStart(_Receive)).Start();
         }
 
+        /// <summary>
+        /// Sends a Message through the stream to the connected peer.
+        /// </summary>
+        /// <param name="msg">The Message to send.</param>
         public void Send(Message msg)
         {
-            short size = (short)Marshal.SizeOf(typeof(Message));
-            byte[] data;
-            
-            // Send the serialized header
-            data = _Serialize(size);
-            NetStream.Write(data, 0, data.Length);
+            // Build the serialized header and message
+            byte[] messageData = _Serialize(msg);
 
-            // Send the serialized message
-            data = _Serialize(msg);
-            NetStream.Write(data, 0, data.Length);
+            if (messageData.Length > MESSAGE_MAX)
+            {
+                throw new ArgumentOutOfRangeException("msg", "Message size is too large (> 65535 bytes).")
+            }
+
+            byte[] headerData = BitConverter.GetBytes(messageData.Length);
+            
+            // Send the header
+            NetStream.Write(headerData, 0, headerData.Length);
+
+            // Send the message
+            NetStream.Write(messageData, 0, messageData.Length);
         }
 
+        /// <summary>
+        /// Get the queue of Messages received from the connected peer, and clear the existing queue.
+        /// </summary>
+        /// <returns>The queue of Messages.</returns>
         public List<Message> GetMessages()
         {
+            // This will hold a copy of of the queue
             List<Message> messages = new List<Message>();
 
             try
             {
+                // Lock access to the Message queue, and copy everything into messages,
+                // then clear the queue
                 MessageMutex.WaitOne();
                 foreach (Message msg in Messages)
                 {
@@ -65,46 +100,55 @@ namespace Systek.Net
             }
             finally
             {
+                // Allow access to the Message queue
                 MessageMutex.ReleaseMutex();
             }
 
             return messages;
         }
 
+        /// <summary>
+        /// Runs in its own thread, listening for data on the stream, translating that data to Message objects,
+        /// and filling the Message queue with the translated Messages.
+        /// </summary>
         private void _Receive()
         {
-            int bytesRead;
-            int bytesToRead;
-            int headerSize = sizeof(short);
-            byte[] input = new byte[65535];
-            Message msg;
-
+            // Listen forever.  Loop is exited with return statements if an exception is caught.
             while (true)
             {
+                Message msg;    // Incoming Message to be added to the Message queue
+
                 try
                 {
+                    int bytesRead;                                  // How many bytes have been read so far
+                    int bytesToRead;                                // How many bytes remain to be read
+                    byte[] headerInput = new byte[HEADER_SIZE];     // Message header data; size is static
+                    byte[] messageInput;                            // Message data
+
+                    // Reset the variables for a fresh Message
                     bytesRead = 0;
                     bytesToRead = 0;
-                    Array.Clear(input, 0, input.Length);
+                    Array.Clear(headerInput, 0, headerInput.Length);
                     NetStream.ReadTimeout = System.Threading.Timeout.Infinite;
 
                     // Read the header, which currently is just a short declaring the size of the upcoming message, in bytes
-                    while (bytesRead <= headerSize)
+                    while (bytesRead < HEADER_SIZE)
                     {
-                        bytesRead += NetStream.Read(input, bytesRead, headerSize - bytesRead);
+                        bytesRead += NetStream.Read(headerInput, bytesRead, HEADER_SIZE - bytesRead);
                     }
 
-                    // Interpret the message size as a short, and reset the variables for another read
-                    bytesToRead = (short)_Deserialize(input);
+                    // Interpret the message size as an int, and reset the variables for another read
+                    bytesToRead = BitConverter.ToInt32(headerInput, 0);
                     bytesRead = 0;
-                    Array.Clear(input, 0, headerSize);
+                    Array.Clear(headerInput, 0, HEADER_SIZE);
+                    messageInput = new byte[bytesToRead];  // Size of the incoming message is determined by the header
 
-                    // Read the message
-                    while (bytesRead <= bytesToRead)
+                    // Read the message, and translate into a Message object
+                    while (bytesRead < bytesToRead)
                     {
-                        bytesRead += NetStream.Read(input, bytesRead, bytesToRead - bytesRead);
+                        bytesRead += NetStream.Read(messageInput, bytesRead, bytesToRead - bytesRead);
                     }
-                    msg = (Message)_Deserialize(input);
+                    msg = (Message)_Deserialize(messageInput);
                 }
                 catch (Exception e)
                 {
@@ -113,9 +157,9 @@ namespace Systek.Net
                     return;
                 }
 
+                // Add the message into the queue of messages to be read
                 try
                 {
-                    // Add the message into the queue of messages to be read
                     MessageMutex.WaitOne();
                     Messages.Add(msg);
                 }
