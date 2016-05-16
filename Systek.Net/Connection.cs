@@ -58,6 +58,15 @@ namespace Systek.Net
         }
 
         /// <summary>
+        /// Closes the connection.
+        /// </summary>
+        public void Close()
+        {
+            NetStream.Close();
+            Connected = false;
+        }
+
+        /// <summary>
         /// Sends a Message through the stream to the connected peer.
         /// </summary>
         /// <param name="msg">The Message to send.</param>

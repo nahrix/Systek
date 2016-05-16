@@ -47,6 +47,31 @@ namespace Systek.Net
     [Serializable]
     public struct Message
     {
+        // override object.Equals
+        public override bool Equals(object obj)
+        {
+            if (obj == null || GetType() != obj.GetType())
+            {
+                return false;
+            }
+
+            Message test = (Message)obj;
+            if ((Type != test.Type)
+                || (Sequence != test.Sequence)
+                || (Data != test.Data))
+            {
+                return false;
+            }
+
+            if ((Parameters.Count != test.Parameters.Count)
+                || Parameters.Except(test.Parameters).Any())
+            {
+                return false;
+            }
+
+            return true;
+        }
+
         public MessageType Type;
         public int Sequence;
         public String Data;

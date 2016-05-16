@@ -11,6 +11,8 @@ namespace Systek.Net
         bool Connected { get; }
 
         void Initialize();
+        void Close();
+
         void Send(Message msg);
         List<Message> GetMessages();
     }

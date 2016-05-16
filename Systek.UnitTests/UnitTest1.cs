@@ -10,14 +10,16 @@ using System.Threading;
 namespace Systek.UnitTests
 {
     [TestClass]
-    public class UnitTest1
+    public class ConnectionTests
     {
+        private const string localIP = "192.168.1.64";
+        private const int localPort = 65000;
         [TestMethod]
-        public void TestMethod1()
+        public void TestSendAndRecieveMessage()
         {
-            IPEndPoint remoteEndPoint = new IPEndPoint(IPAddress.Parse("192.168.0.199"), 65000);
+            IPEndPoint remoteEndPoint = new IPEndPoint(IPAddress.Parse(localIP), localPort);
 
-            TcpListener serverListener = new TcpListener(IPAddress.Any, 65000);
+            TcpListener serverListener = new TcpListener(IPAddress.Any, localPort);
             serverListener.Start();
             IAsyncResult ar = serverListener.BeginAcceptTcpClient(null, null);
 
@@ -44,8 +46,12 @@ namespace Systek.UnitTests
 
             List<Message> messages = serverConnection.GetMessages();
 
-            Thread.Sleep(10000);
-            Debug.WriteLine("End");
+            Thread.Sleep(100);
+
+            Assert.AreEqual(msg, messages[0]);
+
+            agentConnection.Close();
+            serverConnection.Close();
         }
     }
 }
