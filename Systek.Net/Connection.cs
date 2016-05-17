@@ -42,6 +42,7 @@ namespace Systek.Net
         public Connection(TcpClient peer)
         {
             Peer = peer;
+            Connected = false;
             Timeout = DEFAULT_TIMEOUT;
             MessageMutex = new Mutex();
             Connected = Peer.Connected;

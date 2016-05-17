@@ -9,10 +9,11 @@ namespace Systek.Net
     public interface IConnection
     {
         bool Connected { get; }
+        int Timeout { get; set; }
+        Exception LastError { get; }
 
         void Initialize();
         void Close();
-
         void Send(Message msg);
         List<Message> GetMessages();
     }
