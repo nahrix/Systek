@@ -1,10 +1,10 @@
-﻿using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Systek.Net;
-using System.Net.Sockets;
-using System.Net;
-using System.Diagnostics;
+using Systek.Utility;
+using System;
 using System.Collections.Generic;
+using System.Net;
+using System.Net.Sockets;
 using System.Threading;
 
 namespace Systek.UnitTests
@@ -22,7 +22,7 @@ namespace Systek.UnitTests
         /// it was received on the other end, and equivalent to the original Message.
         /// </summary>
         [TestMethod]
-        public void ICollectionBaseTest()
+        public void IConnectionBaseTest()
         {
             // Create the endpoint representing the server, and listen for a connection
             IPEndPoint remoteEndPoint = new IPEndPoint(IPAddress.Parse(localIP), localPort);
@@ -39,8 +39,8 @@ namespace Systek.UnitTests
             TcpClient server = serverListener.EndAcceptTcpClient(ar);
 
             // Build the IConnections representing agent/server
-            IConnection agentConnection = new Connection(agent);
-            IConnection serverConnection = new Connection(server);
+            IConnection agentConnection = new Connection(agent, Logger.Instance.Log);
+            IConnection serverConnection = new Connection(server, Logger.Instance.Log);
 
             agentConnection.Initialize();
             serverConnection.Initialize();

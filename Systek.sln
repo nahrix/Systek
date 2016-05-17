@@ -14,6 +14,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Systek.Agent", "Systek.Agen
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Systek.Server", "Systek.Server\Systek.Server.csproj", "{8A5FE9F3-8A95-4112-869D-844FAB00F8E5}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Systek.Utility", "Systek.Utility\Systek.Utility.csproj", "{DF154906-5DE6-42FA-910D-763DA24D114A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -36,6 +38,10 @@ Global
 		{8A5FE9F3-8A95-4112-869D-844FAB00F8E5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8A5FE9F3-8A95-4112-869D-844FAB00F8E5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8A5FE9F3-8A95-4112-869D-844FAB00F8E5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DF154906-5DE6-42FA-910D-763DA24D114A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DF154906-5DE6-42FA-910D-763DA24D114A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DF154906-5DE6-42FA-910D-763DA24D114A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DF154906-5DE6-42FA-910D-763DA24D114A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

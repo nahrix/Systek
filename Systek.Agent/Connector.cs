@@ -1,12 +1,9 @@
 ﻿using Systek.Net;
+using Systek.Utility;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net;
 using System.Net.Sockets;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace Systek.Agent
 {
@@ -14,7 +11,7 @@ namespace Systek.Agent
     {
         private IPEndPoint RemoteEndPoint { get; set; }     // End point of the remote server this agent is connecting to
         private TcpClient Peer { get; set; }                // The TCP socket between the agent and server
-        private Connection Agent { get; set; }              // An abstraction of the TCPClient, including Message handling
+        private IConnection Agent { get; set; }              // An abstraction of the TCPClient, including Message handling
         private bool Running { get; set; }                  // Represents whether this connection should be running or not
 
         private const int CONNECTION_CHECK_WAIT = 5000;     // The default amount of time, in ms, to wait between checking connectivity
@@ -45,7 +42,7 @@ namespace Systek.Agent
             try
             {
                 Peer = new TcpClient();
-                Agent = new Connection(Peer);
+                Agent = new Connection(Peer, Logger.Instance.Log);
                 Running = true;
 
                 Thread connector = new Thread(new ThreadStart(_Connector));
@@ -75,7 +72,7 @@ namespace Systek.Agent
                 if (!Agent.Connected)
                 {
                     Peer.Connect(RemoteEndPoint);
-                    Agent = new Connection(Peer);
+                    Agent = new Connection(Peer, Logger.Instance.Log);
                     Agent.Initialize();
                 }
 

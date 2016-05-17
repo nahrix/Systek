@@ -1,14 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Net;
 using System.Net.Sockets;
-using System.Runtime.InteropServices;
 using System.Runtime.Serialization.Formatters.Binary;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace Systek.Net
 {
@@ -26,6 +21,10 @@ namespace Systek.Net
         public int Timeout { get; set; }                    // The time, in milliseconds, for how long to wait for an expected message before timing out
         public Exception LastError { get; private set; }    // The last exception thrown in the _Receive thread
 
+        public delegate void Logger(int typeID, int areaID,
+            string server, string message);                 // This library doesn't implement a logger, so the caller passes in a delgate
+        private Logger Log;
+
         private TcpClient Peer { get; set; }                // The socket that this machine will be connected to
         private NetworkStream NetStream { get; set; }       // The stream that will read/write data between agent and server
         private List<Message> Messages { get; set; }        // The queue of messages that have already been read from the stream
@@ -39,9 +38,10 @@ namespace Systek.Net
         /// Constructor
         /// </summary>
         /// <param name="peer">Remote machine that this is connecting to.</param>
-        public Connection(TcpClient peer)
+        public Connection(TcpClient peer, Logger log)
         {
             Peer = peer;
+            Log = log;
             Connected = false;
             Timeout = DEFAULT_TIMEOUT;
             MessageMutex = new Mutex();
