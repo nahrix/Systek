@@ -63,6 +63,10 @@
       <Project>{810835d9-fa05-462e-b135-b72ef09d2a9d}</Project>
       <Name>Systek.Net</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Systek.Utility\Systek.Utility.csproj">
+      <Project>{df154906-5de6-42fa-910d-763da24d114a}</Project>
+      <Name>Systek.Utility</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

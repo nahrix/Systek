@@ -39,8 +39,8 @@ namespace Systek.UnitTests
             TcpClient server = serverListener.EndAcceptTcpClient(ar);
 
             // Build the IConnections representing agent/server
-            IConnection agentConnection = new Connection(agent, Logger.Instance.Log);
-            IConnection serverConnection = new Connection(server, Logger.Instance.Log);
+            IConnection agentConnection = new Connection(agent, Logger.Instance.TblSystemLog);
+            IConnection serverConnection = new Connection(server, Logger.Instance.TblSystemLog);
 
             agentConnection.Initialize();
             serverConnection.Initialize();

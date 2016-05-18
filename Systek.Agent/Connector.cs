@@ -7,6 +7,9 @@ using System.Threading;
 
 namespace Systek.Agent
 {
+    /// <summary>
+    /// Maintains the agent service's connection to the server.
+    /// </summary>
     class Connector
     {
         private IPEndPoint RemoteEndPoint { get; set; }     // End point of the remote server this agent is connecting to
@@ -42,7 +45,7 @@ namespace Systek.Agent
             try
             {
                 Peer = new TcpClient();
-                Agent = new Connection(Peer, Logger.Instance.Log);
+                Agent = new Connection(Peer, Logger.Instance.TblSystemLog);
                 Running = true;
 
                 Thread connector = new Thread(new ThreadStart(_Connector));
@@ -72,7 +75,7 @@ namespace Systek.Agent
                 if (!Agent.Connected)
                 {
                     Peer.Connect(RemoteEndPoint);
-                    Agent = new Connection(Peer, Logger.Instance.Log);
+                    Agent = new Connection(Peer, Logger.Instance.TblSystemLog);
                     Agent.Initialize();
                 }
 

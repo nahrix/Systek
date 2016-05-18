@@ -23,8 +23,8 @@ namespace Systek.Net
 
         public delegate void Logger(int typeID, int areaID,
             string server, string message);                 // This library doesn't implement a logger, so the caller passes in a delgate
-        private Logger Log;
 
+        private Logger Log { get; set; }                    // The logger function passed in by the caller
         private TcpClient Peer { get; set; }                // The socket that this machine will be connected to
         private NetworkStream NetStream { get; set; }       // The stream that will read/write data between agent and server
         private List<Message> Messages { get; set; }        // The queue of messages that have already been read from the stream

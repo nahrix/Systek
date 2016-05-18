@@ -28,7 +28,7 @@ namespace Systek.Utility
             }
         }
 
-        public void Log(int typeID, int areaID, string server, string message)
+        public void TblSystemLog(int typeID, int areaID, string server, string message)
         {
 
         }
