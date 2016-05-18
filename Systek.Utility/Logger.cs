@@ -6,15 +6,24 @@ using System.Threading.Tasks;
 
 namespace Systek.Utility
 {
+    /// <summary>
+    /// General interface for writing logs to a file, the Windows event log, or the database.
+    /// </summary>
     public class Logger
     {
-        private static Logger Singleton;
+        private static Logger Singleton;        // The logger only needs a single instance
 
+        /// <summary>
+        /// Constructor.  Empty for now.
+        /// </summary>
         private Logger()
         {
 
         }
 
+        /// <summary>
+        /// Used to get the singleton instance of this class.
+        /// </summary>
         public static Logger Instance
         {
             get
@@ -28,9 +37,28 @@ namespace Systek.Utility
             }
         }
 
-        public void TblSystemLog(int typeID, int areaID, string server, string message)
+        /// <summary>
+        /// Writes a log to TblSystemLog in the database.
+        /// </summary>
+        /// <param name="typeID">The ID of the type of log (error/info/etc)</param>
+        /// <param name="areaID">The ID of the area in code being logged.</param>
+        /// <param name="serverID">The ID of the server generating the log.</param>
+        /// <param name="message">The log's content (error message, stack trace, etc)</param>
+        public void TblSystemLog(int type, int area, int server, string msg)
         {
+            using (LoggingContext db = new LoggingContext())
+            {
+                tblSystemLog log = new tblSystemLog
+                {
+                    typeID = type,
+                    areaID = area,
+                    serverID = server,
+                    message = msg
+                };
 
+                db.tblSystemLog.Add(log);
+                db.SaveChanges();
+            }
         }
     }
 }

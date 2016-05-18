@@ -1,0 +1,319 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+  <!-- EF Runtime content -->
+  <edmx:Runtime>
+    <!-- SSDL content -->
+    <edmx:StorageModels>
+    <Schema Namespace="SystekModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2012" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+        <EntityType Name="tblAreaType">
+          <Key>
+            <PropertyRef Name="ID" />
+          </Key>
+          <Property Name="ID" Type="int" Nullable="false" />
+          <Property Name="name" Type="nvarchar" MaxLength="50" Nullable="false" />
+        </EntityType>
+        <EntityType Name="tblRole">
+          <Key>
+            <PropertyRef Name="ID" />
+          </Key>
+          <Property Name="ID" Type="int" Nullable="false" />
+          <Property Name="name" Type="nvarchar" MaxLength="50" Nullable="false" />
+        </EntityType>
+        <EntityType Name="tblServer">
+          <Key>
+            <PropertyRef Name="ID" />
+          </Key>
+          <Property Name="ID" Type="int" Nullable="false" />
+          <Property Name="hostname" Type="nvarchar" MaxLength="50" Nullable="false" />
+          <Property Name="ip" Type="nvarchar" MaxLength="15" Nullable="false" />
+          <Property Name="online" Type="bit" Nullable="false" />
+          <Property Name="roleID" Type="int" Nullable="false" />
+        </EntityType>
+        <EntityType Name="tblSystemLog">
+          <Key>
+            <PropertyRef Name="ID" />
+          </Key>
+          <Property Name="ID" Type="int" Nullable="false" />
+          <Property Name="typeID" Type="int" Nullable="false" />
+          <Property Name="areaID" Type="int" Nullable="false" />
+          <Property Name="serverID" Type="int" Nullable="false" />
+          <Property Name="message" Type="nvarchar(max)" Nullable="false" />
+        </EntityType>
+        <EntityType Name="tblType">
+          <Key>
+            <PropertyRef Name="ID" />
+          </Key>
+          <Property Name="ID" Type="int" Nullable="false" />
+          <Property Name="name" Type="nvarchar" MaxLength="50" Nullable="false" />
+        </EntityType>
+        <Association Name="FK_tblServer_tblRole">
+          <End Role="tblRole" Type="Self.tblRole" Multiplicity="1" />
+          <End Role="tblServer" Type="Self.tblServer" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="tblRole">
+              <PropertyRef Name="ID" />
+            </Principal>
+            <Dependent Role="tblServer">
+              <PropertyRef Name="roleID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_tblSystemLog_tblAreaType">
+          <End Role="tblAreaType" Type="Self.tblAreaType" Multiplicity="1" />
+          <End Role="tblSystemLog" Type="Self.tblSystemLog" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="tblAreaType">
+              <PropertyRef Name="ID" />
+            </Principal>
+            <Dependent Role="tblSystemLog">
+              <PropertyRef Name="areaID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_tblSystemLog_tblServer">
+          <End Role="tblServer" Type="Self.tblServer" Multiplicity="1" />
+          <End Role="tblSystemLog" Type="Self.tblSystemLog" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="tblServer">
+              <PropertyRef Name="ID" />
+            </Principal>
+            <Dependent Role="tblSystemLog">
+              <PropertyRef Name="serverID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_tblSystemLog_tblType">
+          <End Role="tblType" Type="Self.tblType" Multiplicity="1" />
+          <End Role="tblSystemLog" Type="Self.tblSystemLog" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="tblType">
+              <PropertyRef Name="ID" />
+            </Principal>
+            <Dependent Role="tblSystemLog">
+              <PropertyRef Name="typeID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityContainer Name="SystekModelStoreContainer">
+          <EntitySet Name="tblAreaType" EntityType="Self.tblAreaType" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="tblRole" EntityType="Self.tblRole" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="tblServer" EntityType="Self.tblServer" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="tblSystemLog" EntityType="Self.tblSystemLog" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="tblType" EntityType="Self.tblType" Schema="dbo" store:Type="Tables" />
+          <AssociationSet Name="FK_tblServer_tblRole" Association="Self.FK_tblServer_tblRole">
+            <End Role="tblRole" EntitySet="tblRole" />
+            <End Role="tblServer" EntitySet="tblServer" />
+          </AssociationSet>
+          <AssociationSet Name="FK_tblSystemLog_tblAreaType" Association="Self.FK_tblSystemLog_tblAreaType">
+            <End Role="tblAreaType" EntitySet="tblAreaType" />
+            <End Role="tblSystemLog" EntitySet="tblSystemLog" />
+          </AssociationSet>
+          <AssociationSet Name="FK_tblSystemLog_tblServer" Association="Self.FK_tblSystemLog_tblServer">
+            <End Role="tblServer" EntitySet="tblServer" />
+            <End Role="tblSystemLog" EntitySet="tblSystemLog" />
+          </AssociationSet>
+          <AssociationSet Name="FK_tblSystemLog_tblType" Association="Self.FK_tblSystemLog_tblType">
+            <End Role="tblType" EntitySet="tblType" />
+            <End Role="tblSystemLog" EntitySet="tblSystemLog" />
+          </AssociationSet>
+        </EntityContainer>
+      </Schema></edmx:StorageModels>
+    <!-- CSDL content -->
+    <edmx:ConceptualModels>
+      <Schema Namespace="SystekModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
+        <EntityType Name="tblAreaType">
+          <Key>
+            <PropertyRef Name="ID" />
+          </Key>
+          <Property Name="ID" Type="Int32" Nullable="false" />
+          <Property Name="name" Type="String" MaxLength="50" FixedLength="false" Unicode="true" Nullable="false" />
+          <NavigationProperty Name="tblSystemLog" Relationship="Self.FK_tblSystemLog_tblAreaType" FromRole="tblAreaType" ToRole="tblSystemLog" />
+        </EntityType>
+        <EntityType Name="tblRole">
+          <Key>
+            <PropertyRef Name="ID" />
+          </Key>
+          <Property Name="ID" Type="Int32" Nullable="false" />
+          <Property Name="name" Type="String" MaxLength="50" FixedLength="false" Unicode="true" Nullable="false" />
+          <NavigationProperty Name="tblServer" Relationship="SystekModel.FK_tblServer_tblRole" FromRole="tblRole" ToRole="tblServer" />
+        </EntityType>
+        <EntityType Name="tblServer">
+          <Key>
+            <PropertyRef Name="ID" />
+          </Key>
+          <Property Name="ID" Type="Int32" Nullable="false" />
+          <Property Name="hostname" Type="String" MaxLength="50" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="ip" Type="String" MaxLength="15" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="online" Type="Boolean" Nullable="false" />
+          <Property Name="roleID" Type="Int32" Nullable="false" />
+          <NavigationProperty Name="tblSystemLog" Relationship="Self.FK_tblSystemLog_tblServer" FromRole="tblServer" ToRole="tblSystemLog" />
+          <NavigationProperty Name="tblRole" Relationship="SystekModel.FK_tblServer_tblRole" FromRole="tblServer" ToRole="tblRole" />
+        </EntityType>
+        <EntityType Name="tblSystemLog">
+          <Key>
+            <PropertyRef Name="ID" />
+          </Key>
+          <Property Name="ID" Type="Int32" Nullable="false" />
+          <Property Name="typeID" Type="Int32" Nullable="false" />
+          <Property Name="areaID" Type="Int32" Nullable="false" />
+          <Property Name="serverID" Type="Int32" Nullable="false" />
+          <Property Name="message" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" Nullable="false" />
+          <NavigationProperty Name="tblAreaType" Relationship="Self.FK_tblSystemLog_tblAreaType" FromRole="tblSystemLog" ToRole="tblAreaType" />
+          <NavigationProperty Name="tblServer" Relationship="Self.FK_tblSystemLog_tblServer" FromRole="tblSystemLog" ToRole="tblServer" />
+          <NavigationProperty Name="tblType" Relationship="Self.FK_tblSystemLog_tblType" FromRole="tblSystemLog" ToRole="tblType" />
+        </EntityType>
+        <EntityType Name="tblType">
+          <Key>
+            <PropertyRef Name="ID" />
+          </Key>
+          <Property Name="ID" Type="Int32" Nullable="false" />
+          <Property Name="name" Type="String" MaxLength="50" FixedLength="false" Unicode="true" Nullable="false" />
+          <NavigationProperty Name="tblSystemLog" Relationship="Self.FK_tblSystemLog_tblType" FromRole="tblType" ToRole="tblSystemLog" />
+        </EntityType>
+        <Association Name="FK_tblSystemLog_tblAreaType">
+          <End Role="tblAreaType" Type="Self.tblAreaType" Multiplicity="1" />
+          <End Role="tblSystemLog" Type="Self.tblSystemLog" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="tblAreaType">
+              <PropertyRef Name="ID" />
+            </Principal>
+            <Dependent Role="tblSystemLog">
+              <PropertyRef Name="areaID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_tblSystemLog_tblServer">
+          <End Role="tblServer" Type="Self.tblServer" Multiplicity="1" />
+          <End Role="tblSystemLog" Type="Self.tblSystemLog" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="tblServer">
+              <PropertyRef Name="ID" />
+            </Principal>
+            <Dependent Role="tblSystemLog">
+              <PropertyRef Name="serverID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_tblSystemLog_tblType">
+          <End Role="tblType" Type="Self.tblType" Multiplicity="1" />
+          <End Role="tblSystemLog" Type="Self.tblSystemLog" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="tblType">
+              <PropertyRef Name="ID" />
+            </Principal>
+            <Dependent Role="tblSystemLog">
+              <PropertyRef Name="typeID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityContainer Name="LoggingContext" annotation:LazyLoadingEnabled="true">
+          <EntitySet Name="tblAreaType" EntityType="Self.tblAreaType" />
+          <EntitySet Name="tblRole" EntityType="Self.tblRole" />
+          <EntitySet Name="tblServer" EntityType="Self.tblServer" />
+          <EntitySet Name="tblSystemLog" EntityType="Self.tblSystemLog" />
+          <EntitySet Name="tblType" EntityType="Self.tblType" />
+          <AssociationSet Name="FK_tblSystemLog_tblAreaType" Association="Self.FK_tblSystemLog_tblAreaType">
+            <End Role="tblAreaType" EntitySet="tblAreaType" />
+            <End Role="tblSystemLog" EntitySet="tblSystemLog" />
+          </AssociationSet>
+          <AssociationSet Name="FK_tblSystemLog_tblServer" Association="Self.FK_tblSystemLog_tblServer">
+            <End Role="tblServer" EntitySet="tblServer" />
+            <End Role="tblSystemLog" EntitySet="tblSystemLog" />
+          </AssociationSet>
+          <AssociationSet Name="FK_tblSystemLog_tblType" Association="Self.FK_tblSystemLog_tblType">
+            <End Role="tblType" EntitySet="tblType" />
+            <End Role="tblSystemLog" EntitySet="tblSystemLog" />
+          </AssociationSet>
+          <AssociationSet Name="FK_tblServer_tblRole" Association="SystekModel.FK_tblServer_tblRole">
+            <End Role="tblRole" EntitySet="tblRole" />
+            <End Role="tblServer" EntitySet="tblServer" />
+          </AssociationSet>
+        </EntityContainer>
+        <Association Name="FK_tblServer_tblRole">
+          <End Type="SystekModel.tblRole" Role="tblRole" Multiplicity="1" />
+          <End Type="SystekModel.tblServer" Role="tblServer" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="tblRole">
+              <PropertyRef Name="ID" />
+            </Principal>
+            <Dependent Role="tblServer">
+              <PropertyRef Name="roleID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+      </Schema>
+    </edmx:ConceptualModels>
+    <!-- C-S mapping content -->
+    <edmx:Mappings>
+      <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
+        <EntityContainerMapping StorageEntityContainer="SystekModelStoreContainer" CdmEntityContainer="LoggingContext">
+          <EntitySetMapping Name="tblAreaType">
+            <EntityTypeMapping TypeName="SystekModel.tblAreaType">
+              <MappingFragment StoreEntitySet="tblAreaType">
+                <ScalarProperty Name="ID" ColumnName="ID" />
+                <ScalarProperty Name="name" ColumnName="name" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="tblRole">
+            <EntityTypeMapping TypeName="SystekModel.tblRole">
+              <MappingFragment StoreEntitySet="tblRole">
+                <ScalarProperty Name="ID" ColumnName="ID" />
+                <ScalarProperty Name="name" ColumnName="name" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="tblServer">
+            <EntityTypeMapping TypeName="SystekModel.tblServer">
+              <MappingFragment StoreEntitySet="tblServer">
+                <ScalarProperty Name="ID" ColumnName="ID" />
+                <ScalarProperty Name="hostname" ColumnName="hostname" />
+                <ScalarProperty Name="ip" ColumnName="ip" />
+                <ScalarProperty Name="online" ColumnName="online" />
+                <ScalarProperty Name="roleID" ColumnName="roleID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="tblSystemLog">
+            <EntityTypeMapping TypeName="SystekModel.tblSystemLog">
+              <MappingFragment StoreEntitySet="tblSystemLog">
+                <ScalarProperty Name="ID" ColumnName="ID" />
+                <ScalarProperty Name="typeID" ColumnName="typeID" />
+                <ScalarProperty Name="areaID" ColumnName="areaID" />
+                <ScalarProperty Name="serverID" ColumnName="serverID" />
+                <ScalarProperty Name="message" ColumnName="message" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="tblType">
+            <EntityTypeMapping TypeName="SystekModel.tblType">
+              <MappingFragment StoreEntitySet="tblType">
+                <ScalarProperty Name="ID" ColumnName="ID" />
+                <ScalarProperty Name="name" ColumnName="name" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+        </EntityContainerMapping>
+      </Mapping>
+    </edmx:Mappings>
+  </edmx:Runtime>
+  <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <Connection>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="MetadataArtifactProcessing" Value="EmbedInOutputAssembly" />
+      </DesignerInfoPropertySet>
+    </Connection>
+    <Options>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="ValidateOnBuild" Value="true" />
+        <DesignerProperty Name="EnablePluralization" Value="false" />
+        <DesignerProperty Name="IncludeForeignKeysInModel" Value="true" />
+        <DesignerProperty Name="UseLegacyProvider" Value="false" />
+        <DesignerProperty Name="CodeGenerationStrategy" Value="None" />
+      </DesignerInfoPropertySet>
+    </Options>
+    <!-- Diagram content (shape and connector positions) -->
+    <Diagrams></Diagrams>
+  </Designer>
+</edmx:Edmx>
