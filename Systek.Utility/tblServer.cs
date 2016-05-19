@@ -26,8 +26,8 @@ namespace Systek.Utility
         public bool online { get; set; }
         public int roleID { get; set; }
     
+        public virtual tblRole tblRole { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<tblSystemLog> tblSystemLog { get; set; }
-        public virtual tblRole tblRole { get; set; }
     }
 }
