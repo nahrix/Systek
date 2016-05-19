@@ -12,22 +12,18 @@ namespace Systek.Utility
     using System;
     using System.Collections.Generic;
     
-    public partial class tblServer
+    public partial class tblRole
     {
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
-        public tblServer()
+        public tblRole()
         {
-            this.tblSystemLog = new HashSet<tblSystemLog>();
+            this.tblServer = new HashSet<tblServer>();
         }
     
         public int ID { get; set; }
-        public string hostname { get; set; }
-        public string ip { get; set; }
-        public bool online { get; set; }
-        public int roleID { get; set; }
+        public string name { get; set; }
     
-        public virtual tblRole tblRole { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<tblSystemLog> tblSystemLog { get; set; }
+        public virtual ICollection<tblServer> tblServer { get; set; }
     }
 }

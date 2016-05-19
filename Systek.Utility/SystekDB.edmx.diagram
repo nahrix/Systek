@@ -4,16 +4,16 @@
   <edmx:Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
     <!-- Diagram content (shape and connector positions) -->
     <edmx:Diagrams>
-      <Diagram DiagramId="abf43b3b6c5c412aa662f547a1dbebbb" Name="Diagram1">
-        <EntityTypeShape EntityType="SystekModel.tblAreaType" Width="1.5" PointX="0.75" PointY="1.375" IsExpanded="true" />
-        <EntityTypeShape EntityType="SystekModel.tblRole" Width="1.5" PointX="5.875" PointY="4.125" IsExpanded="true" />
-        <EntityTypeShape EntityType="SystekModel.tblServer" Width="1.5" PointX="5.75" PointY="1" IsExpanded="true" />
-        <EntityTypeShape EntityType="SystekModel.tblSystemLog" Width="1.5" PointX="3" PointY="1" IsExpanded="true" />
-        <EntityTypeShape EntityType="SystekModel.tblType" Width="1.5" PointX="3" PointY="4.375" IsExpanded="true" />
-        <AssociationConnector Association="SystekModel.FK_tblSystemLog_tblAreaType" ManuallyRouted="false" />
-        <AssociationConnector Association="SystekModel.FK_tblSystemLog_tblServer" ManuallyRouted="false" />
-        <AssociationConnector Association="SystekModel.FK_tblSystemLog_tblType" ManuallyRouted="false" />
-        <AssociationConnector Association="SystekModel.FK_tblServer_tblRole" />
+      <Diagram DiagramId="8ccd2a7f39b34adfb4962d1175ae116d" Name="Diagram1">
+        <EntityTypeShape EntityType="LoggingModel.tblAreaType" Width="1.5" PointX="3" PointY="4.625" IsExpanded="true" />
+        <EntityTypeShape EntityType="LoggingModel.tblRole" Width="1.5" PointX="0.75" PointY="1.375" IsExpanded="true" />
+        <EntityTypeShape EntityType="LoggingModel.tblServer" Width="1.5" PointX="3" PointY="1" IsExpanded="true" />
+        <EntityTypeShape EntityType="LoggingModel.tblSystemLog" Width="1.5" PointX="5.25" PointY="1" IsExpanded="true" />
+        <EntityTypeShape EntityType="LoggingModel.tblType" Width="1.5" PointX="3" PointY="6.875" IsExpanded="true" />
+        <AssociationConnector Association="LoggingModel.FK_tblSystemLog_tblAreaType" ManuallyRouted="false" />
+        <AssociationConnector Association="LoggingModel.FK_tblServer_tblRole" ManuallyRouted="false" />
+        <AssociationConnector Association="LoggingModel.FK_tblSystemLog_tblServer" ManuallyRouted="false" />
+        <AssociationConnector Association="LoggingModel.FK_tblSystemLog_tblType" ManuallyRouted="false" />
       </Diagram>
     </edmx:Diagrams>
   </edmx:Designer>

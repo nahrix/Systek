@@ -42,8 +42,13 @@ namespace Systek.Server
             while (true)
             {
                 TcpClient agent = listener.AcceptTcpClient();
-                IConnection agentConnection = new Connection(agent, Logger.Instance.TblSystemLog);
+                IConnection agentConnection = new Connection(agent, _NetLibLog);
             }
+        }
+
+        private void _NetLibLog(int type, string message)
+        {
+            //Logger.Instance.TblSystemLog(type, 1, )
         }
     }
 }

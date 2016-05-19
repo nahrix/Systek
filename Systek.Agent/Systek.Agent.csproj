@@ -56,7 +56,9 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="App.config" />
+    <None Include="App.config">
+      <SubType>Designer</SubType>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Systek.Net\Systek.Net.csproj">
@@ -64,7 +66,7 @@
       <Name>Systek.Net</Name>
     </ProjectReference>
     <ProjectReference Include="..\Systek.Utility\Systek.Utility.csproj">
-      <Project>{df154906-5de6-42fa-910d-763da24d114a}</Project>
+      <Project>{9b9f24b2-5493-4fc7-b565-bf2f8fb91617}</Project>
       <Name>Systek.Utility</Name>
     </ProjectReference>
   </ItemGroup>

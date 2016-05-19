@@ -4,7 +4,7 @@
   <edmx:Runtime>
     <!-- SSDL content -->
     <edmx:StorageModels>
-      <Schema Namespace="LoggingModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2012" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+      <Schema Namespace="SystekModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2012" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
         <EntityType Name="tblAreaType">
           <Key>
             <PropertyRef Name="ID" />
@@ -94,7 +94,7 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <EntityContainer Name="LoggingModelStoreContainer">
+        <EntityContainer Name="SystekModelStoreContainer">
           <EntitySet Name="tblAreaType" EntityType="Self.tblAreaType" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="tblRole" EntityType="Self.tblRole" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="tblServer" EntityType="Self.tblServer" Schema="dbo" store:Type="Tables" />
@@ -121,7 +121,7 @@
     </edmx:StorageModels>
     <!-- CSDL content -->
     <edmx:ConceptualModels>
-      <Schema Namespace="LoggingModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
+      <Schema Namespace="SystekModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
         <EntityType Name="tblAreaType">
           <Key>
             <PropertyRef Name="ID" />
@@ -247,9 +247,9 @@
     <!-- C-S mapping content -->
     <edmx:Mappings>
       <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
-        <EntityContainerMapping StorageEntityContainer="LoggingModelStoreContainer" CdmEntityContainer="LoggingContext">
+        <EntityContainerMapping StorageEntityContainer="SystekModelStoreContainer" CdmEntityContainer="LoggingContext">
           <EntitySetMapping Name="tblAreaType">
-            <EntityTypeMapping TypeName="LoggingModel.tblAreaType">
+            <EntityTypeMapping TypeName="SystekModel.tblAreaType">
               <MappingFragment StoreEntitySet="tblAreaType">
                 <ScalarProperty Name="ID" ColumnName="ID" />
                 <ScalarProperty Name="name" ColumnName="name" />
@@ -257,7 +257,7 @@
             </EntityTypeMapping>
           </EntitySetMapping>
           <EntitySetMapping Name="tblRole">
-            <EntityTypeMapping TypeName="LoggingModel.tblRole">
+            <EntityTypeMapping TypeName="SystekModel.tblRole">
               <MappingFragment StoreEntitySet="tblRole">
                 <ScalarProperty Name="ID" ColumnName="ID" />
                 <ScalarProperty Name="name" ColumnName="name" />
@@ -265,7 +265,7 @@
             </EntityTypeMapping>
           </EntitySetMapping>
           <EntitySetMapping Name="tblServer">
-            <EntityTypeMapping TypeName="LoggingModel.tblServer">
+            <EntityTypeMapping TypeName="SystekModel.tblServer">
               <MappingFragment StoreEntitySet="tblServer">
                 <ScalarProperty Name="ID" ColumnName="ID" />
                 <ScalarProperty Name="hostname" ColumnName="hostname" />
@@ -276,7 +276,7 @@
             </EntityTypeMapping>
           </EntitySetMapping>
           <EntitySetMapping Name="tblSystemLog">
-            <EntityTypeMapping TypeName="LoggingModel.tblSystemLog">
+            <EntityTypeMapping TypeName="SystekModel.tblSystemLog">
               <MappingFragment StoreEntitySet="tblSystemLog">
                 <ScalarProperty Name="ID" ColumnName="ID" />
                 <ScalarProperty Name="typeID" ColumnName="typeID" />
@@ -287,7 +287,7 @@
             </EntityTypeMapping>
           </EntitySetMapping>
           <EntitySetMapping Name="tblType">
-            <EntityTypeMapping TypeName="LoggingModel.tblType">
+            <EntityTypeMapping TypeName="SystekModel.tblType">
               <MappingFragment StoreEntitySet="tblType">
                 <ScalarProperty Name="ID" ColumnName="ID" />
                 <ScalarProperty Name="name" ColumnName="name" />

@@ -19,10 +19,8 @@ namespace Systek.Net
     {
         public bool Connected { get; private set; }         // Represents whether the connection is active or not
         public int Timeout { get; set; }                    // The time, in milliseconds, for how long to wait for an expected message before timing out
-        public Exception LastError { get; private set; }    // The last exception thrown in the _Receive thread
 
-        public delegate void Logger(int typeID, int areaID,
-            int serverID, string message);                  // This library doesn't implement a logger, so the caller passes in a delgate
+        public delegate void Logger(int typeID, string message);    // This library doesn't implement a logger, so the caller passes in a delgate
 
         private Logger Log { get; set; }                    // The logger function passed in by the caller
         private TcpClient Peer { get; set; }                // The socket that this machine will be connected to
@@ -166,7 +164,7 @@ namespace Systek.Net
                 catch (Exception e)
                 {
                     // Save the exception as a property of this class, since it will be lost when the thread terminates
-                    LastError = e;
+                    Log(1, e.Message + e.StackTrace);
                     Connected = false;
                     return;
                 }
@@ -180,7 +178,7 @@ namespace Systek.Net
                 catch (Exception e)
                 {
                     // Save the exception as a property of this class, since it will be lost when the thread terminates
-                    LastError = e;
+                    Log(1, e.Message + e.StackTrace);
                     Connected = false;
                     return;
                 }

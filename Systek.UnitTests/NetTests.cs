@@ -12,7 +12,7 @@ namespace Systek.UnitTests
     [TestClass]
     public class NetTests
     {
-        private const string localIP = "192.168.0.199";
+        private const string localIP = "192.168.1.64";
         private const int localPort = 65000;
 
         /// <summary>
@@ -39,8 +39,8 @@ namespace Systek.UnitTests
             TcpClient server = serverListener.EndAcceptTcpClient(ar);
 
             // Build the IConnections representing agent/server
-            IConnection agentConnection = new Connection(agent, Logger.Instance.TblSystemLog);
-            IConnection serverConnection = new Connection(server, Logger.Instance.TblSystemLog);
+            IConnection agentConnection = new Connection(agent, _NetLibLog);
+            IConnection serverConnection = new Connection(server, _NetLibLog);
 
             agentConnection.Initialize();
             serverConnection.Initialize();
@@ -67,6 +67,11 @@ namespace Systek.UnitTests
             // Clean up threads
             agentConnection.Close();
             serverConnection.Close();
+        }
+
+        private void _NetLibLog(int type, string message)
+        {
+            Logger.Instance.TblSystemLog(type, 1, 1, message);
         }
 
         /// <summary>
