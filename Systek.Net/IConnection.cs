@@ -10,7 +10,6 @@ namespace Systek.Net
     {
         bool Connected { get; }
         int Timeout { get; set; }
-        Exception LastError { get; }
 
         void Initialize();
         void Close();

@@ -1,6 +1,7 @@
 ﻿using Systek.Net;
 using Systek.Utility;
 using System;
+using System.Configuration;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
@@ -14,8 +15,9 @@ namespace Systek.Agent
     {
         private IPEndPoint RemoteEndPoint { get; set; }     // End point of the remote server this agent is connecting to
         private TcpClient Peer { get; set; }                // The TCP socket between the agent and server
-        private IConnection Agent { get; set; }              // An abstraction of the TCPClient, including Message handling
+        private IConnection Agent { get; set; }             // An abstraction of the TCPClient, including Message handling
         private bool Running { get; set; }                  // Represents whether this connection should be running or not
+        private string LogPath { get; set; }                // Path to the log files
 
         private const int CONNECTION_CHECK_WAIT = 5000;     // The default amount of time, in ms, to wait between checking connectivity
 
@@ -44,8 +46,9 @@ namespace Systek.Agent
         {
             try
             {
+                LogPath = ConfigurationManager.AppSettings["logPath"];
                 Peer = new TcpClient();
-                Agent = new Connection(Peer, Logger.Instance.TblSystemLog);
+                Agent = new Connection(Peer, _NetLibLog);
                 Running = true;
 
                 Thread connector = new Thread(new ThreadStart(_Connector));
@@ -55,6 +58,11 @@ namespace Systek.Agent
                 Running = false;
                 throw;
             }
+        }
+
+        private void _NetLibLog(int type, string message)
+        {
+            Logger.Instance.FileLog(type, LogPath, message);
         }
 
         /// <summary>
@@ -75,7 +83,7 @@ namespace Systek.Agent
                 if (!Agent.Connected)
                 {
                     Peer.Connect(RemoteEndPoint);
-                    Agent = new Connection(Peer, Logger.Instance.TblSystemLog);
+                    Agent = new Connection(Peer, _NetLibLog);
                     Agent.Initialize();
                 }
 
