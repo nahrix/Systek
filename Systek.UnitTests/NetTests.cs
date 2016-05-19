@@ -12,7 +12,7 @@ namespace Systek.UnitTests
     [TestClass]
     public class NetTests
     {
-        private const string localIP = "192.168.0.199";
+        private const string localIP = "192.168.1.64";
         private const int localPort = 65000;
 
         /// <summary>
@@ -63,6 +63,8 @@ namespace Systek.UnitTests
 
             // The test is that the sent message and receive message have equivilent content
             Assert.AreEqual(msg, messages[0]);
+
+            Logger.Instance.TblSystemLog(1, 1, 1, "test");
 
             // Clean up threads
             agentConnection.Close();
