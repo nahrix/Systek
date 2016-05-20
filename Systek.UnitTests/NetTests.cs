@@ -12,8 +12,8 @@ namespace Systek.UnitTests
     [TestClass]
     public class NetTests
     {
-        private const string localIP = "192.168.1.64";
-        private const int localPort = 65000;
+        private const string LocalIP = "192.168.0.199";
+        private const int LocalPort = 65000;
 
         /// <summary>
         /// Basic IConnection functionality testing.  Builds a TCPClient connection
@@ -25,9 +25,9 @@ namespace Systek.UnitTests
         public void IConnectionBaseTest()
         {
             // Create the endpoint representing the server, and listen for a connection
-            IPEndPoint remoteEndPoint = new IPEndPoint(IPAddress.Parse(localIP), localPort);
+            IPEndPoint remoteEndPoint = new IPEndPoint(IPAddress.Parse(LocalIP), LocalPort);
 
-            TcpListener serverListener = new TcpListener(IPAddress.Any, localPort);
+            TcpListener serverListener = new TcpListener(IPAddress.Any, LocalPort);
             serverListener.Start();
             IAsyncResult ar = serverListener.BeginAcceptTcpClient(null, null);
 
@@ -64,8 +64,6 @@ namespace Systek.UnitTests
             // The test is that the sent message and receive message have equivilent content
             Assert.AreEqual(msg, messages[0]);
 
-            Logger.Instance.TblSystemLog(1, 1, 1, "test");
-
             // Clean up threads
             agentConnection.Close();
             serverConnection.Close();
@@ -73,7 +71,7 @@ namespace Systek.UnitTests
 
         private void _NetLibLog(int type, string message)
         {
-            Logger.Instance.TblSystemLog(type, 1, 1, message);
+            
         }
 
         /// <summary>
@@ -82,7 +80,7 @@ namespace Systek.UnitTests
         [TestMethod]
         public void AgentServerConnectorTest()
         {
-            IPEndPoint remoteEndPoint = new IPEndPoint(IPAddress.Parse(localIP), localPort);
+            IPEndPoint remoteEndPoint = new IPEndPoint(IPAddress.Parse(LocalIP), LocalPort);
         }
     }
 }

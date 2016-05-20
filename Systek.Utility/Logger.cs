@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -46,18 +47,25 @@ namespace Systek.Utility
         /// <param name="message">The log's content (error message, stack trace, etc)</param>
         public void TblSystemLog(int type, int area, int server, string msg)
         {
-            using (LoggingContext db = new LoggingContext())
+            try
             {
-                tblSystemLog log = new tblSystemLog
+                using (LoggingContext db = new LoggingContext())
                 {
-                    typeID = type,
-                    areaID = area,
-                    serverID = server,
-                    message = msg
-                };
+                    tblSystemLog log = new tblSystemLog
+                    {
+                        typeID = type,
+                        areaID = area,
+                        serverID = server,
+                        message = msg
+                    };
 
-                db.tblSystemLog.Add(log);
-                db.SaveChanges();
+                    db.tblSystemLog.Add(log);
+                    db.SaveChanges();
+                }
+            }
+            catch (Exception)
+            {
+                // If the logger throws an error.. Oh god... Cry silently?
             }
         }
 
@@ -69,21 +77,24 @@ namespace Systek.Utility
         public void FileLog(int type, string filePath, string message)
         {
             string logType;
+            string timeStamp = DateTime.Now.ToString("HH:mm:ss");
 
-            switch (type)
+            try
             {
-                case 1:
-                    logType = "ERROR";
-                    break;
-                case 2:
-                    logType = "INFO";
-                    break;
-                case 3:
-                    logType = "OTHER";
-                    break;
+                // Convert the type of message into something human-readable
+                using (LoggingContext db = new LoggingContext())
+                {
+                    logType = db.tblType.Find(type).name.ToUpper();
+                }
+
+                StreamWriter file = new StreamWriter(filePath, true);
+                file.WriteLine("[" + timeStamp + "] " + logType + ": " + message);
+                file.Close();
             }
-
-
+            catch (Exception)
+            {
+                // The logger failed, so this comment will serve as the epitaph for the poor, unlogged exception.
+            }
         }
     }
 }
