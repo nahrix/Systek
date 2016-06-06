@@ -12,7 +12,7 @@ namespace Systek.UnitTests
     [TestClass]
     public class NetTests
     {
-        private const string LocalIP = "192.168.0.199";
+        private const string LocalIP = "192.168.1.177";
         private const int LocalPort = 65000;
 
         /// <summary>

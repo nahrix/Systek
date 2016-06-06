@@ -11,11 +11,13 @@ namespace Systek.Net
     public enum MessageType
     {
         EXECUTE = 1,        // Run any queued commands
-        COMMAND = 2,        // Queue a command
-        CLOSE = 3,          // Gracefully close the connection
-        CLEAR = 4,          // Clear the queue of commands
-        EXECUTE_AT = 5,     // Run the queue of commands, starting at an index
-        LOG = 6             // Log a message
+        NEWSET = 2,         // Start building a new queue of commands
+        COMMAND = 3,        // Queue a command
+        CLOSE = 4,          // Gracefully close the connection
+        CLEAR = 5,          // Clear the queue of commands
+        EXECUTE_AT = 6,     // Run the queue of commands, starting at an index
+        LOG = 7,            // Log a message
+        FAIL = 8            // Report a failure to execute a peer's request
     };
 
     /// <summary>
@@ -23,9 +25,14 @@ namespace Systek.Net
     /// </summary>
     /// <remarks>
     /// EXECUTE
-    /// No values need to be filled out
+    /// CommandSetId: The ID of the command set to execute
+    /// 
+    /// NEWCOMMAND
+    /// CommandSetId: The ID number that represents the entire queue of commands
+    /// Sequence: The total number of commands that will be in this set
     /// 
     /// COMMAND
+    /// CommandSetId: The ID number that represents the entire queue of commands
     /// Sequence: The sequence number of the command
     /// Data: The command to be queued up
     /// Parameters: The command's parameters, if there are any
@@ -45,7 +52,7 @@ namespace Systek.Net
     [Serializable]
     public struct Message
     {
-        // override object.Equals
+        // override object.Equals.  Testing each member individually for equality.
         public override bool Equals(object obj)
         {
             if (obj == null || GetType() != obj.GetType())
@@ -56,13 +63,13 @@ namespace Systek.Net
             Message test = (Message)obj;
             if ((Type != test.Type)
                 || (Sequence != test.Sequence)
+                || (CommandSetId != test.CommandSetId)
                 || (Data != test.Data))
             {
                 return false;
             }
 
-            if ((Parameters.Count != test.Parameters.Count)
-                || Parameters.Except(test.Parameters).Any())
+            if (!Parameters.SequenceEqual(test.Parameters))
             {
                 return false;
             }
@@ -71,6 +78,7 @@ namespace Systek.Net
         }
 
         public MessageType Type;
+        public int CommandSetId;
         public int Sequence;
         public String Data;
         public List<String> Parameters;
