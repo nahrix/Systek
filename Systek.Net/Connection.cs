@@ -189,7 +189,57 @@ namespace Systek.Net
             }
         }
 
-        // Serializes an object into a byte array
+        /// <summary>
+        /// Processes a Message, handling all of the control commands defined in
+        /// the Systek.Net.MessageType enum.
+        /// </summary>
+        /// <param name="msg">The message to be translated.</param>
+        private void TranslateMessage(Message msg)
+        {
+            try
+            {
+                MessageMutex.WaitOne();
+
+                switch(msg.Type)
+                {
+                    case MessageType.NEWSET:
+                        break;
+
+                    case MessageType.COMMAND:
+                        break;
+
+                    case MessageType.CLOSE:
+                        break;
+
+                    case MessageType.CLEAR:
+                        break;
+
+                    case MessageType.EXECUTE:
+                        break;
+
+                    case MessageType.EXECUTE_AT:
+                        break;
+
+                    case MessageType.FAIL:
+                        break;
+
+                    case MessageType.LOG:
+                        break;
+
+                    default:
+                        break;
+                }
+            }
+            finally
+            {
+                MessageMutex.ReleaseMutex();
+            }
+            
+        }
+
+        /// <summary>
+        /// Serializes an object into a byte array
+        /// </summary>
         private static byte[] _Serialize(object input)
         {
             using (MemoryStream stream = new MemoryStream())
@@ -199,7 +249,11 @@ namespace Systek.Net
             }
         }
 
-        // Deserialzes a byte array into an object
+        /// <summary>
+        /// Deserialzes a byte array into an object
+        /// </summary>
+        /// <param name="data">The byte array to be deserialized.</param>
+        /// <returns></returns>
         private static object _Deserialize(byte[] data)
         {
             using (MemoryStream stream = new MemoryStream(data))
