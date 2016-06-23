@@ -41,7 +41,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Command.cs" />
+    <Compile Include="CommandSet.cs" />
     <Compile Include="Connection.cs" />
+    <Compile Include="ICommand.cs" />
+    <Compile Include="ICommandSet.cs" />
     <Compile Include="IConnection.cs" />
     <Compile Include="Message.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

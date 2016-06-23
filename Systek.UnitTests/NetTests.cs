@@ -46,11 +46,16 @@ namespace Systek.UnitTests
             serverConnection.Initialize();
 
             // Mock Message to be passed from agent to server
-            Message msg = new Message();
-            msg.Type = MessageType.COMMAND;
-            msg.Data = "test command";
-            msg.Sequence = 0;
-            msg.Parameters = new List<string> { "one", "two" };
+            ICommand command1 = new Command(1, 1, "test command");
+            ICommand command2 = new Command(1, 2, "test command 2");
+            ICommand command3 = new Command(1, 3, "1234");
+
+            ICommandSet set = new CommandSet(1, 3);
+            set.AddCommand(command1);
+            set.AddCommand(command2);
+            set.AddCommand(command3);
+
+            Message msg = new Message(MessageType.COMMAND, set);
 
             // Send the message
             agentConnection.Send(msg);
@@ -62,7 +67,7 @@ namespace Systek.UnitTests
             List<Message> messages = serverConnection.GetMessages();
 
             // The test is that the sent message and receive message have equivilent content
-            Assert.AreEqual(msg, messages[0]);
+            Assert.IsTrue(msg.Equals(messages[0]));
 
             // Clean up threads
             agentConnection.Close();

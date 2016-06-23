@@ -15,7 +15,7 @@ namespace Systek.Agent
     {
         private IPEndPoint RemoteEndPoint { get; set; }     // End point of the remote server this agent is connecting to
         private TcpClient Peer { get; set; }                // The TCP socket between the agent and server
-        private IConnection Agent { get; set; }             // An abstraction of the TCPClient, including Message handling
+        private IConnection AgentConnection { get; set; }   // An abstraction of the TCPClient, including Message handling
         private bool Running { get; set; }                  // Represents whether this connection should be running or not
         private string LogPath { get; set; }                // Path to the log files
 
@@ -35,7 +35,7 @@ namespace Systek.Agent
         /// </summary>
         public void Stop()
         {
-            Agent.Close();
+            AgentConnection.Close();
             Running = false;
         }
 
@@ -48,7 +48,7 @@ namespace Systek.Agent
             {
                 LogPath = ConfigurationManager.AppSettings["logPath"];
                 Peer = new TcpClient();
-                Agent = new Connection(Peer, _NetLibLog);
+                AgentConnection = new Connection(Peer, _NetLibLog);
                 Running = true;
 
                 Thread connector = new Thread(new ThreadStart(_Connector));
@@ -80,11 +80,11 @@ namespace Systek.Agent
                 }
 
                 // Rebuild the connection if it's down
-                if (!Agent.Connected)
+                if (!AgentConnection.Connected)
                 {
                     Peer.Connect(RemoteEndPoint);
-                    Agent = new Connection(Peer, _NetLibLog);
-                    Agent.Initialize();
+                    AgentConnection = new Connection(Peer, _NetLibLog);
+                    AgentConnection.Initialize();
                 }
 
                 // Wait before the next check, to minimize resource footprint

@@ -8,29 +8,40 @@ using System.Threading;
 namespace Systek.Net
 {
     /// <summary>
-    /// General representation of a connection, that handles sending and receiving IMessage objects.
+    /// Base implementation of Systek.Net.IConnection.
     /// </summary>
-    /// <remarks>
-    /// This class does not maintain its own connection.
-    /// It is the responsibility of the caller to pass in a TcpClient and check for connectivity.
-    /// If the connection is inactive, this object should be destroyed, and a new one created.
-    /// </remarks>
+    /// <seealso cref="Systek.Net.IConnection" />
     public class Connection : IConnection
     {
-        public bool Connected { get; private set; }         // Represents whether the connection is active or not
-        public int Timeout { get; set; }                    // The time, in milliseconds, for how long to wait for an expected message before timing out
+        /// <summary>
+        /// Represents whether the connection is active or not
+        /// </summary>
+        public bool Connected { get; private set; }
 
-        public delegate void Logger(int typeID, string message);    // This library doesn't implement a logger, so the caller passes in a delgate
+        /// <summary>
+        /// The time, in milliseconds, for how long to wait for an expected message before timing out
+        /// </summary>
+        public int Timeout { get; set; }
 
-        private Logger Log { get; set; }                    // The logger function passed in by the caller
-        private TcpClient Peer { get; set; }                // The socket that this machine will be connected to
-        private NetworkStream NetStream { get; set; }       // The stream that will read/write data between agent and server
-        private List<Message> Messages { get; set; }        // The queue of messages that have already been read from the stream
-        private Mutex MessageMutex { get; set; }            // Lock for the Messages list, since it will be accessed by multiple threads
+        /// <summary>
+        /// This library doesn't implement a logger, so the caller passes in a delgate
+        /// </summary>
+        /// <param name="typeID">Type of log, definted in tblType (1 for error, 2 for info, etc)</param>
+        /// <param name="message">The message to write to the log</param>
+        public delegate void Logger(int typeID, string message);
 
-        private const short HEADER_SIZE = sizeof(int);      // The size of the message header
-        private const int MESSAGE_MAX = 65535;              // The maximum possible size of a Message
-        private const int DEFAULT_TIMEOUT = 5000;           // The default value used for the Timeout property above
+        private Logger Log { get; set; }                // The logger function passed in by the caller
+        private TcpClient Peer { get; set; }            // The socket that this machine will be connected to
+        private NetworkStream NetStream { get; set; }   // The stream that will read/write data between agent and server
+
+        private List<Message> Messages { get; set; }    // The queue of messages that have already been read from the stream
+        private Dictionary<int, CommandSet> CommandSets { get; set; }    // The queue of command sets.  The key is the CommandSetId, and the value
+                                                                         // is the set of commands to be run
+        private Mutex MessageMutex { get; set; }        // Lock for the Messages list, since it will be accessed by multiple threads
+
+        private const short HEADER_SIZE = sizeof(int);  // The size of the message header
+        private const int MESSAGE_MAX = 65535;          // The maximum possible size of a Message
+        private const int DEFAULT_TIMEOUT = 5000;       // The default value used for the Timeout property above
 
         /// <summary>
         /// Constructor
@@ -66,9 +77,30 @@ namespace Systek.Net
         }
 
         /// <summary>
+        /// Finds the first available complete set of commands, and returns it to the caller.
+        /// Also, removes it from this object's command set container
+        /// </summary>
+        /// <returns></returns>
+        public ICommandSet GetNextCommandSet()
+        {
+            MessageMutex.WaitOne();
+            try
+            {
+                
+            }
+            finally
+            {
+                MessageMutex.ReleaseMutex();
+            }
+
+            return null;
+        }
+
+        /// <summary>
         /// Sends a Message through the stream to the connected peer.
         /// </summary>
         /// <param name="msg">The Message to send.</param>
+        /// <exception cref="System.ArgumentOutOfRangeException">msg;Message size is too large (> 65535 bytes).</exception>
         public void Send(Message msg)
         {
             // Build the serialized message and header
@@ -91,7 +123,9 @@ namespace Systek.Net
         /// <summary>
         /// Get the queue of Messages received from the connected peer, and clear the existing queue.
         /// </summary>
-        /// <returns>The queue of Messages.</returns>
+        /// <returns>
+        /// The queue of Messages.
+        /// </returns>
         public List<Message> GetMessages()
         {
             // This will hold a copy of of the queue
@@ -202,9 +236,6 @@ namespace Systek.Net
 
                 switch(msg.Type)
                 {
-                    case MessageType.NEWSET:
-                        break;
-
                     case MessageType.COMMAND:
                         break;
 
@@ -215,9 +246,6 @@ namespace Systek.Net
                         break;
 
                     case MessageType.EXECUTE:
-                        break;
-
-                    case MessageType.EXECUTE_AT:
                         break;
 
                     case MessageType.FAIL:
