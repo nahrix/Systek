@@ -48,7 +48,7 @@ namespace Systek.Agent
             {
                 LogPath = ConfigurationManager.AppSettings["logPath"];
                 Peer = new TcpClient();
-                AgentConnection = new Connection(Peer, _NetLibLog);
+                AgentConnection = new Connection(Peer, _LogHandler, _ExecuteHandler);
                 Running = true;
 
                 Thread connector = new Thread(new ThreadStart(_Connector));
@@ -60,9 +60,22 @@ namespace Systek.Agent
             }
         }
 
-        private void _NetLibLog(int type, string message)
+        // Handles log events
+        private void _LogHandler(object sender, LogEventArgs e)
         {
-            Logger.Instance.FileLog(type, LogPath, message);
+            string message = e.Message;
+            
+            if (e.ExceptionDetail != null)
+            {
+                message += "\n" + e.ExceptionDetail.Message + "\n" + e.ExceptionDetail.StackTrace;
+            }
+            Logger.Instance.FileLog(e.Type, LogPath, message);
+        }
+
+        // Handles execution events
+        private bool _ExecuteHandler(object sender, ExecuteEventArgs e)
+        {
+            return true;
         }
 
         /// <summary>
@@ -83,7 +96,7 @@ namespace Systek.Agent
                 if (!AgentConnection.Connected)
                 {
                     Peer.Connect(RemoteEndPoint);
-                    AgentConnection = new Connection(Peer, _NetLibLog);
+                    AgentConnection = new Connection(Peer, _LogHandler, _ExecuteHandler);
                     AgentConnection.Initialize();
                 }
 

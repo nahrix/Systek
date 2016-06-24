@@ -30,19 +30,22 @@ namespace Systek.Net
         /// </summary>
         public int ID { get; private set; }
 
-        // The highest sequence number in this commandSet
-        private int Sequence { get; set; }
+        /// <summary>
+        /// The highest sequence number in this commandSet.
+        /// </summary>
+        public int Sequence { get; private set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CommandSet" /> class.
         /// </summary>
         /// <param name="id">The unique ID of this CommandSet.</param>
-        /// <param name="sequence">The highest sequence number in this CommandSet.</param>
+        /// <param name="sequence">The highest sequence number that this CommandSet will contain.</param>
         public CommandSet(int id, int sequence)
         {
             ID = id;
             Sequence = sequence;
             Commands = new List<ICommand>();
+            Complete = false;
         }
 
         /// <summary>
@@ -69,6 +72,11 @@ namespace Systek.Net
 
             // Add the command, and return success
             Commands.Add(command);
+            if (Commands.Count == Sequence)
+            {
+                Complete = true;
+            }
+
             return true;
         }
 
@@ -76,10 +84,20 @@ namespace Systek.Net
         /// Removes a command from the set, after performing some validation checks.
         /// </summary>
         /// <param name="sequence">The sequence number of the command to remove.</param>
-        /// <returns></returns>
+        /// <returns>true if a command was found and removed.  false if the command was not found.</returns>
         public bool RemoveCommand(int sequence)
         {
-            // To be implemented
+            // Look for a Command with a matching sequence number, and remove it if found
+            foreach (ICommand cmd in Commands)
+            {
+                if (cmd.Sequence == sequence)
+                {
+                    Commands.Remove(cmd);
+                    Complete = false;
+                    return true;
+                }
+            }
+
             return false;
         }
 
@@ -92,6 +110,7 @@ namespace Systek.Net
         /// </returns>
         public override bool Equals(object other)
         {
+            // Type check
             if ((other == null) || (other.GetType() != typeof(CommandSet)))
             {
                 return false;
@@ -105,7 +124,7 @@ namespace Systek.Net
                 return false;
             }
 
-            // Comparison of non-primitives
+            // Comparison of objects
             if ((Commands != null) && !Commands.SequenceEqual(test.Commands))
             {
                 return false;

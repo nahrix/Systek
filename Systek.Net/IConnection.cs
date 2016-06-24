@@ -27,6 +27,16 @@ namespace Systek.Net
         int Timeout { get; set; }
 
         /// <summary>
+        /// Occurs when logging is required.
+        /// </summary>
+        event LogEventHandler LogEvent;
+
+        /// <summary>
+        /// Occurs when a CommandSet needs to be executed.
+        /// </summary>
+        event ExecuteEventHandler ExecuteEvent;
+
+        /// <summary>
         /// Starts the message listener.
         /// </summary>
         void Initialize();

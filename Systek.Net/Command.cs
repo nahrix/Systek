@@ -65,6 +65,7 @@ namespace Systek.Net
         /// </returns>
         public override bool Equals(object other)
         {
+            // Type check
             if ((other == null) || (other.GetType() != typeof(Command)))
             {
                 return false;
@@ -72,6 +73,7 @@ namespace Systek.Net
 
             Command test = (Command)other;
 
+            // Comparison of primitives
             if ((CommandSetId != test.CommandSetId) || (Sequence != test.Sequence) || (Cmd != test.Cmd)
                 || !Parameters.SequenceEqual(test.Parameters))
             {

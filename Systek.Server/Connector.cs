@@ -42,13 +42,18 @@ namespace Systek.Server
             while (true)
             {
                 TcpClient agent = listener.AcceptTcpClient();
-                IConnection agentConnection = new Connection(agent, _NetLibLog);
+                IConnection agentConnection = new Connection(agent, _NetLibLogHandler, _ExecuteHandler);
             }
         }
 
-        private void _NetLibLog(int type, string message)
+        private void _NetLibLogHandler(object sender, LogEventArgs e)
         {
-            //Logger.Instance.TblSystemLog(type, 1, )
+
+        }
+
+        private bool _ExecuteHandler(object sender, ExecuteEventArgs e)
+        {
+            return true;
         }
     }
 }

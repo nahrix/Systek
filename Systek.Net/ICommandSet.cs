@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
 namespace Systek.Net
 {
@@ -23,10 +19,14 @@ namespace Systek.Net
         List<ICommand> Commands { get; }
 
         /// <summary>
-        /// The unique ID of this CommandSet.  Is used to validate that the commands that are added are
-        /// for the right CommandSet.
+        /// The unique ID of this CommandSet.  Is used to validate that the commands added are for the correct CommandSet.
         /// </summary>
         int ID { get; }
+
+        /// <summary>
+        /// The highest sequence number in this commandSet.
+        /// </summary>
+        int Sequence { get; }
 
         /// <summary>
         /// Adds a command to the set, after performing some validation checks.

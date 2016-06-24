@@ -86,17 +86,23 @@ namespace Systek.Net
         /// </returns>
         public override bool Equals(object other)
         {
+            // Type check
             if ((other == null) || (other.GetType() != typeof(Message)))
             {
                 return false;
             }
 
             Message test = (Message)other;
-            bool test1 = (Type != test.Type);
-            test1 = (Sequence != test.Sequence);
-            test1 = CmdSet.Equals(test.CmdSet);
 
-            if ((Type != test.Type) || (Sequence != test.Sequence) || (!CmdSet.Equals(test.CmdSet)))
+            // Comparison of primitives
+            if ((Type != test.Type) || (Sequence != test.Sequence))
+            {
+                return false;
+            }
+
+            // Comparison of objects
+            if (((CmdSet != null) && !CmdSet.Equals(test.CmdSet))
+                || ((CmdSet == null) && (test.CmdSet != null)))
             {
                 return false;
             }

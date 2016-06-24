@@ -39,8 +39,8 @@ namespace Systek.UnitTests
             TcpClient server = serverListener.EndAcceptTcpClient(ar);
 
             // Build the IConnections representing agent/server
-            IConnection agentConnection = new Connection(agent, _NetLibLog);
-            IConnection serverConnection = new Connection(server, _NetLibLog);
+            IConnection agentConnection = new Connection(agent, _LogHandler, _ExecuteHandler);
+            IConnection serverConnection = new Connection(server, _LogHandler, _ExecuteHandler);
 
             agentConnection.Initialize();
             serverConnection.Initialize();
@@ -74,9 +74,16 @@ namespace Systek.UnitTests
             serverConnection.Close();
         }
 
-        private void _NetLibLog(int type, string message)
+        // Handles log events
+        private void _LogHandler(object sender, LogEventArgs e)
         {
             
+        }
+
+        // Handles execution events
+        private bool _ExecuteHandler(object sender, ExecuteEventArgs e)
+        {
+            return true;
         }
 
         /// <summary>

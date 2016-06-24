@@ -30,15 +30,17 @@ namespace Systek.Net
         /// <param name="message">The message to write to the log</param>
         public delegate void Logger(int typeID, string message);
 
-        private Logger Log { get; set; }                // The logger function passed in by the caller
+        public event LogEventHandler LogEvent;
+        public event ExecuteEventHandler ExecuteEvent;
+
+        
+
         private TcpClient Peer { get; set; }            // The socket that this machine will be connected to
         private NetworkStream NetStream { get; set; }   // The stream that will read/write data between agent and server
-
-        private List<Message> Messages { get; set; }    // The queue of messages that have already been read from the stream
-        private Dictionary<int, CommandSet> CommandSets { get; set; }    // The queue of command sets.  The key is the CommandSetId, and the value
-                                                                         // is the set of commands to be run
-        private Mutex MessageMutex { get; set; }        // Lock for the Messages list, since it will be accessed by multiple threads
-
+        private List<Message> Messages { get; set; }                    // The queue of messages that have already been read from the stream
+        private Mutex MessageMutex { get; set; }                        // Lock for the Messages list, since it will be accessed by multiple threads
+        private Dictionary<int, CommandSet> CommandSets { get; set; }   // The queue of command sets.  The key is the CommandSetId, and the value
+                                                                        // is the set of commands to be run
         private const short HEADER_SIZE = sizeof(int);  // The size of the message header
         private const int MESSAGE_MAX = 65535;          // The maximum possible size of a Message
         private const int DEFAULT_TIMEOUT = 5000;       // The default value used for the Timeout property above
@@ -47,14 +49,16 @@ namespace Systek.Net
         /// Constructor
         /// </summary>
         /// <param name="peer">Remote machine that this is connecting to.</param>
-        public Connection(TcpClient peer, Logger log)
+        /// <param name="logHandler">The function for handling log events.</param>
+        /// <param name="executeHandler">The function for handling the execution events.</param>
+        public Connection(TcpClient peer, LogEventHandler logHandler, ExecuteEventHandler executeHandler)
         {
-            Peer = peer;
-            Log = log;
             Connected = false;
+            Peer = peer;
+            LogEvent += logHandler;
+            ExecuteEvent += executeHandler;
             Timeout = DEFAULT_TIMEOUT;
             MessageMutex = new Mutex();
-            Connected = Peer.Connected;
         }
 
         /// <summary>
@@ -65,6 +69,7 @@ namespace Systek.Net
             Messages = new List<Message>();
             NetStream = Peer.GetStream();
             new Thread(new ThreadStart(_Receive)).Start();
+            Connected = Peer.Connected;
         }
 
         /// <summary>
@@ -73,6 +78,7 @@ namespace Systek.Net
         public void Close()
         {
             NetStream.Close();
+            Peer.Close();
             Connected = false;
         }
 
@@ -194,11 +200,16 @@ namespace Systek.Net
                         bytesRead += NetStream.Read(messageInput, bytesRead, bytesToRead - bytesRead);
                     }
                     msg = (Message)_Deserialize(messageInput);
+
+                    _TranslateMessage(msg);
                 }
                 catch (Exception e)
                 {
-                    // Save the exception as a property of this class, since it will be lost when the thread terminates
-                    Log(1, e.Message + e.StackTrace);
+                    // Only log if the failure was unexpected; ie, during an active connection.
+                    if (Connected)
+                    {
+                        LogEvent?.Invoke(this, new LogEventArgs(1, "Exception caught while receiving data from peer.", DateTime.Now, e));
+                    }
                     Connected = false;
                     return;
                 }
@@ -211,8 +222,11 @@ namespace Systek.Net
                 }
                 catch (Exception e)
                 {
-                    // Save the exception as a property of this class, since it will be lost when the thread terminates
-                    Log(1, e.Message + e.StackTrace);
+                    // Only log if the failure was unexpected; ie, during an active connection.
+                    if (Connected)
+                    {
+                        LogEvent?.Invoke(this, new LogEventArgs(1, "Exception caught while adding a message to the queue.", DateTime.Now, e));
+                    }
                     Connected = false;
                     return;
                 }
@@ -228,7 +242,7 @@ namespace Systek.Net
         /// the Systek.Net.MessageType enum.
         /// </summary>
         /// <param name="msg">The message to be translated.</param>
-        private void TranslateMessage(Message msg)
+        private void _TranslateMessage(Message msg)
         {
             try
             {
