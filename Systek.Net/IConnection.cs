@@ -27,16 +27,6 @@ namespace Systek.Net
         int Timeout { get; set; }
 
         /// <summary>
-        /// Occurs when logging is required.
-        /// </summary>
-        event LogEventHandler LogEvent;
-
-        /// <summary>
-        /// Occurs when a CommandSet needs to be executed.
-        /// </summary>
-        event ExecuteEventHandler ExecuteEvent;
-
-        /// <summary>
         /// Starts the message listener.
         /// </summary>
         void Initialize();
@@ -51,18 +41,5 @@ namespace Systek.Net
         /// </summary>
         /// <param name="msg">The Message to send.</param>
         void Send(Message msg);
-
-        /// <summary>
-        /// Get the queue of Messages received from the connected peer, and clear the existing queue.
-        /// </summary>
-        /// <returns>The queue of Messages.</returns>
-        List<Message> GetMessages();
-
-        /// <summary>
-        /// Finds the first available complete set of commands, and returns it to the caller.
-        /// Also, removes it from this object's command set container
-        /// </summary>
-        /// <returns></returns>
-        ICommandSet GetNextCommandSet();
     }
 }

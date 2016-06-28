@@ -12,9 +12,34 @@ namespace Systek.UnitTests
     [TestClass]
     public class NetTests
     {
-        private const string LocalIP = "192.168.1.177";
-        private const int LocalPort = 65000;
+        private static string LocalIP;
+        private static int LocalPort;
+        private static bool ExecuteSuccess;
+        private static Message testMsg;
 
+        // Initialize the variables for testing
+        [ClassInitialize]
+        public static void Initialize(TestContext context)
+        {
+            // Connection details
+            LocalIP = "192.168.1.177";
+            LocalPort = 65000;
+
+            // Flag for determining whether command execution succeeded
+            ExecuteSuccess = false;
+
+            // Mock Message to be passed from agent to server
+            ICommand command1 = new Command(1, 1, "test command");
+            ICommand command2 = new Command(1, 2, "test command 2");
+            ICommand command3 = new Command(1, 3, "1234");
+
+            ICommandSet set = new CommandSet(1, 3);
+            set.AddCommand(command1);
+            set.AddCommand(command2);
+            set.AddCommand(command3);
+
+            testMsg = new Message(MessageType.COMMAND, set);
+        }
         /// <summary>
         /// Basic IConnection functionality testing.  Builds a TCPClient connection
         /// and passes it into 2 Connection objects representing agent + server, then makes a Message
@@ -45,33 +70,20 @@ namespace Systek.UnitTests
             agentConnection.Initialize();
             serverConnection.Initialize();
 
-            // Mock Message to be passed from agent to server
-            ICommand command1 = new Command(1, 1, "test command");
-            ICommand command2 = new Command(1, 2, "test command 2");
-            ICommand command3 = new Command(1, 3, "1234");
-
-            ICommandSet set = new CommandSet(1, 3);
-            set.AddCommand(command1);
-            set.AddCommand(command2);
-            set.AddCommand(command3);
-
-            Message msg = new Message(MessageType.COMMAND, set);
-
             // Send the message
-            agentConnection.Send(msg);
+            agentConnection.Send(testMsg);
 
             // Give the Connection objects time to communicate, since they run in their own thread
             Thread.Sleep(100);
 
-            // Pull the queue of Messages (1 message)
-            List<Message> messages = serverConnection.GetMessages();
-
-            // The test is that the sent message and receive message have equivilent content
-            Assert.IsTrue(msg.Equals(messages[0]));
+            Assert.IsTrue(agentConnection.Connected);
+            Assert.IsTrue(serverConnection.Connected);
 
             // Clean up threads
             agentConnection.Close();
             serverConnection.Close();
+
+            Assert.IsTrue(ExecuteSuccess);
         }
 
         // Handles log events
@@ -83,7 +95,9 @@ namespace Systek.UnitTests
         // Handles execution events
         private bool _ExecuteHandler(object sender, ExecuteEventArgs e)
         {
-            return true;
+            ExecuteSuccess = e.CmdSet.Equals(testMsg.CmdSet);
+            ExecuteSuccess = e.Sequence == testMsg.Sequence;
+            return ExecuteSuccess;
         }
 
         /// <summary>

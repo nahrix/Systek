@@ -16,29 +16,19 @@ namespace Systek.Net
         COMMAND = 1,
 
         /// <summary>
-        /// Run a commandSet
-        /// </summary>
-        EXECUTE = 2,
-
-        /// <summary>
         /// Gracefully close the connection
         /// </summary>
-        CLOSE = 3,
-
-        /// <summary>
-        /// Delete a commandSet
-        /// </summary>
-        CLEAR = 4,
+        CLOSE = 2,
 
         /// <summary>
         /// Log a message
         /// </summary>
-        LOG = 5,
+        LOG = 3,
 
         /// <summary>
         /// Report a failure to execute a peer's request
         /// </summary>
-        FAIL = 6
+        FAIL = 4
     };
 
     /// <summary>
@@ -65,7 +55,17 @@ namespace Systek.Net
         public int Sequence;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="Message" /> struct.
+        /// A human-readable message.  Used to describe a log, for example.
+        /// </summary>
+        public string Msg;
+
+        /// <summary>
+        /// The type of log, if there is one, defined in tblType.
+        /// </summary>
+        public int LogType;
+
+        /// <summary>
+        /// Constructor for COMMAND, CLOSE, and FAIL message types
         /// </summary>
         /// <param name="type">The type of message, described in Systek.Net.MessageType</param>
         /// <param name="seq">The sequence number to start the CommandSet from.</param>
@@ -75,6 +75,22 @@ namespace Systek.Net
             Type = type;
             Sequence = seq;
             CmdSet = cmds;
+            Msg = null;
+            LogType = 0;
+        }
+
+        /// <summary>
+        /// Constructor for the LOG message type
+        /// </summary>
+        /// <param name="msg">The log to be written at the peer.</param>
+        /// <param name="type">The type of log, defined in tblType.</param>
+        public Message(string msg, int type)
+        {
+            Type = MessageType.LOG;
+            Sequence = 0;
+            CmdSet = null;
+            Msg = msg;
+            LogType = type;
         }
 
         /// <summary>
@@ -95,7 +111,7 @@ namespace Systek.Net
             Message test = (Message)other;
 
             // Comparison of primitives
-            if ((Type != test.Type) || (Sequence != test.Sequence))
+            if ((Type != test.Type) || (Sequence != test.Sequence) || (Msg != test.Msg) || (LogType != test.LogType))
             {
                 return false;
             }

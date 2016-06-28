@@ -40,11 +40,12 @@ namespace Systek.Net
         public Exception ExceptionDetail { get; private set; }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="LogEventArgs"/> class.
+        /// Initializes a new instance of the <see cref="LogEventArgs" /> class.
         /// </summary>
-        /// <param name="msg">The MSG.</param>
-        /// <param name="time">The time.</param>
-        /// <param name="e">The e.</param>
+        /// <param name="type">The type of log, defined in tblType.</param>
+        /// <param name="msg">The message to be logged.</param>
+        /// <param name="time">The current time.</param>
+        /// <param name="e">The exception data related to this log, if any.</param>
         public LogEventArgs(int type, string msg, DateTime time, Exception e = null)
         {
             Type = type;
@@ -73,7 +74,7 @@ namespace Systek.Net
         /// <summary>
         /// Gets the CommandSet to be executed.
         /// </summary>
-        public CommandSet Commands { get; private set; }
+        public ICommandSet CmdSet { get; private set; }
 
         /// <summary>
         /// Gets the sequence number that represents where in the CommandSet to begin execution.
@@ -85,9 +86,9 @@ namespace Systek.Net
         /// </summary>
         /// <param name="cmds">The CMDS.</param>
         /// <param name="seq">The seq.</param>
-        public ExecuteEventArgs(CommandSet cmds, int seq = 1)
+        public ExecuteEventArgs(ICommandSet cmds, int seq = 1)
         {
-            Commands = cmds;
+            CmdSet = cmds;
             Sequence = seq;
         }
     }

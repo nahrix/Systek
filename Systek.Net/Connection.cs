@@ -30,17 +30,10 @@ namespace Systek.Net
         /// <param name="message">The message to write to the log</param>
         public delegate void Logger(int typeID, string message);
 
-        public event LogEventHandler LogEvent;
-        public event ExecuteEventHandler ExecuteEvent;
-
-        
-
+        private event LogEventHandler LogEvent;         // Occurs when logging is required.
+        private event ExecuteEventHandler ExecuteEvent; // Occurs when a CommandSet needs to be executed.
         private TcpClient Peer { get; set; }            // The socket that this machine will be connected to
         private NetworkStream NetStream { get; set; }   // The stream that will read/write data between agent and server
-        private List<Message> Messages { get; set; }                    // The queue of messages that have already been read from the stream
-        private Mutex MessageMutex { get; set; }                        // Lock for the Messages list, since it will be accessed by multiple threads
-        private Dictionary<int, CommandSet> CommandSets { get; set; }   // The queue of command sets.  The key is the CommandSetId, and the value
-                                                                        // is the set of commands to be run
         private const short HEADER_SIZE = sizeof(int);  // The size of the message header
         private const int MESSAGE_MAX = 65535;          // The maximum possible size of a Message
         private const int DEFAULT_TIMEOUT = 5000;       // The default value used for the Timeout property above
@@ -58,7 +51,6 @@ namespace Systek.Net
             LogEvent += logHandler;
             ExecuteEvent += executeHandler;
             Timeout = DEFAULT_TIMEOUT;
-            MessageMutex = new Mutex();
         }
 
         /// <summary>
@@ -66,7 +58,6 @@ namespace Systek.Net
         /// </summary>
         public void Initialize()
         {
-            Messages = new List<Message>();
             NetStream = Peer.GetStream();
             new Thread(new ThreadStart(_Receive)).Start();
             Connected = Peer.Connected;
@@ -80,26 +71,6 @@ namespace Systek.Net
             NetStream.Close();
             Peer.Close();
             Connected = false;
-        }
-
-        /// <summary>
-        /// Finds the first available complete set of commands, and returns it to the caller.
-        /// Also, removes it from this object's command set container
-        /// </summary>
-        /// <returns></returns>
-        public ICommandSet GetNextCommandSet()
-        {
-            MessageMutex.WaitOne();
-            try
-            {
-                
-            }
-            finally
-            {
-                MessageMutex.ReleaseMutex();
-            }
-
-            return null;
         }
 
         /// <summary>
@@ -127,53 +98,21 @@ namespace Systek.Net
         }
 
         /// <summary>
-        /// Get the queue of Messages received from the connected peer, and clear the existing queue.
-        /// </summary>
-        /// <returns>
-        /// The queue of Messages.
-        /// </returns>
-        public List<Message> GetMessages()
-        {
-            // This will hold a copy of of the queue
-            List<Message> messages = new List<Message>();
-
-            try
-            {
-                // Lock access to the Message queue, and copy everything into messages,
-                // then clear the queue
-                MessageMutex.WaitOne();
-                foreach (Message msg in Messages)
-                {
-                    messages.Add(msg);
-                }
-                Messages.Clear();
-            }
-            finally
-            {
-                // Allow access to the Message queue
-                MessageMutex.ReleaseMutex();
-            }
-
-            return messages;
-        }
-
-        /// <summary>
-        /// Runs in its own thread, listening for data on the stream, translating that data to Message objects,
-        /// and filling the Message queue with the translated Messages.
+        /// Runs in its own thread.  Listens for data on the stream, translates that data to Message objects,
+        /// and processes the Messages.
         /// </summary>
         private void _Receive()
         {
-            // Listen forever.  Loop is exited with return statements if an exception is caught.
+            // Listen forever.  Loop exits if an exception is caught
             while (true)
             {
-                Message msg;    // Incoming Message to be added to the Message queue
-
                 try
                 {
-                    int bytesRead;                                  // How many bytes have been read so far
-                    int bytesToRead;                                // How many bytes remain to be read
-                    byte[] headerInput = new byte[HEADER_SIZE];     // Message header data; size is static
-                    byte[] messageInput;                            // Message data
+                    Message msg;                                // Incoming Message to be added to the Message queue
+                    int bytesRead;                              // How many bytes have been read so far
+                    int bytesToRead;                            // How many bytes remain to be read
+                    byte[] headerInput = new byte[HEADER_SIZE]; // Message header data; size is static
+                    byte[] messageInput;                        // Message data
 
                     // Reset the variables for a fresh Message
                     bytesRead = 0;
@@ -211,28 +150,7 @@ namespace Systek.Net
                         LogEvent?.Invoke(this, new LogEventArgs(1, "Exception caught while receiving data from peer.", DateTime.Now, e));
                     }
                     Connected = false;
-                    return;
-                }
-
-                // Add the message into the queue of messages to be read
-                try
-                {
-                    MessageMutex.WaitOne();
-                    Messages.Add(msg);
-                }
-                catch (Exception e)
-                {
-                    // Only log if the failure was unexpected; ie, during an active connection.
-                    if (Connected)
-                    {
-                        LogEvent?.Invoke(this, new LogEventArgs(1, "Exception caught while adding a message to the queue.", DateTime.Now, e));
-                    }
-                    Connected = false;
-                    return;
-                }
-                finally
-                {
-                    MessageMutex.ReleaseMutex();
+                    break;
                 }
             }
         }
@@ -246,37 +164,35 @@ namespace Systek.Net
         {
             try
             {
-                MessageMutex.WaitOne();
-
                 switch(msg.Type)
                 {
+                    // The Agent or Server projects will handle the events generated by COMMANDs
                     case MessageType.COMMAND:
+                        ExecuteEvent?.Invoke(this, new ExecuteEventArgs(msg.CmdSet, msg.Sequence));
                         break;
 
+                    // Elegantly close the connection
                     case MessageType.CLOSE:
+                        Close();
                         break;
 
-                    case MessageType.CLEAR:
-                        break;
-
-                    case MessageType.EXECUTE:
-                        break;
-
+                    // TODO:  Handle each FAIL case
                     case MessageType.FAIL:
                         break;
 
+                    // The Agent or Server projects will handle the events generated by LOGs
                     case MessageType.LOG:
+                        LogEvent?.Invoke(this, new LogEventArgs(msg.LogType, msg.Msg, DateTime.Now));
                         break;
 
                     default:
                         break;
                 }
             }
-            finally
+            catch (Exception e)
             {
-                MessageMutex.ReleaseMutex();
+                LogEvent?.Invoke(this, new LogEventArgs(1, "Failed to process a message.", DateTime.Now, e));
             }
-            
         }
 
         /// <summary>
