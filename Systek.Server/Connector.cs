@@ -11,7 +11,10 @@ namespace Systek.Server
     /// </summary>
     public class Connector
     {
-        public int Port { get; private set; }       // Port number that the server will listen on
+        /// <summary>
+        /// Port number that the server will listen on
+        /// </summary>
+        public int Port { get; private set; }
 
         /// <summary>
         /// Constructor.
@@ -42,11 +45,11 @@ namespace Systek.Server
             while (true)
             {
                 TcpClient agent = listener.AcceptTcpClient();
-                IConnection agentConnection = new Connection(agent, _NetLibLogHandler, _ExecuteHandler);
+                IConnection agentConnection = new Connection(agent, _LogHandler, _ExecuteHandler);
             }
         }
 
-        private void _NetLibLogHandler(object sender, LogEventArgs e)
+        private void _LogHandler(object sender, LogEventArgs e)
         {
 
         }

@@ -50,7 +50,12 @@ namespace Systek.Net
         public ICommandSet CmdSet;
 
         /// <summary>
-        /// The sequence number in the command set to begin execution (default is 1)
+        /// The ID of the CommandSet referred to in this message
+        /// </summary>
+        public int CmdSetId;
+
+        /// <summary>
+        /// The sequence number reference in this message
         /// </summary>
         public int Sequence;
 
@@ -65,7 +70,7 @@ namespace Systek.Net
         public int LogType;
 
         /// <summary>
-        /// Constructor for COMMAND, CLOSE, and FAIL message types
+        /// Constructor for COMMAND and CLOSE Message types
         /// </summary>
         /// <param name="type">The type of message, described in Systek.Net.MessageType</param>
         /// <param name="seq">The sequence number to start the CommandSet from.</param>
@@ -77,10 +82,11 @@ namespace Systek.Net
             CmdSet = cmds;
             Msg = null;
             LogType = 0;
+            CmdSetId = cmds.ID;
         }
 
         /// <summary>
-        /// Constructor for the LOG message type
+        /// Constructor for the LOG Message type
         /// </summary>
         /// <param name="msg">The log to be written at the peer.</param>
         /// <param name="type">The type of log, defined in tblType.</param>
@@ -91,6 +97,23 @@ namespace Systek.Net
             CmdSet = null;
             Msg = msg;
             LogType = type;
+            CmdSetId = 0;
+        }
+
+        /// <summary>
+        /// Constructor for the SUCCESS and FAIL Message types
+        /// </summary>
+        /// <param name="type">The type.</param>
+        /// <param name="cmdSetId">The command set identifier.</param>
+        /// <param name="seq">The seq.</param>
+        public Message(MessageType type, int cmdSetId, int seq)
+        {
+            Type = type;
+            Sequence = seq;
+            CmdSet = null;
+            Msg = null;
+            LogType = 0;
+            CmdSetId = cmdSetId;
         }
 
         /// <summary>
