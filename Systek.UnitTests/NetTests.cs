@@ -1,8 +1,7 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Systek.Net;
-using Systek.Utility;
 using System;
-using System.Collections.Generic;
+using System.Configuration;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
@@ -15,18 +14,22 @@ namespace Systek.UnitTests
         private static string LocalIP;
         private static int LocalPort;
         private static bool ExecuteSuccess;
-        private static Message testMsg;
+        private static Message TestMsg;
+        private static bool Finished;
 
         // Initialize the variables for testing
         [ClassInitialize]
         public static void Initialize(TestContext context)
         {
             // Connection details
-            LocalIP = "192.168.1.177";
-            LocalPort = 65000;
+            LocalIP = ConfigurationManager.AppSettings["IP"];
+            LocalPort = Int32.Parse(ConfigurationManager.AppSettings["Port"]);
 
             // Flag for determining whether command execution succeeded
             ExecuteSuccess = false;
+
+            // Flag will be true when all execution is complete, and Asserts are ready to be evaluated
+            Finished = false;
 
             // Mock Message to be passed from agent to server
             ICommand command1 = new Command(1, 1, "test command");
@@ -38,8 +41,12 @@ namespace Systek.UnitTests
             set.AddCommand(command2);
             set.AddCommand(command3);
 
-            testMsg = new Message(MessageType.COMMAND, set);
+            TestMsg = new Message();
+            TestMsg.Type = MessageType.COMMAND;
+            TestMsg.CmdSet = set;
+            TestMsg.Sequence = 1;
         }
+
         /// <summary>
         /// Basic IConnection functionality testing.  Builds a TCPClient connection
         /// and passes it into 2 Connection objects representing agent + server, then makes a Message
@@ -64,17 +71,20 @@ namespace Systek.UnitTests
             TcpClient server = serverListener.EndAcceptTcpClient(ar);
 
             // Build the IConnections representing agent/server
-            IConnection agentConnection = new Connection(agent, _LogHandler, _ExecuteHandler);
-            IConnection serverConnection = new Connection(server, _LogHandler, _ExecuteHandler);
+            IConnection agentConnection = new Connection(agent, _LogHandler, _AgentMessageHandler);
+            IConnection serverConnection = new Connection(server, _LogHandler, _ServerMessageHandler);
 
             agentConnection.Initialize();
             serverConnection.Initialize();
 
             // Send the message
-            agentConnection.Send(testMsg);
+            serverConnection.Send(TestMsg);
 
-            // Give the Connection objects time to communicate, since they run in their own thread
-            Thread.Sleep(100);
+            // Wait for the message to send, since communication happens in its own thread
+            while (!Finished)
+            {
+                Thread.Sleep(100);
+            }
 
             Assert.IsTrue(agentConnection.Connected);
             Assert.IsTrue(serverConnection.Connected);
@@ -87,17 +97,22 @@ namespace Systek.UnitTests
         }
 
         // Handles log events
-        private void _LogHandler(object sender, LogEventArgs e)
+        private void _LogHandler(LogEventArgs e)
         {
             
         }
 
         // Handles execution events
-        private bool _ExecuteHandler(object sender, ExecuteEventArgs e)
+        private void _AgentMessageHandler(Message msg)
         {
-            ExecuteSuccess = e.CmdSet.Equals(testMsg.CmdSet);
-            ExecuteSuccess = e.Sequence == testMsg.Sequence;
-            return ExecuteSuccess;
+            ExecuteSuccess = msg.Equals(TestMsg);
+            Finished = true;
+        }
+
+        // Handles execution events
+        private void _ServerMessageHandler(Message msg)
+        {
+
         }
 
         /// <summary>

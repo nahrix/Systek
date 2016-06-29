@@ -45,18 +45,18 @@ namespace Systek.Server
             while (true)
             {
                 TcpClient agent = listener.AcceptTcpClient();
-                IConnection agentConnection = new Connection(agent, _LogHandler, _ExecuteHandler);
+                IConnection agentConnection = new Connection(agent, _LogHandler, _MessageHandler);
             }
         }
 
-        private void _LogHandler(object sender, LogEventArgs e)
+        private void _LogHandler(LogEventArgs e)
         {
 
         }
 
-        private bool _ExecuteHandler(object sender, ExecuteEventArgs e)
+        private void _MessageHandler(Message msg)
         {
-            return true;
+            
         }
     }
 }

@@ -11,7 +11,7 @@ namespace Systek.Agent
     /// <summary>
     /// Maintains the agent service's connection to the server.
     /// </summary>
-    class Connector
+    public class Connector
     {
         private IPEndPoint RemoteEndPoint { get; set; }     // End point of the remote server this agent is connecting to
         private TcpClient Peer { get; set; }                // The TCP socket between the agent and server
@@ -48,7 +48,7 @@ namespace Systek.Agent
             {
                 LogPath = ConfigurationManager.AppSettings["logPath"];
                 Peer = new TcpClient();
-                AgentConnection = new Connection(Peer, _LogHandler, _ExecuteHandler);
+                AgentConnection = new Connection(Peer, _LogHandler, _MessageHandler);
                 Running = true;
 
                 Thread connector = new Thread(new ThreadStart(_Connector));
@@ -61,7 +61,7 @@ namespace Systek.Agent
         }
 
         // Handles log events
-        private void _LogHandler(object sender, LogEventArgs e)
+        private void _LogHandler(LogEventArgs e)
         {
             string message = e.Message;
             
@@ -73,9 +73,9 @@ namespace Systek.Agent
         }
 
         // Handles execution events
-        private bool _ExecuteHandler(object sender, ExecuteEventArgs e)
+        private void _MessageHandler(Message msg)
         {
-            return true;
+            
         }
 
         /// <summary>
@@ -96,7 +96,7 @@ namespace Systek.Agent
                 if (!AgentConnection.Connected)
                 {
                     Peer.Connect(RemoteEndPoint);
-                    AgentConnection = new Connection(Peer, _LogHandler, _ExecuteHandler);
+                    AgentConnection = new Connection(Peer, _LogHandler, _MessageHandler);
                     AgentConnection.Initialize();
                 }
 

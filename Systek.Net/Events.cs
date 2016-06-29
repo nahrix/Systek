@@ -9,9 +9,8 @@ namespace Systek.Net
     /// <summary>
     /// Required for log events.
     /// </summary>
-    /// <param name="sender">The sender.</param>
     /// <param name="e">The <see cref="LogEventArgs" /> instance containing the event data.</param>
-    public delegate void LogEventHandler(object sender, LogEventArgs e);
+    public delegate void LogEventHandler(LogEventArgs e);
 
     /// <summary>
     /// Custom event arguments for logging events
@@ -92,4 +91,10 @@ namespace Systek.Net
             Sequence = seq;
         }
     }
+
+    /// <summary>
+    /// Required for message processing.
+    /// </summary>
+    /// <param name="msg">The message to be processed.</param>
+    public delegate void MessageEventHandler(Message msg);
 }

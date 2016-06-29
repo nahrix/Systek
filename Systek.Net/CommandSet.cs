@@ -125,7 +125,7 @@ namespace Systek.Net
             }
 
             // Comparison of objects
-            if ((Commands != null) && !Commands.SequenceEqual(test.Commands))
+            if (!Commands?.SequenceEqual(test.Commands) ?? (test.Commands != null))
             {
                 return false;
             }

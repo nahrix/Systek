@@ -28,7 +28,12 @@ namespace Systek.Net
         /// <summary>
         /// Report a failure to execute a peer's request
         /// </summary>
-        FAIL = 4
+        FAIL = 4,
+
+        /// <summary>
+        /// Send an update of the current state of the machine
+        /// </summary>
+        UPDATE
     };
 
     /// <summary>
@@ -70,51 +75,14 @@ namespace Systek.Net
         public int LogType;
 
         /// <summary>
-        /// Constructor for COMMAND and CLOSE Message types
+        /// The area type, as defined in tblAreaType, if applicable.
         /// </summary>
-        /// <param name="type">The type of message, described in Systek.Net.MessageType</param>
-        /// <param name="seq">The sequence number to start the CommandSet from.</param>
-        /// <param name="cmds">The CommandSet to be run.</param>
-        public Message(MessageType type, ICommandSet cmds = null, int seq = 1)
-        {
-            Type = type;
-            Sequence = seq;
-            CmdSet = cmds;
-            Msg = null;
-            LogType = 0;
-            CmdSetId = cmds.ID;
-        }
+        public int AreaType;
 
         /// <summary>
-        /// Constructor for the LOG Message type
+        /// The current state of the machine.
         /// </summary>
-        /// <param name="msg">The log to be written at the peer.</param>
-        /// <param name="type">The type of log, defined in tblType.</param>
-        public Message(string msg, int type)
-        {
-            Type = MessageType.LOG;
-            Sequence = 0;
-            CmdSet = null;
-            Msg = msg;
-            LogType = type;
-            CmdSetId = 0;
-        }
-
-        /// <summary>
-        /// Constructor for the SUCCESS and FAIL Message types
-        /// </summary>
-        /// <param name="type">The type.</param>
-        /// <param name="cmdSetId">The command set identifier.</param>
-        /// <param name="seq">The seq.</param>
-        public Message(MessageType type, int cmdSetId, int seq)
-        {
-            Type = type;
-            Sequence = seq;
-            CmdSet = null;
-            Msg = null;
-            LogType = 0;
-            CmdSetId = cmdSetId;
-        }
+        public UpdateData Update;
 
         /// <summary>
         /// Determines whether the specified <see cref="Systek.Net.Message" />, is equal to this instance.
@@ -134,14 +102,15 @@ namespace Systek.Net
             Message test = (Message)other;
 
             // Comparison of primitives
-            if ((Type != test.Type) || (Sequence != test.Sequence) || (Msg != test.Msg) || (LogType != test.LogType))
+            if ((Type != test.Type) || (Sequence != test.Sequence) || (Msg != test.Msg)
+                || (LogType != test.LogType) || (CmdSetId != test.CmdSetId) || (AreaType != test.AreaType))
             {
                 return false;
             }
 
             // Comparison of objects
-            if (((CmdSet != null) && !CmdSet.Equals(test.CmdSet))
-                || ((CmdSet == null) && (test.CmdSet != null)))
+            if ((!CmdSet?.Equals(test.CmdSet) ?? (test.CmdSet != null))
+                || (!Update?.Equals(test.Update) ?? (test.Update != null)))
             {
                 return false;
             }
