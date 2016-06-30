@@ -35,28 +35,17 @@ namespace Systek.Server
 
         /// <summary>
         /// To be run in its own thread.  Listens for agent connection requests, and builds
-        /// IConnections out of the TcpClients.
+        /// Machine objects from the TcpClients.
         /// </summary>
-        public void _Listen()
+        private void _Listen()
         {
             TcpListener listener = new TcpListener(IPAddress.Any, Port);
-
-            // 
+            
             while (true)
             {
                 TcpClient agent = listener.AcceptTcpClient();
-                IConnection agentConnection = new Connection(agent, _LogHandler, _MessageHandler);
+                new Machine(agent);
             }
-        }
-
-        private void _LogHandler(LogEventArgs e)
-        {
-
-        }
-
-        private void _MessageHandler(Message msg)
-        {
-            
         }
     }
 }

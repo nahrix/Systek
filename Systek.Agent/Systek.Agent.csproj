@@ -52,7 +52,7 @@
     <Compile Include="AgentService.Designer.cs">
       <DependentUpon>AgentService.cs</DependentUpon>
     </Compile>
-    <Compile Include="Connector.cs" />
+    <Compile Include="Core.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -75,6 +75,10 @@
     <ProjectReference Include="..\Systek.Utility\Systek.Utility.csproj">
       <Project>{9b9f24b2-5493-4fc7-b565-bf2f8fb91617}</Project>
       <Name>Systek.Utility</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Systek\Systek.csproj">
+      <Project>{8ead6285-a668-498e-9751-c7dde6b75a92}</Project>
+      <Name>Systek</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

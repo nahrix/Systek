@@ -12,6 +12,8 @@ namespace Systek
             UNIT_TEST = 1,
             NET_LIB = 2,
             AGENT_MESSAGE_HANDLER = 3,
-            SERVER_MESSAGE_HANDLER = 4;
+            SERVER_MESSAGE_HANDLER = 4,
+            AGENT_INITIALIZATION = 5,
+            SERVER_INITIALIZATION = 6;
     }
 }
