@@ -29,6 +29,11 @@ namespace Systek.Net
         public int Type { get; private set; }
 
         /// <summary>
+        /// Gets the area in the code that is being affected, as defined in tblAreaType
+        /// </summary>
+        public int AreaType { get; private set; }
+
+        /// <summary>
         /// The time stamp when the event occurred.
         /// </summary>
         public DateTime TimeStamp { get; private set; }
@@ -45,50 +50,13 @@ namespace Systek.Net
         /// <param name="msg">The message to be logged.</param>
         /// <param name="time">The current time.</param>
         /// <param name="e">The exception data related to this log, if any.</param>
-        public LogEventArgs(int type, string msg, DateTime time, Exception e = null)
+        public LogEventArgs(int type, int area, string msg, DateTime time, Exception e = null)
         {
             Type = type;
+            AreaType = area;
             Message = msg;
             TimeStamp = time;
             ExceptionDetail = e;
-        }
-    }
-
-    /// <summary>
-    /// Required for execution events.
-    /// </summary>
-    /// <param name="sender">The sender.</param>
-    /// <param name="e">The <see cref="ExecuteEventArgs" /> instance containing the event data.</param>
-    /// <returns>
-    ///   <c>true</c> if the execution completed successfully, or <c>false</c> if not.
-    /// </returns>
-    public delegate bool ExecuteEventHandler(object sender, ExecuteEventArgs e);
-
-    /// <summary>
-    /// Custom event arguments for command-execution events.
-    /// </summary>
-    /// <seealso cref="System.EventArgs" />
-    public class ExecuteEventArgs : EventArgs
-    {
-        /// <summary>
-        /// Gets the CommandSet to be executed.
-        /// </summary>
-        public ICommandSet CmdSet { get; private set; }
-
-        /// <summary>
-        /// Gets the sequence number that represents where in the CommandSet to begin execution.
-        /// </summary>
-        public int Sequence { get; private set; }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ExecuteEventArgs"/> class.
-        /// </summary>
-        /// <param name="cmds">The CMDS.</param>
-        /// <param name="seq">The seq.</param>
-        public ExecuteEventArgs(ICommandSet cmds, int seq = 1)
-        {
-            CmdSet = cmds;
-            Sequence = seq;
         }
     }
 

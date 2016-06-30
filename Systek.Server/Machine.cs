@@ -60,6 +60,9 @@ namespace Systek.Server
             return true;
         }
 
+        /// <summary>
+        /// Initializes this instance.
+        /// </summary>
         public void Initialize()
         {
             if (!NetConnection.Connected)
@@ -69,7 +72,6 @@ namespace Systek.Server
 
             Update();
         }
-
 
         /// <summary>
         /// Updates this instance with the latest state.
@@ -90,7 +92,7 @@ namespace Systek.Server
         /// <param name="e">The <see cref="LogEventArgs"/> instance containing the event data.</param>
         public void LogHandler(LogEventArgs e)
         {
-
+            Logger.Instance.TblSystemLog(e.Type, e.AreaType, MachineID, e.Message);
         }
 
         /// <summary>
@@ -145,7 +147,7 @@ namespace Systek.Server
             }
             catch (Exception e)
             {
-                Logger.Instance.TblSystemLog(1, 3, MachineID, "Error while processing a message from the agent.\n\n" + e.Message);
+                Logger.Instance.TblSystemLog(Type.ERROR, AreaType.SERVER_MESSAGE_HANDLER, MachineID, "Error while processing a message from the agent.\n\n" + e.Message);
                 NetConnection.Close();
             }
         }

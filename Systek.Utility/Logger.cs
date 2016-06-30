@@ -73,19 +73,22 @@ namespace Systek.Utility
         /// Writes a log to the file system.
         /// </summary>
         /// <param name="type">The type of log being written.  These types are defined in tblType in the database.</param>
+        /// <param name="area">The area being affected, as defined in tblAreaType.</param>
         /// <param name="filePath">The full path of the log file.</param>
         /// <param name="message">The content of the log to write to the file.</param>
-        public void FileLog(int type, string filePath, string message)
+        public void FileLog(int type, int area, string filePath, string message)
         {
-            string logType;
-            string timeStamp = DateTime.Now.ToString("HH:mm:ss");
-
             try
             {
+                string logType;
+                string areaType;
+                string timeStamp = DateTime.Now.ToString("HH:mm:ss");
+
                 // Convert the type of message into something human-readable
                 using (LoggingContext db = new LoggingContext())
                 {
                     logType = db.tblType.Find(type).name.ToUpper();
+                    areaType = db.tblAreaType.Find(area).name.ToUpper();
                 }
 
                 StreamWriter file = new StreamWriter(filePath, true);
@@ -94,13 +97,17 @@ namespace Systek.Utility
                 if (logType == null)
                 {
                     file.WriteLine("[" + timeStamp + "] Logger: Type not found.  TypeID specified: " + type);
-                    file.WriteLine("[" + timeStamp + "] (Unknown): " + message);
-                    file.Close();
-                    return;
+                    logType = "unknown";
                 }
 
-                
-                file.WriteLine("[" + timeStamp + "] " + logType + ": " + message);
+                // If an invalid area type is specified, log that too
+                if (areaType == null)
+                {
+                    file.WriteLine("[" + timeStamp + "] Logger: AreaType not found.  AreaTypeID specified: " + areaType);
+                    areaType = "unknown";
+                }
+
+                file.WriteLine("[" + timeStamp + "] (" + logType + ") <" + areaType + ">: " + message);
                 file.Close();
             }
             catch (Exception)

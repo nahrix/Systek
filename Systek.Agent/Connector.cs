@@ -69,7 +69,7 @@ namespace Systek.Agent
             {
                 message += "\n" + e.ExceptionDetail.Message + "\n" + e.ExceptionDetail.StackTrace;
             }
-            Logger.Instance.FileLog(e.Type, LogPath, message);
+            Logger.Instance.FileLog(e.Type, e.AreaType, LogPath, message);
         }
 
         // Handles execution events

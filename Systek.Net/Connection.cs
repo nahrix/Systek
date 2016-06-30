@@ -24,7 +24,6 @@ namespace Systek.Net
         public int Timeout { get; set; }
 
         private event LogEventHandler LogEvent;         // Occurs when logging is required.
-        private event ExecuteEventHandler ExecuteEvent; // Occurs when a CommandSet needs to be executed.
         private event MessageEventHandler MessageEvent; // Occurs when a Message needs processing.
         private TcpClient Peer { get; set; }            // The socket that this machine will be connected to
         private NetworkStream NetStream { get; set; }   // The stream that will read/write data between agent and server
@@ -142,7 +141,7 @@ namespace Systek.Net
                     // Only log if the failure was unexpected; ie, during an active connection.
                     if (Connected)
                     {
-                        LogEvent?.Invoke(new LogEventArgs(1, "Exception caught while receiving data from peer.", DateTime.Now, e));
+                        LogEvent?.Invoke(new LogEventArgs(Type.ERROR, AreaType.NET_LIB, "Exception caught while receiving data from peer.", DateTime.Now, e));
                     }
                     Connected = false;
                     break;
