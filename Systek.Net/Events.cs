@@ -34,11 +34,6 @@ namespace Systek.Net
         public int AreaType { get; private set; }
 
         /// <summary>
-        /// The time stamp when the event occurred.
-        /// </summary>
-        public DateTime TimeStamp { get; private set; }
-
-        /// <summary>
         /// The exception to be logged, if any.
         /// </summary>
         public Exception ExceptionDetail { get; private set; }
@@ -47,15 +42,14 @@ namespace Systek.Net
         /// Initializes a new instance of the <see cref="LogEventArgs" /> class.
         /// </summary>
         /// <param name="type">The type of log, defined in tblType.</param>
+        /// <param name="area">The area.</param>
         /// <param name="msg">The message to be logged.</param>
-        /// <param name="time">The current time.</param>
         /// <param name="e">The exception data related to this log, if any.</param>
-        public LogEventArgs(int type, int area, string msg, DateTime time, Exception e = null)
+        public LogEventArgs(int type, int area, string msg, Exception e = null)
         {
             Type = type;
             AreaType = area;
             Message = msg;
-            TimeStamp = time;
             ExceptionDetail = e;
         }
     }

@@ -118,8 +118,17 @@ namespace Systek.Net
                         bytesRead += NetStream.Read(headerInput, bytesRead, HEADER_SIZE - bytesRead);
                     }
 
-                    // Interpret the message size as an int, and reset the variables for another read
+                    // Interpret the header as an int representing the amount of bytes incoming for the Message,
+                    // and verify the requested size of the Message is valid
                     bytesToRead = BitConverter.ToInt32(headerInput, 0);
+                    if (bytesToRead > MESSAGE_MAX)
+                    {
+                        LogEvent?.Invoke(new LogEventArgs(Type.ERROR, AreaType.NET_LIB, "Message is too large to receive.  Size requested: "
+                            + bytesToRead + " bytes."));
+                        Close();
+                        break;
+                    }
+
                     bytesRead = 0;
                     Array.Clear(headerInput, 0, HEADER_SIZE);
                     messageInput = new byte[bytesToRead];  // Size of the incoming message is determined by the header
@@ -140,7 +149,8 @@ namespace Systek.Net
                     // Only log if the failure was unexpected; ie, during an active connection.
                     if (Connected)
                     {
-                        LogEvent?.Invoke(new LogEventArgs(Type.ERROR, AreaType.NET_LIB, "Exception caught while receiving data from peer.", DateTime.Now, e));
+                        LogEvent?.Invoke(new LogEventArgs(Type.ERROR, AreaType.NET_LIB, "Exception caught while receiving data from peer.", e));
+                        Close();
                     }
                     Connected = false;
                     break;

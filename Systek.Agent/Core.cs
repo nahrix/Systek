@@ -77,7 +77,7 @@ namespace Systek.Agent
         /// <summary>
         /// Stops the connection.
         /// </summary>
-        public void Stop()
+        public void Shutdown()
         {
             Server?.Close();
             Running = false;

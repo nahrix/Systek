@@ -122,6 +122,7 @@ namespace Systek.UnitTests
         public void AgentServerConnectorTest()
         {
             IPEndPoint remoteEndPoint = new IPEndPoint(IPAddress.Parse(LocalIP), LocalPort);
+            
         }
     }
 }
