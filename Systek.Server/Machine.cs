@@ -65,6 +65,8 @@ namespace Systek.Server
         /// </summary>
         public void Initialize()
         {
+            NetConnection.Initialize();
+
             if (!NetConnection.Connected)
             {
                 return;

@@ -1,5 +1,6 @@
 ﻿using Systek.Net;
 using Systek.Utility;
+using System;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
@@ -15,6 +16,8 @@ namespace Systek.Server
         /// Port number that the server will listen on
         /// </summary>
         public int Port { get; private set; }
+
+        private const int SYSTEK_SERVER = 2;
 
         /// <summary>
         /// Constructor.
@@ -43,8 +46,22 @@ namespace Systek.Server
             
             while (true)
             {
-                TcpClient agent = listener.AcceptTcpClient();
-                new Machine(agent);
+                try
+                {
+                    TcpClient agentSocket = listener.AcceptTcpClient();
+                    IMachine agentMachine = new Machine(agentSocket);
+                    agentMachine.Initialize();
+
+                    if (!agentMachine.NetConnection.Connected)
+                    {
+                        Logger.Instance.TblSystemLog(Type.ERROR, AreaType.AGENT_INITIALIZATION, SYSTEK_SERVER, "New agent connection failed to initialize.");
+                    }
+                }
+                catch (Exception e)
+                {
+                    string message = "Systek server threw exception while creating new agent connection. \n" + e.Message + "\n\n" + e.StackTrace;
+                    Logger.Instance.TblSystemLog(Type.ERROR, AreaType.SERVER_TCP_LISTENER, SYSTEK_SERVER, message);
+                }
             }
         }
     }
