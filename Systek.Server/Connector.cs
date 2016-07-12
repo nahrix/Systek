@@ -43,6 +43,16 @@ namespace Systek.Server
         private void _Listen()
         {
             TcpListener listener = new TcpListener(IPAddress.Any, Port);
+            try
+            {
+                listener.Start();
+            }
+            catch(Exception e)
+            {
+                string message = "Systek server threw exception while trying to start the TcpListener.\n" + e.Message + "\n\n" + e.StackTrace;
+                Logger.Instance.TblSystemLog(Type.ERROR, AreaType.SERVER_TCP_LISTENER, SYSTEK_SERVER, message);
+                return;
+            }
             
             while (true)
             {
@@ -59,7 +69,7 @@ namespace Systek.Server
                 }
                 catch (Exception e)
                 {
-                    string message = "Systek server threw exception while creating new agent connection. \n" + e.Message + "\n\n" + e.StackTrace;
+                    string message = "Systek server threw exception while creating new agent connection.\n" + e.Message + "\n\n" + e.StackTrace;
                     Logger.Instance.TblSystemLog(Type.ERROR, AreaType.SERVER_TCP_LISTENER, SYSTEK_SERVER, message);
                 }
             }
