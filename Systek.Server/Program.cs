@@ -7,14 +7,14 @@
         /// </summary>
         static void Main()
         {
-#if (RELEASE)
+#if (!DEBUG)
             ServiceBase[] ServicesToRun;
             ServicesToRun = new ServiceBase[]
             {
                 new Service1()
             };
             ServiceBase.Run(ServicesToRun);
-#elif (DEBUG)
+#else
             new ServerService().Initialize();
 #endif
         }

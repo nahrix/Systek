@@ -24,6 +24,7 @@ namespace Systek.Server
         /// <param name="args">Data passed by the start command.</param>
         protected override void OnStart(string[] args)
         {
+            Initialize();
         }
 
         /// <summary>
