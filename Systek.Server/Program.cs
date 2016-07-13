@@ -1,4 +1,6 @@
-﻿namespace Systek.Server
+﻿using System.ServiceProcess;
+
+namespace Systek.Server
 {
     static class Program
     {
@@ -11,7 +13,7 @@
             ServiceBase[] ServicesToRun;
             ServicesToRun = new ServiceBase[]
             {
-                new Service1()
+                new ServerService()
             };
             ServiceBase.Run(ServicesToRun);
 #else
