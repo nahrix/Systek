@@ -4,7 +4,7 @@
   <edmx:Runtime>
     <!-- SSDL content -->
     <edmx:StorageModels>
-      <Schema Namespace="SystekModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2012" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+    <Schema Namespace="SystekModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2012" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
         <EntityType Name="tblAreaType">
           <Key>
             <PropertyRef Name="ID" />
@@ -34,6 +34,7 @@
             <PropertyRef Name="ID" />
           </Key>
           <Property Name="ID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="tStamp" Type="datetime" Nullable="false" />
           <Property Name="typeID" Type="int" Nullable="false" />
           <Property Name="areaID" Type="int" Nullable="false" />
           <Property Name="serverID" Type="int" Nullable="false" />
@@ -117,8 +118,7 @@
             <End Role="tblSystemLog" EntitySet="tblSystemLog" />
           </AssociationSet>
         </EntityContainer>
-      </Schema>
-    </edmx:StorageModels>
+      </Schema></edmx:StorageModels>
     <!-- CSDL content -->
     <edmx:ConceptualModels>
       <Schema Namespace="SystekModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
@@ -162,6 +162,7 @@
           <NavigationProperty Name="tblAreaType" Relationship="Self.FK_tblSystemLog_tblAreaType" FromRole="tblSystemLog" ToRole="tblAreaType" />
           <NavigationProperty Name="tblServer" Relationship="Self.FK_tblSystemLog_tblServer" FromRole="tblSystemLog" ToRole="tblServer" />
           <NavigationProperty Name="tblType" Relationship="Self.FK_tblSystemLog_tblType" FromRole="tblSystemLog" ToRole="tblType" />
+          <Property Name="tStamp" Type="DateTime" Nullable="false" Precision="3" />
         </EntityType>
         <EntityType Name="tblType">
           <Key>
@@ -278,6 +279,7 @@
           <EntitySetMapping Name="tblSystemLog">
             <EntityTypeMapping TypeName="SystekModel.tblSystemLog">
               <MappingFragment StoreEntitySet="tblSystemLog">
+                <ScalarProperty Name="tStamp" ColumnName="tStamp" />
                 <ScalarProperty Name="ID" ColumnName="ID" />
                 <ScalarProperty Name="typeID" ColumnName="typeID" />
                 <ScalarProperty Name="areaID" ColumnName="areaID" />

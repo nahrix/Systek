@@ -19,6 +19,11 @@ namespace Systek.Utility
             : base("name=LoggingContext")
         {
         }
+
+        public LoggingContext(string contextName)
+            : base("name=" + contextName)
+        {
+        }
     
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {

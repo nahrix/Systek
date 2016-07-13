@@ -12,30 +12,25 @@ namespace Systek.Utility
     /// </summary>
     public class Logger
     {
-        private static Logger Singleton;        // The logger only needs a single instance
+        /// <summary>
+        /// Gets the name of the connection string.
+        /// </summary>
+        public string ConnectionString { get; private set; }
 
         /// <summary>
-        /// Constructor.  Empty for now.
+        /// If the logger fails to write to the database, it will need to fall back on a simpler
+        /// file-based log to log its own error.
         /// </summary>
-        private Logger()
-        {
-
-        }
+        public string DefaultLocalLogPath { get; private set; }
 
         /// <summary>
-        /// Used to get the singleton instance of this class.
+        /// Initializes a new instance of the <see cref="Logger"/> class.
         /// </summary>
-        public static Logger Instance
+        /// <param name="connectionString">The connection string.</param>
+        public Logger(string connectionString, string defaultLocalLogPath)
         {
-            get
-            {
-                if (Singleton == null)
-                {
-                    Singleton = new Logger();
-                }
-
-                return Singleton;
-            }
+            ConnectionString = connectionString;
+            DefaultLocalLogPath = defaultLocalLogPath;
         }
 
         /// <summary>
@@ -49,10 +44,11 @@ namespace Systek.Utility
         {
             try
             {
-                using (LoggingContext db = new LoggingContext())
+                using (LoggingContext db = new LoggingContext(ConnectionString))
                 {
                     tblSystemLog log = new tblSystemLog
                     {
+                        tStamp = DateTime.Now,
                         typeID = type,
                         areaID = area,
                         serverID = server,
@@ -63,9 +59,11 @@ namespace Systek.Utility
                     db.SaveChanges();
                 }
             }
-            catch (Exception)
+            catch (Exception e)
             {
-                // If the logger throws an error.. Oh god... Cry silently?
+                msg = "Logger threw an exception while trying to write a log.\n" + e.Message + "\n\n" + e.StackTrace
+                    + "\nOriginal error: " + msg;
+                FileLog(type, area, DefaultLocalLogPath, msg);
             }
         }
 
@@ -85,7 +83,7 @@ namespace Systek.Utility
                 string timeStamp = DateTime.Now.ToString("HH:mm:ss");
 
                 // Convert the type of message into something human-readable
-                using (LoggingContext db = new LoggingContext())
+                using (LoggingContext db = new LoggingContext(ConnectionString))
                 {
                     logType = db.tblType.Find(type).name.ToUpper();
                     areaType = db.tblAreaType.Find(area).name.ToUpper();

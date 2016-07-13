@@ -19,10 +19,16 @@ namespace Systek.Agent
         public Core AgentCore { get; private set; }
 
         /// <summary>
+        /// Used for writing logs in this class.
+        /// </summary>
+        private Logger Log { get; set; }
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="AgentService"/> class.
         /// </summary>
         public AgentService()
         {
+            Log = new Logger("AgentLogContext", ConfigurationManager.AppSettings["localLogPath"]);
             InitializeComponent();
         }
 
@@ -60,7 +66,7 @@ namespace Systek.Agent
 
             if (!AgentCore.Running)
             {
-                Logger.Instance.FileLog(Type.ERROR, AreaType.AGENT_INITIALIZATION, logPath, "Unable to initialize agent");
+                Log.FileLog(Type.ERROR, AreaType.AGENT_INITIALIZATION, logPath, "Unable to initialize agent");
             }
         }
 

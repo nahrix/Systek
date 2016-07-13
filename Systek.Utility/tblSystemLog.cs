@@ -19,6 +19,7 @@ namespace Systek.Utility
         public int areaID { get; set; }
         public int serverID { get; set; }
         public string message { get; set; }
+        public System.DateTime tStamp { get; set; }
     
         public virtual tblAreaType tblAreaType { get; set; }
         public virtual tblServer tblServer { get; set; }

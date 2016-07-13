@@ -15,6 +15,7 @@ namespace Systek.UnitTests
     public class UtilityTests
     {
         private const string LogPath = "C:\\dev\\logs\\";
+        private const string LogContext = "LoggingContext";
         private const int TEST_SERVER = 1;
 
         public UtilityTests()
@@ -73,12 +74,13 @@ namespace Systek.UnitTests
         {
             try
             {
+                Logger Log = new Logger(LogContext, LogPath);
                 string guid = Guid.NewGuid().ToString();
                 string message = "Testing the logger from the UtilityTest unit test class. GUID: " + guid;
                 string logPath = LogPath + "Testlog_" + DateTime.Now.ToString("yyyyMMdd_hh") + ".txt";
 
-                Logger.Instance.TblSystemLog(Type.ERROR, AreaType.UNIT_TEST, TEST_SERVER, message);
-                Logger.Instance.FileLog(Type.ERROR, AreaType.UNIT_TEST, logPath, message);
+                Log.TblSystemLog(Type.ERROR, AreaType.UNIT_TEST, TEST_SERVER, message);
+                Log.FileLog(Type.ERROR, AreaType.UNIT_TEST, logPath, message);
 
                 using (LoggingContext db = new LoggingContext())
                 {

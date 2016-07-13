@@ -45,11 +45,19 @@ namespace Systek.Agent
         public int ReconnectWait { get; private set; }
 
         /// <summary>
+        /// Used for writing logs in this class.
+        /// </summary>
+        private Logger Log { get; set; }
+
+        // Used to describe the server ID when logging
+        private const int LOCALHOST = 1;
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="Core"/> class.
         /// </summary>
         public Core()
         {
-            LogPath = ConfigurationManager.AppSettings["logPath"];
+            Log = new Logger("AgentLogContext", ConfigurationManager.AppSettings["localLogPath"]);
             ReconnectWait = Int32.Parse(ConfigurationManager.AppSettings["reconnectWait"]);
             Running = false;
         }
@@ -70,7 +78,7 @@ namespace Systek.Agent
             {
                 Server?.Close();
                 Running = false;
-                Logger.Instance.FileLog(Type.ERROR, AreaType.AGENT_INITIALIZATION, LogPath, e.Message);
+                Log.TblSystemLog(Type.ERROR, AreaType.AGENT_INITIALIZATION, LOCALHOST, e.Message);
             }
         }
 
@@ -124,7 +132,7 @@ namespace Systek.Agent
             {
                 message += "\n" + e.ExceptionDetail.Message + "\n" + e.ExceptionDetail.StackTrace;
             }
-            Logger.Instance.FileLog(e.Type, e.AreaType, LogPath, message);
+            Log.TblSystemLog(e.Type, e.AreaType, LOCALHOST, message);
         }
 
         /// <summary>
