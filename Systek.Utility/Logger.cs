@@ -21,16 +21,24 @@ namespace Systek.Utility
         /// If the logger fails to write to the database, it will need to fall back on a simpler
         /// file-based log to log its own error.
         /// </summary>
-        public string DefaultLocalLogPath { get; private set; }
+        public string LogPath { get; private set; }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="Logger"/> class.
+        /// Gets the name of the log.
+        /// </summary>
+        public string LogName { get; private set; }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Logger" /> class.
         /// </summary>
         /// <param name="connectionString">The connection string.</param>
-        public Logger(string connectionString, string defaultLocalLogPath)
+        /// <param name="logPath">The default local log path.</param>
+        /// <param name="logName">Name of the log.</param>
+        public Logger(string connectionString, string logPath, string logName)
         {
             ConnectionString = connectionString;
-            DefaultLocalLogPath = defaultLocalLogPath;
+            LogPath = logPath;
+            LogName = logName;
         }
 
         /// <summary>
@@ -48,7 +56,7 @@ namespace Systek.Utility
                 {
                     tblSystemLog log = new tblSystemLog
                     {
-                        tStamp = DateTime.Now,
+                        tStamp = DateTime.UtcNow,
                         typeID = type,
                         areaID = area,
                         serverID = server,
@@ -63,7 +71,7 @@ namespace Systek.Utility
             {
                 msg = "Logger threw an exception while trying to write a log.\n" + e.Message + "\n\n" + e.StackTrace
                     + "\nOriginal error: " + msg;
-                FileLog(type, area, DefaultLocalLogPath, msg);
+                FileLog(type, area, msg);
             }
         }
 
@@ -74,13 +82,14 @@ namespace Systek.Utility
         /// <param name="area">The area being affected, as defined in tblAreaType.</param>
         /// <param name="filePath">The full path of the log file.</param>
         /// <param name="message">The content of the log to write to the file.</param>
-        public void FileLog(int type, int area, string filePath, string message)
+        public void FileLog(int type, int area, string message)
         {
             try
             {
                 string logType;
                 string areaType;
-                string timeStamp = DateTime.Now.ToString("HH:mm:ss");
+                string timeStamp = DateTime.UtcNow.ToString("HH:mm:ss");
+                string filePath = LogPath + "\\" + LogName + "_" + DateTime.UtcNow.ToString("yyyyMMdd_hh") + ".txt";
 
                 // Convert the type of message into something human-readable
                 using (LoggingContext db = new LoggingContext(ConnectionString))

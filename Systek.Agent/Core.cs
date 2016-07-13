@@ -57,7 +57,7 @@ namespace Systek.Agent
         /// </summary>
         public Core()
         {
-            Log = new Logger("AgentLogContext", ConfigurationManager.AppSettings["localLogPath"]);
+            Log = new Logger("AgentLogContext", ConfigurationManager.AppSettings["localLogPath"], "ServerCore");
             ReconnectWait = Int32.Parse(ConfigurationManager.AppSettings["reconnectWait"]);
             Running = false;
         }

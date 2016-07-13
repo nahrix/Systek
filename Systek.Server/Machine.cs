@@ -52,7 +52,7 @@ namespace Systek.Server
         {
             Authenticated = false;
             MachineName = null;
-            Log = new Logger("ServerLogContext", ConfigurationManager.AppSettings["localLogPath"]);
+            Log = new Logger("ServerLogContext", ConfigurationManager.AppSettings["localLogPath"], "AgentMachine");
             NetConnection = new Connection(agent, LogHandler, MessageHandler);
         }
 

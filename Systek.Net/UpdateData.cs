@@ -12,6 +12,10 @@ namespace Systek.Net
     [Serializable]
     public class UpdateData
     {
+        public string HostName { get; set; }
+
+        public string AuthKey { get; set; }
+
         /// <summary>
         /// Determines whether the specified <see cref="System.Object" />, is equal to this instance.
         /// </summary>
@@ -22,7 +26,7 @@ namespace Systek.Net
         public override bool Equals(object other)
         {
             // Type check
-            if ((other == null) || (other.GetType() != typeof(Message)))
+            if ((other == null) || (other.GetType() != typeof(UpdateData)))
             {
                 return false;
             }

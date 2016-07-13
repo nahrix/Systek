@@ -32,7 +32,7 @@ namespace Systek.Server
         /// <param name="port">Port number that the server will listen on.</param>
         public Connector(int port)
         {
-            Log = new Logger("ServerLogContext", ConfigurationManager.AppSettings["localLogPath"]);
+            Log = new Logger("ServerLogContext", ConfigurationManager.AppSettings["localLogPath"], "ServerConnector");
             Port = port;
         }
 

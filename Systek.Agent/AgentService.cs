@@ -28,7 +28,7 @@ namespace Systek.Agent
         /// </summary>
         public AgentService()
         {
-            Log = new Logger("AgentLogContext", ConfigurationManager.AppSettings["localLogPath"]);
+            Log = new Logger("AgentLogContext", ConfigurationManager.AppSettings["localLogPath"], "AgentService");
             InitializeComponent();
         }
 
@@ -66,7 +66,7 @@ namespace Systek.Agent
 
             if (!AgentCore.Running)
             {
-                Log.FileLog(Type.ERROR, AreaType.AGENT_INITIALIZATION, logPath, "Unable to initialize agent");
+                Log.FileLog(Type.ERROR, AreaType.AGENT_INITIALIZATION, "Unable to initialize agent");
             }
         }
 
