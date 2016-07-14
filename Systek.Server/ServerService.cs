@@ -29,7 +29,8 @@ namespace Systek.Server
         }
 
         /// <summary>
-        /// When implemented in a derived class, executes when a Start command is sent to the service by the Service Control Manager (SCM) or when the operating system starts (for a service that starts automatically). Specifies actions to take when the service starts.
+        /// When implemented in a derived class, executes when a Start command is sent to the service by the Service Control Manager
+        /// (SCM) or when the operating system starts (for a service that starts automatically). Specifies actions to take when the service starts.
         /// </summary>
         /// <param name="args">Data passed by the start command.</param>
         protected override void OnStart(string[] args)
@@ -38,11 +39,13 @@ namespace Systek.Server
         }
 
         /// <summary>
-        /// When implemented in a derived class, executes when a Stop command is sent to the service by the Service Control Manager (SCM). Specifies actions to take when a service stops running.
+        /// When implemented in a derived class, executes when a Stop command is sent to the service by the Service Control Manager (SCM).
+        /// Specifies actions to take when a service stops running.
         /// </summary>
         protected override void OnStop()
         {
             Connector.Instance?.Stop();
+            Log.TblSystemLog(Type.INFO, AreaType.SERVER_INITIALIZATION, SYSTEK_SERVER, "Systek server shutdown successfully.");
         }
 
         /// <summary>
@@ -56,6 +59,7 @@ namespace Systek.Server
 
                 Connector.Port = port;
                 Connector.Instance.Initialize();
+                Log.TblSystemLog(Type.INFO, AreaType.SERVER_INITIALIZATION, SYSTEK_SERVER, "Systek server started successfully.");
             }
             catch (Exception e)
             {
