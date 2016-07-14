@@ -91,11 +91,20 @@ namespace Systek.Utility
                 string timeStamp = DateTime.UtcNow.ToString("HH:mm:ss");
                 string filePath = LogPath + "\\" + LogName + "_" + DateTime.UtcNow.ToString("yyyyMMdd_hh") + ".txt";
 
-                // Convert the type of message into something human-readable
-                using (LoggingContext db = new LoggingContext(ConnectionString))
+                try
                 {
-                    logType = db.tblType.Find(type).name.ToUpper();
-                    areaType = db.tblAreaType.Find(area).name.ToUpper();
+                    // Convert the type of message into something human-readable
+                    using (LoggingContext db = new LoggingContext(ConnectionString))
+                    {
+                        logType = db.tblType.Find(type).name.ToUpper();
+                        areaType = db.tblAreaType.Find(area).name.ToUpper();
+                    }
+                }
+                // If table lookup fails, proceed with unknown values
+                catch (Exception)
+                {
+                    logType = null;
+                    areaType = null;
                 }
 
                 StreamWriter file = new StreamWriter(filePath, true);
