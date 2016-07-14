@@ -110,7 +110,7 @@ namespace Systek.Utility
                 // If an invalid area type is specified, log that too
                 if (areaType == null)
                 {
-                    file.WriteLine("[" + timeStamp + "] Logger: AreaType not found.  AreaTypeID specified: " + areaType);
+                    file.WriteLine("[" + timeStamp + "] Logger: AreaType not found.  AreaTypeID specified: " + area);
                     areaType = "unknown";
                 }
 

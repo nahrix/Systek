@@ -86,7 +86,6 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="App.config" />
     <None Include="packages.config" />
     <EntityDeploy Include="SystekDB.edmx">
       <Generator>EntityModelCodeGenerator</Generator>
