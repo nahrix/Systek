@@ -80,7 +80,6 @@ namespace Systek.Utility
         /// </summary>
         /// <param name="type">The type of log being written.  These types are defined in tblType in the database.</param>
         /// <param name="area">The area being affected, as defined in tblAreaType.</param>
-        /// <param name="filePath">The full path of the log file.</param>
         /// <param name="message">The content of the log to write to the file.</param>
         public void FileLog(int type, int area, string message)
         {

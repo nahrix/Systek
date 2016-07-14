@@ -46,6 +46,7 @@ namespace Systek.Server
         {
             Connector.Instance?.Stop();
             Log.TblSystemLog(Type.INFO, AreaType.SERVER_INITIALIZATION, SYSTEK_SERVER, "Systek server shutdown successfully.");
+            Log.FileLog(Type.INFO, AreaType.SERVER_INITIALIZATION, "Systek server shutdown successfully.");
         }
 
         /// <summary>
@@ -60,11 +61,13 @@ namespace Systek.Server
                 Connector.Port = port;
                 Connector.Instance.Initialize();
                 Log.TblSystemLog(Type.INFO, AreaType.SERVER_INITIALIZATION, SYSTEK_SERVER, "Systek server started successfully.");
+                Log.FileLog(Type.INFO, AreaType.SERVER_INITIALIZATION, "Systek server started successfully.");
             }
             catch (Exception e)
             {
                 string message = "Exception thrown while trying to initialize server:\n" + e.Message + "\n\n" + e.StackTrace;
                 Log.TblSystemLog(Type.ERROR, AreaType.SERVER_INITIALIZATION, SYSTEK_SERVER, message);
+                Log.FileLog(Type.ERROR, AreaType.SERVER_INITIALIZATION, message);
             }
         }
     }
