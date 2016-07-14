@@ -37,12 +37,15 @@ namespace Systek.Server
         /// </summary>
         private static Connector _Instance = null;
 
+        private TcpListener Listener;
+
         /// <summary>
         /// Constructor.
         /// </summary>
         private Connector()
         {
-            Log = new Logger("ServerLogContext", ConfigurationManager.AppSettings["localLogPath"], "ServerConnector");
+            Log = new Logger("ServerLogContext", ConfigurationManager.AppSettings["LocalLogPath"], "ServerConnector");
+            Listener = new TcpListener(IPAddress.Any, Port);
         }
 
         /// <summary>
@@ -81,6 +84,7 @@ namespace Systek.Server
         public void Stop()
         {
             Running = false;
+            Listener.Stop();
         }
 
         /// <summary>
@@ -89,10 +93,9 @@ namespace Systek.Server
         /// </summary>
         private void _Listen()
         {
-            TcpListener listener = new TcpListener(IPAddress.Any, Port);
             try
             {
-                listener.Start();
+                Listener.Start();
             }
             catch(Exception e)
             {
@@ -107,7 +110,7 @@ namespace Systek.Server
             {
                 try
                 {
-                    TcpClient agentSocket = listener.AcceptTcpClient();
+                    TcpClient agentSocket = Listener.AcceptTcpClient();
                     IMachine agentMachine = new Machine(agentSocket);
                     agentMachine.Initialize();
 
@@ -118,8 +121,11 @@ namespace Systek.Server
                 }
                 catch (Exception e)
                 {
-                    string message = "Systek server threw exception while creating new agent connection.\n" + e.Message + "\n\n" + e.StackTrace;
-                    Log.TblSystemLog(Type.ERROR, AreaType.SERVER_TCP_LISTENER, SYSTEK_SERVER, message);
+                    if (Running)
+                    {
+                        string message = "Systek server threw exception while creating new agent connection.\n" + e.Message + "\n\n" + e.StackTrace;
+                        Log.TblSystemLog(Type.ERROR, AreaType.SERVER_TCP_LISTENER, SYSTEK_SERVER, message);
+                    }
                 }
             }
         }
