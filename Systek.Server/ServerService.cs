@@ -67,6 +67,7 @@ namespace Systek.Server
                 string message = "Exception thrown while trying to initialize server:\n" + e.Message + "\n\n" + e.StackTrace;
                 Log.TblSystemLog(Type.ERROR, AreaType.SERVER_INITIALIZATION, SYSTEK_SERVER, message);
                 Log.FileLog(Type.ERROR, AreaType.SERVER_INITIALIZATION, message);
+                Stop();
             }
         }
     }

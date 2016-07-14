@@ -8,16 +8,11 @@ namespace Systek.Agent
 {
     /// <summary>
     /// The base Windows Service used to keep this agent running.  The actual implementation of agent features
-    /// contained in the <see cref="Core"/> class, while this class just manages the service itself.
+    /// are contained in the <see cref="Core"/> class, while this class just manages the service itself.
     /// </summary>
     /// <seealso cref="System.ServiceProcess.ServiceBase" />
     public partial class AgentService : ServiceBase
     {
-        /// <summary>
-        /// Gets the agent core class, which manages the more important functions of the agent.
-        /// </summary>
-        public Core AgentCore { get; private set; }
-
         /// <summary>
         /// Used for writing logs in this class.
         /// </summary>
@@ -49,6 +44,7 @@ namespace Systek.Agent
         /// </summary>
         protected override void OnStop()
         {
+            Core.Instance?.Shutdown();
         }
 
         /// <summary>
@@ -64,25 +60,19 @@ namespace Systek.Agent
 
                 IPEndPoint remoteEndPoint = new IPEndPoint(ip, port);
 
-                AgentCore.Initialize(remoteEndPoint);
+                Core.Instance.Initialize(remoteEndPoint);
 
-                if (!AgentCore.Running)
+                if (!Core.Instance.Running)
                 {
                     Log.FileLog(Type.ERROR, AreaType.AGENT_INITIALIZATION, "Unable to initialize agent");
+                    Stop();
                 }
             }
             catch (Exception e)
             {
                 Log.FileLog(Type.ERROR, AreaType.AGENT_INITIALIZATION, "Exception thrown while trying to initialize:\n" + e.Message + "\n\n" + e.StackTrace);
+                Stop();
             }
-        }
-
-        /// <summary>
-        /// Shuts down the service, and does any necessary cleanup.
-        /// </summary>
-        public void Shutdown()
-        {
-            AgentCore.Shutdown();
         }
     }
 }

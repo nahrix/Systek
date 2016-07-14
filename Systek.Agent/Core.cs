@@ -49,17 +49,39 @@ namespace Systek.Agent
         /// </summary>
         private Logger Log { get; set; }
 
+        /// <summary>
+        /// Gets or sets the singleton instance.
+        /// </summary>
+        private static Core _Instance { get; set; }
+
         // Used to describe the server ID when logging
         private const int LOCALHOST = 1;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="Core"/> class.
+        /// Initializes a new instance of the <see cref="Core"/> class.  Privatized because this class is a singleton.
         /// </summary>
-        public Core()
+        private Core()
         {
             Log = new Logger("AgentLogContext", ConfigurationManager.AppSettings["localLogPath"], "AgentCore");
             ReconnectWait = Int32.Parse(ConfigurationManager.AppSettings["reconnectWait"]);
             Running = false;
+        }
+
+        /// <summary>
+        /// Returns the singleton instance of this class.
+        /// </summary>
+        /// <returns>This instance.</returns>
+        public static Core Instance
+        {
+            get
+            {
+                if (_Instance == null)
+                {
+                    _Instance = new Core();
+                }
+
+                return _Instance;
+            }
         }
 
         /// <summary>

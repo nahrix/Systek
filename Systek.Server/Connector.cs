@@ -40,7 +40,7 @@ namespace Systek.Server
         private TcpListener Listener;
 
         /// <summary>
-        /// Constructor.
+        /// Constructor, privatized because this class is a singleton.
         /// </summary>
         private Connector()
         {
@@ -51,7 +51,7 @@ namespace Systek.Server
         /// <summary>
         /// Gets the singleton instance of this object.
         /// </summary>
-        /// <returns>The singleton instance of this object </returns>
+        /// <returns>The singleton instance of this object.</returns>
         public static Connector Instance
         {
             get
