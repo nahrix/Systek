@@ -57,7 +57,7 @@ namespace Systek.Agent
         /// </summary>
         public Core()
         {
-            Log = new Logger("AgentLogContext", ConfigurationManager.AppSettings["localLogPath"], "ServerCore");
+            Log = new Logger("AgentLogContext", ConfigurationManager.AppSettings["localLogPath"], "AgentCore");
             ReconnectWait = Int32.Parse(ConfigurationManager.AppSettings["reconnectWait"]);
             Running = false;
         }
@@ -78,7 +78,10 @@ namespace Systek.Agent
             {
                 Server?.Close();
                 Running = false;
-                Log.TblSystemLog(Type.ERROR, AreaType.AGENT_INITIALIZATION, LOCALHOST, e.Message);
+
+                string message = "There was an exception thrown when trying to initialize the Agent:\n" + e.Message
+                    + "\n\n" + e.StackTrace;
+                Log.FileLog(Type.ERROR, AreaType.AGENT_INITIALIZATION, message);
             }
         }
 
@@ -96,27 +99,30 @@ namespace Systek.Agent
         /// </summary>
         private void _Connector(IPEndPoint remoteEndPoint)
         {
-            // This thread should run until the class' Stop function is called.
-            while (true)
+            try
             {
-                // Rebuild the connection if it's down
-                if (!AgentConnection.Connected)
+                // This thread should run until the class' Stop function is called.
+                do
                 {
-                    Server = new TcpClient();
-                    Server.Connect(remoteEndPoint);
-                    AgentConnection = new Connection(Server, _LogHandler, _MessageHandler);
-                    AgentConnection.Initialize();
-                    Running = true;
-                }
+                    // Rebuild the connection if it's down
+                    if (!AgentConnection.Connected)
+                    {
+                        Server = new TcpClient();
+                        Server.Connect(remoteEndPoint);
+                        AgentConnection = new Connection(Server, _LogHandler, _MessageHandler);
+                        AgentConnection.Initialize();
+                        Running = true;
+                    }
 
-                // Wait before the next check, to minimize resource footprint
-                Thread.Sleep(ReconnectWait);
-
-                // Calling the Stop function flags Running to false, terminating this thread
-                if (!Running)
-                {
-                    return;
-                }
+                    // Wait before the next check, to minimize resource footprint
+                    Thread.Sleep(ReconnectWait);
+                } while (Running);
+            }
+            catch (Exception e)
+            {
+                string message = "There was an exception thrown when trying to connect the Agent to the Server:\n" + e.Message
+                    + "\n\n" + e.StackTrace;
+                Log.FileLog(Type.ERROR, AreaType.AGENT_INITIALIZATION, message);
             }
         }
 
@@ -130,9 +136,9 @@ namespace Systek.Agent
 
             if (e.ExceptionDetail != null)
             {
-                message += "\n" + e.ExceptionDetail.Message + "\n" + e.ExceptionDetail.StackTrace;
+                message += "\n" + e.ExceptionDetail.Message + "\n\n" + e.ExceptionDetail.StackTrace;
             }
-            Log.TblSystemLog(e.Type, e.AreaType, LOCALHOST, message);
+            Log.FileLog(e.Type, e.AreaType, message);
         }
 
         /// <summary>

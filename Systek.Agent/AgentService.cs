@@ -28,7 +28,7 @@ namespace Systek.Agent
         /// </summary>
         public AgentService()
         {
-            Log = new Logger("AgentLogContext", ConfigurationManager.AppSettings["localLogPath"], "AgentService");
+            Log = new Logger("AgentLogContext", ConfigurationManager.AppSettings["LocalLogPath"], "AgentService");
             InitializeComponent();
         }
 
@@ -56,17 +56,24 @@ namespace Systek.Agent
         /// </summary>
         public void Initialize()
         {
-            int port = Int32.Parse(ConfigurationManager.AppSettings["port"]);
-            IPAddress ip = IPAddress.Parse(ConfigurationManager.AppSettings["serverIP"]);
-            string logPath = ConfigurationManager.AppSettings["logPath"];
-
-            IPEndPoint remoteEndPoint = new IPEndPoint(ip, port);
-
-            AgentCore.Initialize(remoteEndPoint);
-
-            if (!AgentCore.Running)
+            try
             {
-                Log.FileLog(Type.ERROR, AreaType.AGENT_INITIALIZATION, "Unable to initialize agent");
+                int port = Int32.Parse(ConfigurationManager.AppSettings["Port"]);
+                IPAddress ip = IPAddress.Parse(ConfigurationManager.AppSettings["ServerIP"]);
+                string logPath = ConfigurationManager.AppSettings["LogPath"];
+
+                IPEndPoint remoteEndPoint = new IPEndPoint(ip, port);
+
+                AgentCore.Initialize(remoteEndPoint);
+
+                if (!AgentCore.Running)
+                {
+                    Log.FileLog(Type.ERROR, AreaType.AGENT_INITIALIZATION, "Unable to initialize agent");
+                }
+            }
+            catch (Exception e)
+            {
+                Log.FileLog(Type.ERROR, AreaType.AGENT_INITIALIZATION, "Exception thrown while trying to initialize:\n" + e.Message + "\n\n" + e.StackTrace);
             }
         }
 

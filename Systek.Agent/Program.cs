@@ -1,4 +1,6 @@
-﻿namespace Systek.Agent
+﻿using System.ServiceProcess;
+
+namespace Systek.Agent
 {
     static class Program
     {
@@ -7,14 +9,14 @@
         /// </summary>
         static void Main()
         {
-#if (RELEASE)
+#if (!DEBUG)
             ServiceBase[] ServicesToRun;
             ServicesToRun = new ServiceBase[]
             {
                 new AgentService()
             };
             ServiceBase.Run(ServicesToRun);
-#elif (DEBUG)
+#else
             new AgentService().Initialize();
 #endif
         }

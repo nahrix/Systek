@@ -14,9 +14,15 @@ namespace Systek.Server
     public class Connector
     {
         /// <summary>
-        /// Port number that the server will listen on
+        /// Port number that the server will listen on.  Needs to be set before an instance of
+        /// this class can be created.
         /// </summary>
-        public int Port { get; private set; }
+        public static int Port { get; set; }
+
+        /// <summary>
+        /// Gets a value indicating whether this <see cref="Connector"/> is running.
+        /// </summary>
+        public bool Running { get; private set; }
 
         // Used to describe the server ID when logging
         private const int SYSTEK_SERVER = 2;
@@ -27,13 +33,38 @@ namespace Systek.Server
         private Logger Log { get; set; }
 
         /// <summary>
+        /// The singleton instance
+        /// </summary>
+        private static Connector _Instance = null;
+
+        /// <summary>
         /// Constructor.
         /// </summary>
-        /// <param name="port">Port number that the server will listen on.</param>
-        public Connector(int port)
+        private Connector()
         {
             Log = new Logger("ServerLogContext", ConfigurationManager.AppSettings["localLogPath"], "ServerConnector");
-            Port = port;
+        }
+
+        /// <summary>
+        /// Gets the singleton instance of this object.
+        /// </summary>
+        /// <returns>The singleton instance of this object </returns>
+        public static Connector Instance
+        {
+            get
+            {
+                if (Port == 0)
+                {
+                    return null;
+                }
+
+                if (_Instance == null)
+                {
+                    _Instance = new Connector();
+                }
+
+                return _Instance;
+            }
         }
 
         /// <summary>
@@ -42,6 +73,14 @@ namespace Systek.Server
         public void Initialize()
         {
             new Thread(new ThreadStart(_Listen)).Start();
+        }
+
+        /// <summary>
+        /// Stops this instance from listening for more connections.
+        /// </summary>
+        public void Stop()
+        {
+            Running = false;
         }
 
         /// <summary>
@@ -61,8 +100,10 @@ namespace Systek.Server
                 Log.TblSystemLog(Type.ERROR, AreaType.SERVER_TCP_LISTENER, SYSTEK_SERVER, message);
                 return;
             }
+
+            Running = true;
             
-            while (true)
+            while (Running)
             {
                 try
                 {

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Systek.Utility;
+using System;
 using System.Configuration;
 using System.ServiceProcess;
 
@@ -11,10 +12,19 @@ namespace Systek.Server
     public partial class ServerService : ServiceBase
     {
         /// <summary>
+        /// Used for writing logs in this class.
+        /// </summary>
+        private Logger Log { get; set; }
+
+        // Used to describe the server ID for logging
+        private const int SYSTEK_SERVER = 2;
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="ServerService"/> class.
         /// </summary>
         public ServerService()
         {
+            Log = new Logger("ServerLogContext", ConfigurationManager.AppSettings["LocalLogPath"], "ServerService");
             InitializeComponent();
         }
 
@@ -32,16 +42,26 @@ namespace Systek.Server
         /// </summary>
         protected override void OnStop()
         {
+            Connector.Instance?.Stop();
         }
 
         /// <summary>
-        /// Initializes this instance.
+        /// Initializes this service.
         /// </summary>
         public void Initialize()
         {
-            int port = Int32.Parse(ConfigurationManager.AppSettings["port"]);
+            try
+            {
+                int port = Int32.Parse(ConfigurationManager.AppSettings["Port"]);
 
-            new Connector(port).Initialize();
+                Connector.Port = port;
+                Connector.Instance.Initialize();
+            }
+            catch (Exception e)
+            {
+                string message = "Exception thrown while trying to initialize server:\n" + e.Message + "\n\n" + e.StackTrace;
+                Log.TblSystemLog(Type.ERROR, AreaType.SERVER_INITIALIZATION, SYSTEK_SERVER, message);
+            }
         }
     }
 }
