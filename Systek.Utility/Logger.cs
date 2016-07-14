@@ -116,8 +116,12 @@ namespace Systek.Utility
                 file.WriteLine("[" + timeStamp + "] (" + logType + ") <" + areaType + ">: " + message);
                 file.Close();
             }
-            catch (Exception)
+            catch (Exception e)
             {
+                System.Diagnostics.EventLog appLog = new System.Diagnostics.EventLog();
+                appLog.Source = "Systek Server";
+                appLog.WriteEntry("Logger failed to write a log with exception:\n" + e.Message + "\n\n" + e.StackTrace
+                    + "\nOriginal message: " + message);
                 // The logger failed, so this comment will serve as the epitaph for the poor, unlogged exception.
             }
         }

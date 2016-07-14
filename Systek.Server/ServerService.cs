@@ -48,8 +48,7 @@ namespace Systek.Server
             Connector.Instance?.Stop();
             Log.TblSystemLog(Type.INFO, AreaType.SERVER_INITIALIZATION, SYSTEK_SERVER, "Systek server shutdown successfully.");
             Log.FileLog(Type.INFO, AreaType.SERVER_INITIALIZATION, "Systek server shutdown successfully.");
-            System.Diagnostics.EventLog appLog =
-    new System.Diagnostics.EventLog();
+            System.Diagnostics.EventLog appLog = new System.Diagnostics.EventLog();
             appLog.Source = "Systek Server";
             appLog.WriteEntry("Systek server shutdown successfully.");
         }
@@ -67,8 +66,7 @@ namespace Systek.Server
                 Connector.Instance.Initialize();
                 Log.TblSystemLog(Type.INFO, AreaType.SERVER_INITIALIZATION, SYSTEK_SERVER, "Systek server started successfully.");
                 Log.FileLog(Type.INFO, AreaType.SERVER_INITIALIZATION, "Systek server started successfully.");
-                System.Diagnostics.EventLog appLog =
-    new System.Diagnostics.EventLog();
+                System.Diagnostics.EventLog appLog = new System.Diagnostics.EventLog();
                 appLog.Source = "Systek server";
                 appLog.WriteEntry("Systek server started successfully.");
             }
