@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -118,11 +119,12 @@ namespace Systek.Utility
             }
             catch (Exception e)
             {
+                // If all else fails, attempt to write to the local Windows Event Log
                 System.Diagnostics.EventLog appLog = new System.Diagnostics.EventLog();
                 appLog.Source = "Systek Server";
-                appLog.WriteEntry("Logger failed to write a log with exception:\n" + e.Message + "\n\n" + e.StackTrace
-                    + "\nOriginal message: " + message);
-                // The logger failed, so this comment will serve as the epitaph for the poor, unlogged exception.
+                
+                appLog.WriteEntry("Logger failed to write a log with exception:\n" + e.Message + "\n\n" + e.StackTrace + "\nOriginal message: " + message,
+                    EventLogEntryType.Error);
             }
         }
     }
