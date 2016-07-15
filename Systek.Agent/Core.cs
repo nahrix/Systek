@@ -103,7 +103,7 @@ namespace Systek.Agent
 
                 string message = "There was an exception thrown when trying to initialize the Agent:\n" + e.Message
                     + "\n\n" + e.StackTrace;
-                Log.FileLog(Type.ERROR, AreaType.AGENT_INITIALIZATION, message);
+                Log.TblSystemLog(Type.ERROR, AreaType.AGENT_INITIALIZATION, LOCALHOST, message);
             }
         }
 
@@ -143,7 +143,7 @@ namespace Systek.Agent
                 {
                     string message = "There was an exception thrown when trying to connect the Agent to the Server:\n" + e.Message
                         + "\n\n" + e.StackTrace;
-                    Log.FileLog(Type.ERROR, AreaType.AGENT_INITIALIZATION, message);
+                    Log.TblSystemLog(Type.ERROR, AreaType.AGENT_INITIALIZATION, LOCALHOST, message);
                     Thread.Sleep(ReconnectWait * 100);  // Longer timeout to retry if the server appears to be down, to avoid log spam
                 }
             } while (Running);
@@ -161,7 +161,7 @@ namespace Systek.Agent
             {
                 message += "\n" + e.ExceptionDetail.Message + "\n\n" + e.ExceptionDetail.StackTrace;
             }
-            Log.FileLog(e.Type, e.AreaType, message);
+            Log.TblSystemLog(e.Type, e.AreaType, LOCALHOST, message);
         }
 
         /// <summary>

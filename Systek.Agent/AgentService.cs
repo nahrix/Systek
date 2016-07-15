@@ -18,6 +18,8 @@ namespace Systek.Agent
         /// </summary>
         private Logger Log { get; set; }
 
+        private const int LOCALHOST = 1;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="AgentService"/> class.
         /// </summary>
@@ -64,13 +66,13 @@ namespace Systek.Agent
 
                 if (!Core.Instance.Running)
                 {
-                    Log.FileLog(Type.ERROR, AreaType.AGENT_INITIALIZATION, "Unable to initialize agent");
+                    Log.TblSystemLog(Type.ERROR, AreaType.AGENT_INITIALIZATION, LOCALHOST, "Unable to initialize agent");
                     Stop();
                 }
             }
             catch (Exception e)
             {
-                Log.FileLog(Type.ERROR, AreaType.AGENT_INITIALIZATION, "Exception thrown while trying to initialize:\n" + e.Message + "\n\n" + e.StackTrace);
+                Log.TblSystemLog(Type.ERROR, AreaType.AGENT_INITIALIZATION, LOCALHOST, "Exception thrown while trying to initialize:\n" + e.Message + "\n\n" + e.StackTrace);
                 Stop();
             }
         }
