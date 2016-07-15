@@ -45,15 +45,22 @@ namespace Systek.Server
         private Logger Log { get; set; }
 
         /// <summary>
+        /// Indicates whether verbose logs should be written.
+        /// </summary>
+        private bool VerboseLogging = false;
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="Machine" /> class.
         /// </summary>
         /// <param name="agent">The connection to the agent.</param>
         public Machine(TcpClient agent)
         {
+            Boolean.TryParse(ConfigurationManager.AppSettings["VerboseLogging"], out VerboseLogging);
             Authenticated = false;
             MachineName = null;
             Log = new Logger("ServerLogContext", ConfigurationManager.AppSettings["localLogPath"], "AgentMachine");
             NetConnection = new Connection(agent, LogHandler, MessageHandler);
+            NetConnection.VerboseLogging = VerboseLogging;
         }
 
         /// <summary>

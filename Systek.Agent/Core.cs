@@ -50,6 +50,11 @@ namespace Systek.Agent
         private Logger Log { get; set; }
 
         /// <summary>
+        /// The
+        /// </summary>
+        private bool VerboseLogging = false;
+
+        /// <summary>
         /// Gets or sets the singleton instance.
         /// </summary>
         private static Core _Instance { get; set; }
@@ -62,6 +67,7 @@ namespace Systek.Agent
         /// </summary>
         private Core()
         {
+            Boolean.TryParse(ConfigurationManager.AppSettings["VerboseLogging"], out VerboseLogging);
             Log = new Logger("AgentLogContext", ConfigurationManager.AppSettings["LocalLogPath"], "AgentCore");
             ReconnectWait = Int32.Parse(ConfigurationManager.AppSettings["ReconnectWait"]);
             Running = false;
@@ -135,6 +141,7 @@ namespace Systek.Agent
                         Server = new TcpClient();
                         Server.Connect(remoteEndPoint);
                         AgentConnection = new Connection(Server, _LogHandler, _MessageHandler);
+                        AgentConnection.VerboseLogging = VerboseLogging;
                         AgentConnection.Initialize();
                         Running = true;
                         Log.TblSystemLog(Type.INFO, AreaType.AGENT_INITIALIZATION, LOCALHOST, "Agent service connected to server successfully.");

@@ -22,6 +22,14 @@ namespace Systek.Net
         /// </summary>
         public int Timeout { get; set; }
 
+        /// <summary>
+        /// Gets or sets a value indicating whether verbose logs should be written.
+        /// </summary>
+        /// <value>
+        ///   <c>true</c> if this library should write verbose logs; otherwise, <c>false</c>.
+        /// </value>
+        public bool VerboseLogging { get; set; }
+
         private event LogEventHandler LogEvent;         // Occurs when logging is required.
         private event MessageEventHandler MessageEvent; // Occurs when a Message needs processing.
         private TcpClient Peer { get; set; }            // The socket that this machine will be connected to
@@ -39,6 +47,7 @@ namespace Systek.Net
         public Connection(TcpClient peer, LogEventHandler logHandler, MessageEventHandler messageHandler)
         {
             Connected = false;
+            VerboseLogging = false;
             Peer = peer;
             LogEvent += logHandler;
             MessageEvent += messageHandler;
@@ -112,6 +121,11 @@ namespace Systek.Net
                     Array.Clear(headerInput, 0, headerInput.Length);
                     NetStream.ReadTimeout = System.Threading.Timeout.Infinite;
 
+                    if (VerboseLogging)
+                    {
+                        LogEvent?.Invoke(new LogEventArgs(Type.INFO, AreaType.NET_LIB, "Reading for header."));
+                    }
+
                     // Read the header, which currently is just a short declaring the size of the upcoming message, in bytes
                     while (bytesRead < HEADER_SIZE)
                     {
@@ -133,6 +147,11 @@ namespace Systek.Net
                     Array.Clear(headerInput, 0, HEADER_SIZE);
                     messageInput = new byte[bytesToRead];  // Size of the incoming message is determined by the header
                     NetStream.ReadTimeout = Timeout;
+
+                    if (VerboseLogging)
+                    {
+                        LogEvent?.Invoke(new LogEventArgs(Type.INFO, AreaType.NET_LIB, "Reading for message of size: " + bytesToRead.ToString()));
+                    }
 
                     // Read the message, and translate into a Message object
                     while (bytesRead < bytesToRead)

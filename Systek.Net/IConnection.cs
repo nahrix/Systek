@@ -22,6 +22,14 @@ namespace Systek.Net
         bool Connected { get; }
 
         /// <summary>
+        /// Gets or sets a value indicating whether verbose logs should be written.
+        /// </summary>
+        /// <value>
+        ///   <c>true</c> if verbose logs should be written; otherwise, <c>false</c>.
+        /// </value>
+        bool VerboseLogging { get; set; }
+
+        /// <summary>
         /// The time, in milliseconds, for how long to wait for an expected message before timing out
         /// </summary>
         int Timeout { get; set; }
