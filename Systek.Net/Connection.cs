@@ -77,6 +77,7 @@ namespace Systek.Net
 
             Connected = false;
             NetStream.Close();
+            NetStream.Dispose();
             Peer.Close();
         }
 
@@ -182,6 +183,7 @@ namespace Systek.Net
 
                     Close();
                     LogEvent?.Invoke(new LogEventArgs(Type.ERROR, AreaType.NET_LIB, "Exception caught while receiving data from peer.", e));
+                    break;
                 }
                 catch (Exception e)
                 {
