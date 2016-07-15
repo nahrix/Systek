@@ -50,6 +50,11 @@ namespace Systek.Server
         private bool VerboseLogging = false;
 
         /// <summary>
+        /// The machine count, for debugging.
+        /// </summary>
+        private static int MachineCount = 0;
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="Machine" /> class.
         /// </summary>
         /// <param name="agent">The connection to the agent.</param>
@@ -59,9 +64,30 @@ namespace Systek.Server
             Authenticated = false;
             MachineName = null;
             MachineID = 3;
+            MachineCount++;
             Log = new Logger("ServerLogContext", ConfigurationManager.AppSettings["localLogPath"], "AgentMachine");
             NetConnection = new Connection(agent, LogHandler, MessageHandler);
             NetConnection.VerboseLogging = VerboseLogging;
+
+            if (VerboseLogging)
+            {
+                Log.TblSystemLog(Type.INFO, AreaType.SERVER_INITIALIZATION, MachineID, "New Machine has been created.  MachineCount: "
+                    + MachineCount.ToString());
+            }
+        }
+
+        /// <summary>
+        /// Finalizes an instance of the <see cref="Machine" /> class.
+        /// </summary>
+        ~Machine()
+        {
+            MachineCount--;
+
+            if (VerboseLogging)
+            {
+                Log.TblSystemLog(Type.INFO, AreaType.SERVER_INITIALIZATION, MachineID, "Machine with ID " + MachineID.ToString()
+                    + " is being destroyed.  MachineCount: " + MachineCount.ToString());
+            }
         }
 
         /// <summary>
@@ -70,6 +96,11 @@ namespace Systek.Server
         /// <returns></returns>
         public bool Authenticate()
         {
+            if (VerboseLogging)
+            {
+                Log.TblSystemLog(Type.INFO, AreaType.SERVER_INITIALIZATION, MachineID, "Machine is authenticating.");
+            }
+
             Update();
 
             return true;
@@ -80,6 +111,11 @@ namespace Systek.Server
         /// </summary>
         public void Initialize()
         {
+            if (VerboseLogging)
+            {
+                Log.TblSystemLog(Type.INFO, AreaType.SERVER_INITIALIZATION, MachineID, "Machine is initializing.");
+            }
+
             NetConnection.Initialize();
 
             if (!NetConnection.Connected)
@@ -95,6 +131,11 @@ namespace Systek.Server
         /// </summary>
         public void Update()
         {
+            if (VerboseLogging)
+            {
+                Log.TblSystemLog(Type.INFO, AreaType.SERVER_INITIALIZATION, MachineID, "Machine is updating.");
+            }
+
             if (!NetConnection.Connected)
             {
                 return;
@@ -124,6 +165,12 @@ namespace Systek.Server
         /// <param name="msg">The message to process.</param>
         public void MessageHandler(Message msg)
         {
+            if (VerboseLogging)
+            {
+                Log.TblSystemLog(Type.INFO, AreaType.SERVER_INITIALIZATION, MachineID, "Machine with ID " + MachineID
+                    + " is handling a message of type " + msg.Type.ToString());
+            }
+
             try
             {
                 // Process the full set of Messages if the agent is authenticated

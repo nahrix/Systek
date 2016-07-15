@@ -120,7 +120,7 @@ namespace Systek.Agent
         {
             Running = false;
             Log.TblSystemLog(Type.INFO, AreaType.AGENT_INITIALIZATION, LOCALHOST, "Agent shutdown requested.");
-            Server?.Close();
+            AgentConnection?.Close();
         }
 
         /// <summary>
