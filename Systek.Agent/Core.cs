@@ -118,9 +118,9 @@ namespace Systek.Agent
         /// </summary>
         public void Shutdown()
         {
+            Running = false;
             Log.TblSystemLog(Type.INFO, AreaType.AGENT_INITIALIZATION, LOCALHOST, "Agent shutdown requested.");
             Server?.Close();
-            Running = false;
         }
 
         /// <summary>
@@ -166,11 +166,11 @@ namespace Systek.Agent
         /// <param name="e">The <see cref="LogEventArgs"/> instance containing the event data.</param>
         private void _LogHandler(LogEventArgs e)
         {
-            string message = e.Message;
+            string message = "Agent log handler: " + e.Message;
 
             if (e.ExceptionDetail != null)
             {
-                message = "Agent log handler: " + message + "\n" + e.ExceptionDetail.Message + "\n\n" + e.ExceptionDetail.StackTrace;
+                message += "\n" + e.ExceptionDetail.Message + "\n\n" + e.ExceptionDetail.StackTrace;
             }
             Log.TblSystemLog(e.Type, e.AreaType, LOCALHOST, message);
         }

@@ -69,9 +69,9 @@ namespace Systek.Net
         /// </summary>
         public void Close()
         {
+            Connected = false;
             NetStream.Close();
             Peer.Close();
-            Connected = false;
         }
 
         /// <summary>
