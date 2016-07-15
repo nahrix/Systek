@@ -117,16 +117,18 @@ namespace Systek.Net
                 try
                 {
                     Message msg;                                // Incoming Message to be added to the Message queue
-                    int bytesRead;                              // How many bytes have been read so far
+                    int bytesRead;                              // How many bytes were read in a single pass
+                    int totalBytesRead;                         // How many bytes have been read in all passes total
                     int bytesToRead;                            // How many bytes remain to be read
                     byte[] headerInput = new byte[HEADER_SIZE]; // Message header data; size is static
                     byte[] messageInput;                        // Message data
 
                     // Reset the variables for a fresh Message
+                    totalBytesRead = 0;
                     bytesRead = 0;
                     bytesToRead = 0;
                     Array.Clear(headerInput, 0, headerInput.Length);
-                    //NetStream.ReadTimeout = System.Threading.Timeout.Infinite;
+                    NetStream.ReadTimeout = System.Threading.Timeout.Infinite;
 
                     if (VerboseLogging)
                     {
@@ -134,9 +136,21 @@ namespace Systek.Net
                     }
 
                     // Read the header, which currently is just a short declaring the size of the upcoming message, in bytes
-                    while (bytesRead < HEADER_SIZE)
+                    while (totalBytesRead < HEADER_SIZE)
                     {
-                        bytesRead += NetStream.Read(headerInput, bytesRead, HEADER_SIZE - bytesRead);
+                        bytesRead = NetStream.Read(headerInput, totalBytesRead, HEADER_SIZE - totalBytesRead);
+                        
+                        if (bytesRead == 0)
+                        {
+                            if (VerboseLogging)
+                            {
+                                LogEvent?.Invoke(new LogEventArgs(Type.INFO, AreaType.NET_LIB, "Connection to peer has been closed."));
+                            }
+                            Close();
+                            return;
+                        }
+
+                        totalBytesRead += bytesRead;
                     }
 
                     // Interpret the header as an int representing the amount of bytes incoming for the Message,
@@ -150,10 +164,10 @@ namespace Systek.Net
                         break;
                     }
 
-                    bytesRead = 0;
+                    totalBytesRead = 0;
                     Array.Clear(headerInput, 0, HEADER_SIZE);
                     messageInput = new byte[bytesToRead];  // Size of the incoming message is determined by the header
-                    //NetStream.ReadTimeout = Timeout;
+                    NetStream.ReadTimeout = Timeout;
 
                     if (VerboseLogging)
                     {
@@ -161,29 +175,26 @@ namespace Systek.Net
                     }
 
                     // Read the message, and translate into a Message object
-                    while (bytesRead < bytesToRead)
+                    while (totalBytesRead < bytesToRead)
                     {
-                        bytesRead += NetStream.Read(messageInput, bytesRead, bytesToRead - bytesRead);
+                        bytesRead = NetStream.Read(messageInput, totalBytesRead, bytesToRead - totalBytesRead);
+
+                        if (bytesRead == 0)
+                        {
+                            if (VerboseLogging)
+                            {
+                                LogEvent?.Invoke(new LogEventArgs(Type.INFO, AreaType.NET_LIB, "Connection to peer has been closed."));
+                            }
+                            Close();
+                            return;
+                        }
+
+                        totalBytesRead += bytesRead;
                     }
                     msg = (Message)_Deserialize(messageInput);
 
                     // Pass the message to the message processor
                     MessageEvent?.Invoke(msg);
-                }
-                catch (IOException e)
-                {
-                    if (Peer.Connected)
-                    {
-                        if (VerboseLogging)
-                        {
-                            LogEvent?.Invoke(new LogEventArgs(Type.ERROR, AreaType.NET_LIB, "Receive timeout, retrying."));
-                        }
-                        continue;
-                    }
-
-                    Close();
-                    LogEvent?.Invoke(new LogEventArgs(Type.ERROR, AreaType.NET_LIB, "Exception caught while receiving data from peer.", e));
-                    break;
                 }
                 catch (Exception e)
                 {
@@ -191,9 +202,8 @@ namespace Systek.Net
                     if (Connected)
                     {
                         LogEvent?.Invoke(new LogEventArgs(Type.ERROR, AreaType.NET_LIB, "Exception caught while receiving data from peer.", e));
-                        Close();
                     }
-                    Connected = false;
+                    Close();
                     break;
                 }
             }
