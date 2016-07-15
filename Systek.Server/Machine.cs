@@ -58,6 +58,7 @@ namespace Systek.Server
             Boolean.TryParse(ConfigurationManager.AppSettings["VerboseLogging"], out VerboseLogging);
             Authenticated = false;
             MachineName = null;
+            MachineID = 3;
             Log = new Logger("ServerLogContext", ConfigurationManager.AppSettings["localLogPath"], "AgentMachine");
             NetConnection = new Connection(agent, LogHandler, MessageHandler);
             NetConnection.VerboseLogging = VerboseLogging;

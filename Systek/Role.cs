@@ -14,6 +14,7 @@ namespace Systek
             IIS = 3,
             DB = 4,
             SFTP = 5,
-            SYSTEK_SERVER = 6;
+            SYSTEK_SERVER = 6,
+            UNAUTHENTICATED_MACHINE = 7;
     }
 }
