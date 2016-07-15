@@ -56,7 +56,7 @@ namespace Systek.Agent
             {
                 int port = Int32.Parse(ConfigurationManager.AppSettings["Port"]);
                 IPAddress ip = IPAddress.Parse(ConfigurationManager.AppSettings["ServerIP"]);
-                string logPath = ConfigurationManager.AppSettings["LogPath"];
+                string logPath = ConfigurationManager.AppSettings["LocalLogPath"];
 
                 IPEndPoint remoteEndPoint = new IPEndPoint(ip, port);
 

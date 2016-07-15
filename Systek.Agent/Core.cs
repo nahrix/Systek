@@ -62,8 +62,8 @@ namespace Systek.Agent
         /// </summary>
         private Core()
         {
-            Log = new Logger("AgentLogContext", ConfigurationManager.AppSettings["localLogPath"], "AgentCore");
-            ReconnectWait = Int32.Parse(ConfigurationManager.AppSettings["reconnectWait"]);
+            Log = new Logger("AgentLogContext", ConfigurationManager.AppSettings["LocalLogPath"], "AgentCore");
+            ReconnectWait = Int32.Parse(ConfigurationManager.AppSettings["ReconnectWait"]);
             Running = false;
         }
 
@@ -92,9 +92,9 @@ namespace Systek.Agent
         {
             try
             {
+                Running = true;
                 Thread connector = new Thread(() => _Connector(remoteEndPoint));
                 connector.Start();
-                Running = true;
             }
             catch (Exception e)
             {
@@ -127,7 +127,7 @@ namespace Systek.Agent
                 try
                 {
                     // Rebuild the connection if it's down
-                    if (!AgentConnection.Connected)
+                    if (!AgentConnection?.Connected ?? true)
                     {
                         Server = new TcpClient();
                         Server.Connect(remoteEndPoint);
