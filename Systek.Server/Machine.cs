@@ -77,20 +77,6 @@ namespace Systek.Server
         }
 
         /// <summary>
-        /// Finalizes an instance of the <see cref="Machine" /> class.
-        /// </summary>
-        ~Machine()
-        {
-            MachineCount--;
-
-            if (VerboseLogging)
-            {
-                Log.TblSystemLog(Type.INFO, AreaType.SERVER_INITIALIZATION, MachineID, "Machine with ID " + MachineID.ToString()
-                    + " is being destroyed.  MachineCount: " + MachineCount.ToString());
-            }
-        }
-
-        /// <summary>
         /// Authenticates this instance.
         /// </summary>
         /// <returns></returns>

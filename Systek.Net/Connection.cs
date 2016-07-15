@@ -69,6 +69,11 @@ namespace Systek.Net
         /// </summary>
         public void Close()
         {
+            if (VerboseLogging)
+            {
+                LogEvent?.Invoke(new LogEventArgs(Type.INFO, AreaType.NET_LIB, "Connection is closing down."));
+            }
+
             Connected = false;
             NetStream.Close();
             Peer.Close();
