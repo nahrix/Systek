@@ -25,7 +25,6 @@ namespace Systek.Server
         public ServerService()
         {
             Log = new Logger("ServerLogContext", ConfigurationManager.AppSettings["LocalLogPath"], "ServerService");
-            Log.FileLog(Type.INFO, AreaType.SERVER_INITIALIZATION, "Systek server started successfully.");
             InitializeComponent();
         }
 
