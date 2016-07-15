@@ -60,6 +60,7 @@ namespace Systek.Net
         public void Initialize()
         {
             NetStream = Peer.GetStream();
+            NetStream.ReadTimeout = Timeout;
             new Thread(new ThreadStart(_Receive)).Start();
             Connected = Peer.Connected;
         }
@@ -124,7 +125,7 @@ namespace Systek.Net
                     bytesRead = 0;
                     bytesToRead = 0;
                     Array.Clear(headerInput, 0, headerInput.Length);
-                    NetStream.ReadTimeout = System.Threading.Timeout.Infinite;
+                    //NetStream.ReadTimeout = System.Threading.Timeout.Infinite;
 
                     if (VerboseLogging)
                     {
@@ -151,7 +152,7 @@ namespace Systek.Net
                     bytesRead = 0;
                     Array.Clear(headerInput, 0, HEADER_SIZE);
                     messageInput = new byte[bytesToRead];  // Size of the incoming message is determined by the header
-                    NetStream.ReadTimeout = Timeout;
+                    //NetStream.ReadTimeout = Timeout;
 
                     if (VerboseLogging)
                     {
@@ -167,6 +168,20 @@ namespace Systek.Net
 
                     // Pass the message to the message processor
                     MessageEvent?.Invoke(msg);
+                }
+                catch (IOException e)
+                {
+                    if (Peer.Connected)
+                    {
+                        if (VerboseLogging)
+                        {
+                            LogEvent?.Invoke(new LogEventArgs(Type.ERROR, AreaType.NET_LIB, "Receive timeout, retrying."));
+                        }
+                        continue;
+                    }
+
+                    Close();
+                    LogEvent?.Invoke(new LogEventArgs(Type.ERROR, AreaType.NET_LIB, "Exception caught while receiving data from peer.", e));
                 }
                 catch (Exception e)
                 {
