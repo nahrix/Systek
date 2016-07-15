@@ -66,10 +66,15 @@ namespace Systek.Net
         }
 
         /// <summary>
-        /// Closes the connection.
+        /// Gracefully closes the connection.
         /// </summary>
         public void Close()
         {
+            if (!Connected)
+            {
+                return;
+            }
+
             if (VerboseLogging)
             {
                 LogEvent?.Invoke(new LogEventArgs(Type.INFO, AreaType.NET_LIB, "Connection is closing down."));
@@ -165,6 +170,7 @@ namespace Systek.Net
                     }
 
                     totalBytesRead = 0;
+                    bytesRead = 0;
                     Array.Clear(headerInput, 0, HEADER_SIZE);
                     messageInput = new byte[bytesToRead];  // Size of the incoming message is determined by the header
                     NetStream.ReadTimeout = Timeout;
