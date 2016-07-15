@@ -121,10 +121,10 @@ namespace Systek.Agent
         /// </summary>
         private void _Connector(IPEndPoint remoteEndPoint)
         {
-            try
+            // This thread should run until the class' Stop function is called.
+            do
             {
-                // This thread should run until the class' Stop function is called.
-                do
+                try
                 {
                     // Rebuild the connection if it's down
                     if (!AgentConnection.Connected)
@@ -136,16 +136,17 @@ namespace Systek.Agent
                         Running = true;
                     }
 
-                    // Wait before the next check, to minimize resource footprint
+                    // Wait before the next check, to minimize CPU usage
                     Thread.Sleep(ReconnectWait);
-                } while (Running);
-            }
-            catch (Exception e)
-            {
-                string message = "There was an exception thrown when trying to connect the Agent to the Server:\n" + e.Message
-                    + "\n\n" + e.StackTrace;
-                Log.FileLog(Type.ERROR, AreaType.AGENT_INITIALIZATION, message);
-            }
+                }
+                catch (Exception e)
+                {
+                    string message = "There was an exception thrown when trying to connect the Agent to the Server:\n" + e.Message
+                        + "\n\n" + e.StackTrace;
+                    Log.FileLog(Type.ERROR, AreaType.AGENT_INITIALIZATION, message);
+                    Thread.Sleep(ReconnectWait * 100);  // Longer timeout to retry if the server appears to be down, to avoid log spam
+                }
+            } while (Running);
         }
 
         /// <summary>
