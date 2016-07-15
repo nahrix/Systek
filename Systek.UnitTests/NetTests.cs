@@ -22,7 +22,7 @@ namespace Systek.UnitTests
         public static void Initialize(TestContext context)
         {
             // Connection details
-            LocalIP = ConfigurationManager.AppSettings["IP"];
+            LocalIP = ConfigurationManager.AppSettings["ServerIP"];
             LocalPort = Int32.Parse(ConfigurationManager.AppSettings["Port"]);
 
             // Flag for determining whether command execution succeeded
@@ -121,8 +121,9 @@ namespace Systek.UnitTests
         [TestMethod]
         public void AgentServerConnectorTest()
         {
-            IPEndPoint remoteEndPoint = new IPEndPoint(IPAddress.Parse(LocalIP), LocalPort);
-            
+            new Server.ServerService().Initialize();
+            new Agent.AgentService().Initialize();
+
         }
     }
 }

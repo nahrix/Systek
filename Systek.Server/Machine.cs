@@ -101,7 +101,13 @@ namespace Systek.Server
         /// <param name="e">The <see cref="LogEventArgs"/> instance containing the event data.</param>
         public void LogHandler(LogEventArgs e)
         {
-            Log.TblSystemLog(e.Type, e.AreaType, MachineID, e.Message);
+            string message = e.Message;
+
+            if (e.ExceptionDetail != null)
+            {
+                message = "Server log handler: " + message + "\n" + e.ExceptionDetail.Message + "\n\n" + e.ExceptionDetail.StackTrace;
+            }
+            Log.TblSystemLog(e.Type, e.AreaType, MachineID, message);
         }
 
         /// <summary>

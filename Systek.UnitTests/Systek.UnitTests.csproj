@@ -46,6 +46,7 @@
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Configuration" />
+    <Reference Include="System.ServiceProcess" />
   </ItemGroup>
   <Choose>
     <When Condition="('$(VisualStudioVersion)' == '10.0' or '$(VisualStudioVersion)' == '') and '$(TargetFrameworkVersion)' == 'v3.5'">
@@ -67,9 +68,17 @@
     <Compile Include="UtilityTests.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Systek.Agent\Systek.Agent.csproj">
+      <Project>{3d46786e-31fa-4f27-8a33-c53ee7da2409}</Project>
+      <Name>Systek.Agent</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Systek.Net\Systek.Net.csproj">
       <Project>{810835d9-fa05-462e-b135-b72ef09d2a9d}</Project>
       <Name>Systek.Net</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Systek.Server\Systek.Server.csproj">
+      <Project>{8a5fe9f3-8a95-4112-869d-844fab00f8e5}</Project>
+      <Name>Systek.Server</Name>
     </ProjectReference>
     <ProjectReference Include="..\Systek.Utility\Systek.Utility.csproj">
       <Project>{9b9f24b2-5493-4fc7-b565-bf2f8fb91617}</Project>

@@ -47,6 +47,7 @@ namespace Systek.Agent
         protected override void OnStop()
         {
             Core.Instance?.Shutdown();
+            Log.TblSystemLog(Type.INFO, AreaType.AGENT_INITIALIZATION, LOCALHOST, "Agent service stopped successfully.");
         }
 
         /// <summary>
@@ -68,12 +69,16 @@ namespace Systek.Agent
                 {
                     Log.TblSystemLog(Type.ERROR, AreaType.AGENT_INITIALIZATION, LOCALHOST, "Unable to initialize agent");
                     Stop();
+                    return;
                 }
+
+                Log.TblSystemLog(Type.INFO, AreaType.AGENT_INITIALIZATION, LOCALHOST, "Agent service started successfully.");
             }
             catch (Exception e)
             {
                 Log.TblSystemLog(Type.ERROR, AreaType.AGENT_INITIALIZATION, LOCALHOST, "Exception thrown while trying to initialize:\n" + e.Message + "\n\n" + e.StackTrace);
                 Stop();
+                return;
             }
         }
     }

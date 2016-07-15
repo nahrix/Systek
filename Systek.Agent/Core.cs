@@ -112,6 +112,7 @@ namespace Systek.Agent
         /// </summary>
         public void Shutdown()
         {
+            Log.TblSystemLog(Type.INFO, AreaType.AGENT_INITIALIZATION, LOCALHOST, "Agent shutdown requested.");
             Server?.Close();
             Running = false;
         }
@@ -129,11 +130,14 @@ namespace Systek.Agent
                     // Rebuild the connection if it's down
                     if (!AgentConnection?.Connected ?? true)
                     {
+                        Log.TblSystemLog(Type.INFO, AreaType.AGENT_INITIALIZATION, LOCALHOST, "Agent service is attempting to connect to server, at:"
+                            + "IP " + remoteEndPoint.Address.ToString() + ", Port " + remoteEndPoint.Port.ToString());
                         Server = new TcpClient();
                         Server.Connect(remoteEndPoint);
                         AgentConnection = new Connection(Server, _LogHandler, _MessageHandler);
                         AgentConnection.Initialize();
                         Running = true;
+                        Log.TblSystemLog(Type.INFO, AreaType.AGENT_INITIALIZATION, LOCALHOST, "Agent service connected to server successfully.");
                     }
 
                     // Wait before the next check, to minimize CPU usage
@@ -144,7 +148,7 @@ namespace Systek.Agent
                     string message = "There was an exception thrown when trying to connect the Agent to the Server:\n" + e.Message
                         + "\n\n" + e.StackTrace;
                     Log.TblSystemLog(Type.ERROR, AreaType.AGENT_INITIALIZATION, LOCALHOST, message);
-                    Thread.Sleep(ReconnectWait * 100);  // Longer timeout to retry if the server appears to be down, to avoid log spam
+                    //Thread.Sleep(ReconnectWait * 100);  // Longer timeout to retry if the server appears to be down, to avoid log spam
                 }
             } while (Running);
         }
@@ -159,7 +163,7 @@ namespace Systek.Agent
 
             if (e.ExceptionDetail != null)
             {
-                message += "\n" + e.ExceptionDetail.Message + "\n\n" + e.ExceptionDetail.StackTrace;
+                message = "Agent log handler: " + message + "\n" + e.ExceptionDetail.Message + "\n\n" + e.ExceptionDetail.StackTrace;
             }
             Log.TblSystemLog(e.Type, e.AreaType, LOCALHOST, message);
         }
