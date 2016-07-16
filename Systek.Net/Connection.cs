@@ -37,6 +37,7 @@ namespace Systek.Net
         private const short HEADER_SIZE = sizeof(int);  // The size of the message header
         private const int MESSAGE_MAX = 65535;          // The maximum possible size of a Message
         private const int DEFAULT_TIMEOUT = 5000;       // The default value used for the Timeout property above
+        private static int ObjectCount = 0;             // Used for diagnostics.  Keeps track of the number of active class instantiations.
 
         /// <summary>
         /// Constructor
@@ -46,12 +47,24 @@ namespace Systek.Net
         /// <param name="messageHandler">The message handler.</param>
         public Connection(TcpClient peer, LogEventHandler logHandler, MessageEventHandler messageHandler)
         {
+            ObjectCount++;
             Connected = false;
             VerboseLogging = false;
             Peer = peer;
             LogEvent += logHandler;
             MessageEvent += messageHandler;
             Timeout = DEFAULT_TIMEOUT;
+        }
+
+        /// <summary>
+        /// Finalizes an instance of the <see cref="Connection"/> class.
+        /// </summary>
+        ~Connection()
+        {
+            if (VerboseLogging)
+            {
+                LogEvent?.Invoke(new LogEventArgs(Type.INFO, AreaType.NET_LIB, "Connection destroyed.  ObjectCount: " + ObjectCount.ToString()));
+            }
         }
 
         /// <summary>
@@ -63,6 +76,11 @@ namespace Systek.Net
             NetStream.ReadTimeout = Timeout;
             new Thread(new ThreadStart(_Receive)).Start();
             Connected = Peer.Connected;
+
+            if (VerboseLogging)
+            {
+                LogEvent?.Invoke(new LogEventArgs(Type.INFO, AreaType.NET_LIB, "New connection created.  ObjectCount: " + ObjectCount.ToString()));
+            }
         }
 
         /// <summary>
@@ -100,13 +118,12 @@ namespace Systek.Net
             // Validate message size
             if (messageData.Length > MESSAGE_MAX)
             {
-                throw new ArgumentOutOfRangeException("msg", "Message size is too large (> 65535 bytes).");
+                LogEvent?.Invoke(new LogEventArgs(Type.ERROR, AreaType.NET_LIB, "Message to send is too large. Message size: "
+                    + messageData.Length.ToString() + ".  Max message size: " + MESSAGE_MAX.ToString()));
             }
             
-            // Send the header
+            // Send the header and the message
             NetStream.Write(headerData, 0, headerData.Length);
-
-            // Send the message
             NetStream.Write(messageData, 0, messageData.Length);
         }
 
@@ -134,11 +151,6 @@ namespace Systek.Net
                     bytesToRead = 0;
                     Array.Clear(headerInput, 0, headerInput.Length);
                     NetStream.ReadTimeout = System.Threading.Timeout.Infinite;
-
-                    if (VerboseLogging)
-                    {
-                        LogEvent?.Invoke(new LogEventArgs(Type.INFO, AreaType.NET_LIB, "Reading for header."));
-                    }
 
                     // Read the header, which currently is just a short declaring the size of the upcoming message, in bytes
                     while (totalBytesRead < HEADER_SIZE)
@@ -174,11 +186,6 @@ namespace Systek.Net
                     Array.Clear(headerInput, 0, HEADER_SIZE);
                     messageInput = new byte[bytesToRead];  // Size of the incoming message is determined by the header
                     NetStream.ReadTimeout = Timeout;
-
-                    if (VerboseLogging)
-                    {
-                        LogEvent?.Invoke(new LogEventArgs(Type.INFO, AreaType.NET_LIB, "Reading for message of size: " + bytesToRead.ToString()));
-                    }
 
                     // Read the message, and translate into a Message object
                     while (totalBytesRead < bytesToRead)
