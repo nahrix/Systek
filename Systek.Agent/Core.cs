@@ -155,7 +155,7 @@ namespace Systek.Agent
                     string message = "There was an exception thrown when trying to connect the Agent to the Server:\n" + e.Message
                         + "\n\n" + e.StackTrace;
                     Log.TblSystemLog(Type.ERROR, AreaType.AGENT_INITIALIZATION, LOCALHOST, message);
-                    //Thread.Sleep(ReconnectWait * 100);  // Longer timeout to retry if the server appears to be down, to avoid log spam
+                    Thread.Sleep(ReconnectWait * 100);  // Longer timeout to retry if the server appears to be down, to avoid log spam
                 }
             } while (Running);
         }

@@ -47,7 +47,7 @@ namespace Systek.Net
         /// <param name="messageHandler">The message handler.</param>
         public Connection(TcpClient peer, LogEventHandler logHandler, MessageEventHandler messageHandler)
         {
-            ObjectCount++;
+            ++ObjectCount;
             Connected = false;
             VerboseLogging = false;
             Peer = peer;
@@ -61,6 +61,7 @@ namespace Systek.Net
         /// </summary>
         ~Connection()
         {
+            --ObjectCount;
             if (VerboseLogging)
             {
                 LogEvent?.Invoke(new LogEventArgs(Type.INFO, AreaType.NET_LIB, "Connection destroyed.  ObjectCount: " + ObjectCount.ToString()));
@@ -99,9 +100,10 @@ namespace Systek.Net
             }
 
             Connected = false;
-            NetStream.Close();
             NetStream.Dispose();
+            NetStream = null;
             Peer.Close();
+            Peer = null;
         }
 
         /// <summary>
@@ -138,41 +140,29 @@ namespace Systek.Net
             {
                 try
                 {
-                    Message msg;                                // Incoming Message to be added to the Message queue
-                    int bytesRead;                              // How many bytes were read in a single pass
-                    int totalBytesRead;                         // How many bytes have been read in all passes total
-                    int bytesToRead;                            // How many bytes remain to be read
-                    byte[] headerInput = new byte[HEADER_SIZE]; // Message header data; size is static
-                    byte[] messageInput;                        // Message data
+                    // This buffer stores the incoming data from the network stream, to be converted into a Message object
+                    byte[] inputBuffer;
 
-                    // Reset the variables for a fresh Message
-                    totalBytesRead = 0;
-                    bytesRead = 0;
-                    bytesToRead = 0;
-                    Array.Clear(headerInput, 0, headerInput.Length);
+                    // Read the header, which currently is just a short declaring the size of the upcoming message, in bytes.
+                    // This first read operation does not time out before the first byte, because messages may occur between large intervals.
                     NetStream.ReadTimeout = System.Threading.Timeout.Infinite;
-
-                    // Read the header, which currently is just a short declaring the size of the upcoming message, in bytes
-                    while (totalBytesRead < HEADER_SIZE)
+                    if (!_ReadStream(HEADER_SIZE, out inputBuffer))
                     {
-                        bytesRead = NetStream.Read(headerInput, totalBytesRead, HEADER_SIZE - totalBytesRead);
-                        
-                        if (bytesRead == 0)
+                        // If the read failed while we expected to be connected, then log the failure, and handle our side of the closure
+                        // gracefully.
+                        if (Connected)
                         {
-                            if (VerboseLogging)
-                            {
-                                LogEvent?.Invoke(new LogEventArgs(Type.INFO, AreaType.NET_LIB, "Connection to peer has been closed."));
-                            }
-                            Close();
-                            return;
+                            LogEvent?.Invoke(new LogEventArgs(Type.ERROR, AreaType.NET_LIB, "The connection was closed unexpectedly."));
+                            MessageEvent?.Invoke(new Message { Type = MessageType.CLOSE });
                         }
 
-                        totalBytesRead += bytesRead;
+                        Close();
+                        break;
                     }
 
                     // Interpret the header as an int representing the amount of bytes incoming for the Message,
                     // and verify the requested size of the Message is valid
-                    bytesToRead = BitConverter.ToInt32(headerInput, 0);
+                    int bytesToRead = BitConverter.ToInt32(inputBuffer, 0);
                     if (bytesToRead > MESSAGE_MAX)
                     {
                         LogEvent?.Invoke(new LogEventArgs(Type.ERROR, AreaType.NET_LIB, "Message is too large to receive.  Size requested: "
@@ -181,45 +171,67 @@ namespace Systek.Net
                         break;
                     }
 
-                    totalBytesRead = 0;
-                    bytesRead = 0;
-                    Array.Clear(headerInput, 0, HEADER_SIZE);
-                    messageInput = new byte[bytesToRead];  // Size of the incoming message is determined by the header
-                    NetStream.ReadTimeout = Timeout;
-
-                    // Read the message, and translate into a Message object
-                    while (totalBytesRead < bytesToRead)
+                    // Read the message
+                    if (!_ReadStream(bytesToRead, out inputBuffer))
                     {
-                        bytesRead = NetStream.Read(messageInput, totalBytesRead, bytesToRead - totalBytesRead);
-
-                        if (bytesRead == 0)
-                        {
-                            if (VerboseLogging)
-                            {
-                                LogEvent?.Invoke(new LogEventArgs(Type.INFO, AreaType.NET_LIB, "Connection to peer has been closed."));
-                            }
-                            Close();
-                            return;
-                        }
-
-                        totalBytesRead += bytesRead;
+                        Close();
+                        break;
                     }
-                    msg = (Message)_Deserialize(messageInput);
+
+                    // Convert the byte array into a Message object
+                    Message msg = (Message)_Deserialize(inputBuffer);
 
                     // Pass the message to the message processor
                     MessageEvent?.Invoke(msg);
                 }
                 catch (Exception e)
                 {
-                    // Only log if the failure was unexpected; ie, during an active connection.
+                    // If we expected to be connected, log the failure, and close our side of the connection gracefully
                     if (Connected)
                     {
                         LogEvent?.Invoke(new LogEventArgs(Type.ERROR, AreaType.NET_LIB, "Exception caught while receiving data from peer.", e));
+                        MessageEvent?.Invoke(new Message { Type = MessageType.CLOSE });
                     }
                     Close();
                     break;
                 }
             }
+        }
+
+        /// <summary>
+        /// Reads a specified number of bytes from the network stream into a byte array.
+        /// </summary>
+        /// <param name="bytesToRead">The number of bytes to read.</param>
+        /// <param name="inputBuffer">The buffer to hold the input from the network stream.</param>
+        /// <returns></returns>
+        private bool _ReadStream(int bytesToRead, out byte[] inputBuffer)
+        {
+            // Initialize the input buffer
+            inputBuffer = new byte[bytesToRead];
+
+            // Keep track of the total number of bytes read, in case the read occurs in multiple passes
+            int totalBytesRead = 0;
+
+            // Loop read operation until the specified number of bytes have been read from the network stream
+            while (totalBytesRead < bytesToRead)
+            {
+                int bytesRead = NetStream.Read(inputBuffer, totalBytesRead, bytesToRead - totalBytesRead);
+
+                // This will occur if the socket has been closed
+                if (bytesRead == 0)
+                {
+                    if (VerboseLogging)
+                    {
+                        LogEvent?.Invoke(new LogEventArgs(Type.INFO, AreaType.NET_LIB, "Connection to peer has been closed."));
+                    }
+                    return false;
+                }
+
+                totalBytesRead += bytesRead;
+                NetStream.ReadTimeout = Timeout;
+            }
+
+            return true;
         }
 
         /// <summary>
