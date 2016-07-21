@@ -25,6 +25,14 @@ namespace Systek.Server
         public bool Authenticated { get; private set; }
 
         /// <summary>
+        /// Gets a value indicating whether this <see cref="Machine"/> is disposed.
+        /// </summary>
+        /// <value>
+        ///   <c>true</c> if disposed; otherwise, <c>false</c>.
+        /// </value>
+        public bool Disposed { get; private set; }
+
+        /// <summary>
         /// Gets the name of the machine.
         /// </summary>
         public string MachineName { get; private set; }
@@ -62,6 +70,7 @@ namespace Systek.Server
         {
             Boolean.TryParse(ConfigurationManager.AppSettings["VerboseLogging"], out VerboseLogging);
             Authenticated = false;
+            Disposed = false;
             MachineName = null;
             MachineID = 3;
             MachineCount++;
@@ -71,9 +80,58 @@ namespace Systek.Server
 
             if (VerboseLogging)
             {
-                Log.TblSystemLog(Type.INFO, AreaType.SERVER_INITIALIZATION, MachineID, "New Machine has been created.  MachineCount: "
+                Log.TblSystemLog(Type.INFO, AreaType.SERVER_MACHINE, MachineID, "New Machine created.  MachineCount: "
                     + MachineCount.ToString());
             }
+        }
+
+        /// <summary>
+        /// Finalizes an instance of the <see cref="Machine"/> class.
+        /// </summary>
+        ~Machine()
+        {
+            Dispose(false);
+        }
+
+        /// <summary>
+        /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
+        /// </summary>
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        /// <summary>
+        /// Releases unmanaged and - optionally - managed resources.
+        /// </summary>
+        /// <param name="disposeManaged"><c>true</c> to release both managed and unmanaged resources; <c>false</c> to release only unmanaged resources.</param>
+        protected virtual void Dispose(bool disposeManaged)
+        {
+            if (Disposed)
+            {
+                return;
+            }
+
+            if (disposeManaged)
+            {
+                // Reserved for disposing any managed resources that this class might add
+            }
+
+            --MachineCount;
+
+            if (VerboseLogging)
+            {
+                Log?.TblSystemLog(Type.INFO, AreaType.SERVER_MACHINE, MachineID, "Machine destroyed.  MachineCount: "
+                    + MachineCount.ToString());
+            }
+
+            Log = null;
+
+            NetConnection?.Dispose();
+            NetConnection = null;
+
+            Disposed = true;
         }
 
         /// <summary>
@@ -84,7 +142,7 @@ namespace Systek.Server
         {
             if (VerboseLogging)
             {
-                Log.TblSystemLog(Type.INFO, AreaType.SERVER_INITIALIZATION, MachineID, "Machine is authenticating.");
+                Log.TblSystemLog(Type.INFO, AreaType.SERVER_MACHINE, MachineID, "Machine is authenticating.");
             }
 
             Update();
@@ -99,7 +157,7 @@ namespace Systek.Server
         {
             if (VerboseLogging)
             {
-                Log.TblSystemLog(Type.INFO, AreaType.SERVER_INITIALIZATION, MachineID, "Machine is initializing.");
+                Log.TblSystemLog(Type.INFO, AreaType.SERVER_MACHINE, MachineID, "Machine is initializing.");
             }
 
             NetConnection.Initialize();
@@ -119,7 +177,7 @@ namespace Systek.Server
         {
             if (VerboseLogging)
             {
-                Log.TblSystemLog(Type.INFO, AreaType.SERVER_INITIALIZATION, MachineID, "Machine is updating.");
+                Log.TblSystemLog(Type.INFO, AreaType.SERVER_MACHINE, MachineID, "Machine is updating.");
             }
 
             if (!NetConnection.Connected)
@@ -153,8 +211,8 @@ namespace Systek.Server
         {
             if (VerboseLogging)
             {
-                Log.TblSystemLog(Type.INFO, AreaType.SERVER_INITIALIZATION, MachineID, "Machine with ID " + MachineID
-                    + " is handling a message of type " + msg.Type.ToString());
+                Log.TblSystemLog(Type.INFO, AreaType.SERVER_MACHINE, MachineID, "Server is handling a message from machine "
+                    + "with ID: " + MachineID + ".  Message type is: " + msg.Type.ToString());
             }
 
             try
@@ -170,7 +228,8 @@ namespace Systek.Server
 
                         // Elegantly close the connection
                         case MessageType.CLOSE:
-                            NetConnection.Close();
+                            NetConnection.Dispose();
+                            Dispose();
                             break;
 
                         // TODO:  Handle each FAIL case
@@ -195,6 +254,12 @@ namespace Systek.Server
                         case MessageType.UPDATE:
                             break;
 
+                        // Elegantly close the connection
+                        case MessageType.CLOSE:
+                            NetConnection.Dispose();
+                            Dispose();
+                            break;
+
                         default:
                             break;
                     }
@@ -203,8 +268,9 @@ namespace Systek.Server
             }
             catch (Exception e)
             {
-                Log.TblSystemLog(Type.ERROR, AreaType.SERVER_MESSAGE_HANDLER, MachineID, "Error while processing a message from the agent.\n\n" + e.Message);
-                NetConnection.Close();
+                Log.TblSystemLog(Type.ERROR, AreaType.SERVER_MACHINE, MachineID, "Error while processing a message from the agent.\n\n" + e.Message);
+                NetConnection.Dispose();
+                Dispose();
             }
         }
     }

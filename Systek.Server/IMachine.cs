@@ -10,7 +10,7 @@ namespace Systek.Server
     /// <summary>
     /// A computer that is connected to the Systek server.
     /// </summary>
-    interface IMachine
+    interface IMachine : IDisposable
     {
         /// <summary>
         /// Gets the name of the machine.

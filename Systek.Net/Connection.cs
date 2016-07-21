@@ -30,8 +30,11 @@ namespace Systek.Net
         /// </value>
         public bool VerboseLogging { get; set; }
 
+        private bool Disposed;                          // Keeps track of whether this object has already been disposed
         private event LogEventHandler LogEvent;         // Occurs when logging is required.
         private event MessageEventHandler MessageEvent; // Occurs when a Message needs processing.
+        private LogEventHandler LogHandler;             // Keep track of the delegate, for later removal
+        private MessageEventHandler MessageHandler;     // Keep track of the delegate, for later removal
         private TcpClient Peer { get; set; }            // The socket that this machine will be connected to
         private NetworkStream NetStream { get; set; }   // The stream that will read/write data between agent and server
         private const short HEADER_SIZE = sizeof(int);  // The size of the message header
@@ -51,6 +54,8 @@ namespace Systek.Net
             Connected = false;
             VerboseLogging = false;
             Peer = peer;
+            LogHandler = logHandler;
+            MessageHandler = messageHandler;
             LogEvent += logHandler;
             MessageEvent += messageHandler;
             Timeout = DEFAULT_TIMEOUT;
@@ -61,11 +66,52 @@ namespace Systek.Net
         /// </summary>
         ~Connection()
         {
+            Dispose(false);
+        }
+
+        /// <summary>
+        /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
+        /// </summary>
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        /// <summary>
+        /// Releases unmanaged and - optionally - managed resources.
+        /// </summary>
+        /// <param name="disposeManaged"><c>true</c> to release both managed and unmanaged resources; <c>false</c> to release only unmanaged resources.</param>
+        protected virtual void Dispose(bool disposeManaged)
+        {
+            if (Disposed)
+            {
+                return;
+            }
+
+            Close();
+
+            if (disposeManaged)
+            {
+                Peer = null;
+                NetStream = null;
+            }
+
             --ObjectCount;
             if (VerboseLogging)
             {
-                LogEvent?.Invoke(new LogEventArgs(Type.INFO, AreaType.NET_LIB, "Connection destroyed.  ObjectCount: " + ObjectCount.ToString()));
+                LogEvent?.Invoke(new LogEventArgs(Type.INFO, AreaType.NET_LIB, "Connection disposed.  ObjectCount: " + ObjectCount.ToString()));
             }
+
+            MessageEvent -= MessageHandler;
+            MessageEvent = null;
+            MessageHandler = null;
+
+            LogEvent -= LogHandler;
+            LogEvent = null;
+            LogHandler = null;
+
+            Disposed = true;
         }
 
         /// <summary>
@@ -100,10 +146,9 @@ namespace Systek.Net
             }
 
             Connected = false;
-            NetStream.Dispose();
-            NetStream = null;
-            Peer.Close();
-            Peer = null;
+            NetStream?.Flush();
+            NetStream?.Dispose();
+            Peer?.Close();
         }
 
         /// <summary>
@@ -174,6 +219,14 @@ namespace Systek.Net
                     // Read the message
                     if (!_ReadStream(bytesToRead, out inputBuffer))
                     {
+                        // If the read failed while we expected to be connected, then log the failure, and handle our side of the closure
+                        // gracefully.
+                        if (Connected)
+                        {
+                            LogEvent?.Invoke(new LogEventArgs(Type.ERROR, AreaType.NET_LIB, "The connection was closed unexpectedly."));
+                            MessageEvent?.Invoke(new Message { Type = MessageType.CLOSE });
+                        }
+
                         Close();
                         break;
                     }

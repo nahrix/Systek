@@ -15,6 +15,7 @@ namespace Systek
             SERVER_MESSAGE_HANDLER = 4,
             AGENT_INITIALIZATION = 5,
             SERVER_INITIALIZATION = 6,
-            SERVER_TCP_LISTENER = 7;
+            SERVER_TCP_LISTENER = 7,
+            SERVER_MACHINE = 8;
     }
 }

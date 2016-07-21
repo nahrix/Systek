@@ -14,7 +14,7 @@ namespace Systek.Net
     /// It is the responsibility of the caller to pass in a TcpClient and check for connectivity.
     /// If the connection is inactive, this object should be destroyed, and a new one created.
     /// </remarks>
-    public interface IConnection
+    public interface IConnection : IDisposable
     {
         /// <summary>
         /// Represents whether the connection is active or not

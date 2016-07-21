@@ -63,9 +63,8 @@ namespace Systek.Agent
 
                 IPEndPoint remoteEndPoint = new IPEndPoint(ip, port);
 
-                Core.Instance.Initialize(remoteEndPoint);
-
-                if (!Core.Instance.Running)
+                // Initialize the Agent Core, and shutdown the service if the initialization fails
+                if (!Core.Instance.Initialize(remoteEndPoint))
                 {
                     Log.TblSystemLog(Type.ERROR, AreaType.AGENT_INITIALIZATION, LOCALHOST, "Unable to initialize agent");
                     Stop();

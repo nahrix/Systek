@@ -94,22 +94,24 @@ namespace Systek.Agent
         /// Initializes the connection to the specified remote end point.
         /// </summary>
         /// <param name="remoteEndPoint">The remote end point.</param>
-        public void Initialize(IPEndPoint remoteEndPoint)
+        public bool Initialize(IPEndPoint remoteEndPoint)
         {
             try
             {
-                Running = true;
                 Thread connector = new Thread(() => _Connector(remoteEndPoint));
                 connector.Start();
+
+                return true;
             }
             catch (Exception e)
             {
                 Server?.Close();
-                Running = false;
 
-                string message = "There was an exception thrown when trying to initialize the Agent:\n" + e.Message
-                    + "\n\n" + e.StackTrace;
+                string message = "There was an exception thrown when trying to initialize the Agent:\n"
+                    + e.Message + "\n\n" + e.StackTrace;
                 Log.TblSystemLog(Type.ERROR, AreaType.AGENT_INITIALIZATION, LOCALHOST, message);
+
+                return false;
             }
         }
 

@@ -118,6 +118,9 @@ namespace Systek.Server
                     {
                         Log.TblSystemLog(Type.ERROR, AreaType.AGENT_INITIALIZATION, SYSTEK_SERVER, "New agent connection failed to initialize.");
                     }
+
+                    agentMachine = null;
+                    agentSocket = null;
                 }
                 catch (Exception e)
                 {
