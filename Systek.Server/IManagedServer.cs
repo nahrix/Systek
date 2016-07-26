@@ -23,10 +23,5 @@ namespace Systek.Server
         /// <param name="cmdSetId">The command set identifier.</param>
         /// <param name="runSet">The run set.</param>
         void RunCommand(int cmdSetId, int[] runSet = null);
-
-        /// <summary>
-        /// Updates 
-        /// </summary>
-        void Update();
     }
 }

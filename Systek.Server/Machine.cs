@@ -63,6 +63,11 @@ namespace Systek.Server
         private static int MachineCount = 0;
 
         /// <summary>
+        /// Gets or sets the authentication key.
+        /// </summary>
+        private string AuthKey { get; set; }
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="Machine" /> class.
         /// </summary>
         /// <param name="agent">The connection to the agent.</param>
@@ -185,7 +190,7 @@ namespace Systek.Server
                 return;
             }
 
-            
+            NetConnection.Send(new Message() { Type = MessageType.UPDATE_BASIC });
         }
 
         /// <summary>
@@ -251,7 +256,9 @@ namespace Systek.Server
                     switch (msg.Type)
                     {
                         // Updates the state of the agent
-                        case MessageType.UPDATE:
+                        case MessageType.UPDATE_BASIC:
+                            MachineName = msg.Update.HostName;
+                            AuthKey = msg.Update.AuthKey;
                             break;
 
                         // Elegantly close the connection

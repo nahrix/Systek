@@ -33,7 +33,7 @@ namespace Systek.Net
         /// <summary>
         /// Send an update of the current state of the machine
         /// </summary>
-        UPDATE
+        UPDATE_BASIC = 5
     };
 
     /// <summary>

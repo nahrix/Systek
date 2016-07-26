@@ -19,7 +19,7 @@ namespace Systek.Agent
         /// <summary>
         /// Gets the IConnection that handles low-level communications to the server.
         /// </summary>
-        public IConnection AgentConnection { get; private set; }
+        public IConnection NetConnection { get; private set; }
 
         /// <summary>
         /// Gets the TCP socket to the server.
@@ -122,7 +122,7 @@ namespace Systek.Agent
         {
             Running = false;
             Log.TblSystemLog(Type.INFO, AreaType.AGENT_INITIALIZATION, LOCALHOST, "Agent shutdown requested.");
-            AgentConnection?.Close();
+            NetConnection?.Close();
         }
 
         /// <summary>
@@ -136,15 +136,15 @@ namespace Systek.Agent
                 try
                 {
                     // Rebuild the connection if it's down
-                    if (!AgentConnection?.Connected ?? true)
+                    if (!NetConnection?.Connected ?? true)
                     {
                         Log.TblSystemLog(Type.INFO, AreaType.AGENT_INITIALIZATION, LOCALHOST, "Agent service is attempting to connect to server, at:"
                             + "IP " + remoteEndPoint.Address.ToString() + ", Port " + remoteEndPoint.Port.ToString());
                         Server = new TcpClient();
                         Server.Connect(remoteEndPoint);
-                        AgentConnection = new Connection(Server, _LogHandler, _MessageHandler);
-                        AgentConnection.VerboseLogging = VerboseLogging;
-                        AgentConnection.Initialize();
+                        NetConnection = new Connection(Server, _LogHandler, _MessageHandler);
+                        NetConnection.VerboseLogging = VerboseLogging;
+                        NetConnection.Initialize();
                         Running = true;
                         Log.TblSystemLog(Type.INFO, AreaType.AGENT_INITIALIZATION, LOCALHOST, "Agent service connected to server successfully.");
                     }
@@ -183,7 +183,23 @@ namespace Systek.Agent
         /// <param name="msg">The MSG.</param>
         private void _MessageHandler(Message msg)
         {
+            switch (msg.Type)
+            {
+                case MessageType.UPDATE_BASIC:
+                    NetConnection.Send(new Message()
+                    {
+                        Type = MessageType.UPDATE_BASIC,
+                        Update = new UpdateData()
+                        {
+                            HostName = Environment.MachineName,
+                            AuthKey = ConfigurationManager.AppSettings["AuthKey"]
+                        }
+                    });
+                    break;
 
+                default:
+                    break;
+            }
         }
     }
 }

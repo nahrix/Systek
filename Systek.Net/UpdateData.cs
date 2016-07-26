@@ -12,8 +12,14 @@ namespace Systek.Net
     [Serializable]
     public class UpdateData
     {
+        /// <summary>
+        /// Gets or sets the name of the host.
+        /// </summary>
         public string HostName { get; set; }
 
+        /// <summary>
+        /// Gets or sets the authentication key.
+        /// </summary>
         public string AuthKey { get; set; }
 
         /// <summary>
@@ -32,6 +38,12 @@ namespace Systek.Net
             }
 
             UpdateData test = (UpdateData)other;
+
+            // Comparison of primitives
+            if ((HostName != test.HostName) || (AuthKey != test.AuthKey))
+            {
+                return false;
+            }
 
             return true;
         }
