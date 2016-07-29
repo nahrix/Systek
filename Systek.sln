@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.25123.0
+VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Systek.Net", "Systek.Net\Systek.Net.csproj", "{810835D9-FA05-462E-B135-B72EF09D2A9D}"
 	ProjectSection(ProjectDependencies) = postProject
@@ -36,6 +36,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Systek.Utility", "Systek.Ut
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Systek", "Systek\Systek.csproj", "{8EAD6285-A668-498E-9751-C7DDE6B75A92}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Systek.Web", "Systek.Web\Systek.Web.csproj", "{2B2DF3CD-4C72-4FF6-9B64-F054612A2FA5}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -66,6 +68,10 @@ Global
 		{8EAD6285-A668-498E-9751-C7DDE6B75A92}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8EAD6285-A668-498E-9751-C7DDE6B75A92}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8EAD6285-A668-498E-9751-C7DDE6B75A92}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2B2DF3CD-4C72-4FF6-9B64-F054612A2FA5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2B2DF3CD-4C72-4FF6-9B64-F054612A2FA5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2B2DF3CD-4C72-4FF6-9B64-F054612A2FA5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2B2DF3CD-4C72-4FF6-9B64-F054612A2FA5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
