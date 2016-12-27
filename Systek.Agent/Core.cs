@@ -47,12 +47,12 @@ namespace Systek.Agent
         /// <summary>
         /// Used for writing logs in this class.
         /// </summary>
-        private Logger Log { get; set; }
+        private Logger _Log { get; set; }
 
         /// <summary>
-        /// The
+        /// Indicates whether logs should be verbose or not
         /// </summary>
-        private bool VerboseLogging = false;
+        private bool _VerboseLogging = false;
 
         /// <summary>
         /// Gets or sets the singleton instance.
@@ -67,9 +67,6 @@ namespace Systek.Agent
         /// </summary>
         private Core()
         {
-            Boolean.TryParse(ConfigurationManager.AppSettings["VerboseLogging"], out VerboseLogging);
-            Log = new Logger("AgentLogContext", ConfigurationManager.AppSettings["LocalLogPath"], "AgentCore");
-            ReconnectWait = Int32.Parse(ConfigurationManager.AppSettings["ReconnectWait"]);
             Running = false;
         }
 
@@ -98,6 +95,20 @@ namespace Systek.Agent
         {
             try
             {
+                bool parseResults = true;
+                parseResults = parseResults && bool.TryParse(ConfigurationManager.AppSettings["VerboseLogging"], out _VerboseLogging);
+                parseResults = parseResults && int.TryParse(ConfigurationManager.AppSettings["ReconnectWait"], out ReconnectWait);
+                string logPath = ConfigurationManager.AppSettings["LocalLogPath"];
+                parseResults = parseResults && (logPath != null);
+
+                // Initialization fails if any of the AppSettings values failed to load
+                if (!parseResults)
+                {
+                    return false;
+                }
+
+                _Log = new Logger("AgentLogContext", logPath, "AgentCore");
+
                 Thread connector = new Thread(() => _Connector(remoteEndPoint));
                 connector.Start();
 
@@ -109,7 +120,7 @@ namespace Systek.Agent
 
                 string message = "There was an exception thrown when trying to initialize the Agent:\n"
                     + e.Message + "\n\n" + e.StackTrace;
-                Log.TblSystemLog(Type.ERROR, AreaType.AGENT_INITIALIZATION, LOCALHOST, message);
+                _Log.TblSystemLog(Type.ERROR, AreaType.AGENT_INITIALIZATION, LOCALHOST, message);
 
                 return false;
             }
@@ -121,7 +132,7 @@ namespace Systek.Agent
         public void Shutdown()
         {
             Running = false;
-            Log.TblSystemLog(Type.INFO, AreaType.AGENT_INITIALIZATION, LOCALHOST, "Agent shutdown requested.");
+            _Log.TblSystemLog(Type.INFO, AreaType.AGENT_INITIALIZATION, LOCALHOST, "Agent shutdown requested.");
             NetConnection?.Close();
         }
 
@@ -130,7 +141,7 @@ namespace Systek.Agent
         /// </summary>
         private void _Connector(IPEndPoint remoteEndPoint)
         {
-            // This thread should run until the class' Stop function is called.
+            // This thread should run until the class' Shutdown function is called.
             do
             {
                 try
@@ -138,15 +149,15 @@ namespace Systek.Agent
                     // Rebuild the connection if it's down
                     if (!NetConnection?.Connected ?? true)
                     {
-                        Log.TblSystemLog(Type.INFO, AreaType.AGENT_INITIALIZATION, LOCALHOST, "Agent service is attempting to connect to server, at:"
+                        _Log.TblSystemLog(Type.INFO, AreaType.AGENT_INITIALIZATION, LOCALHOST, "Agent service is attempting to connect to server, at:"
                             + "IP " + remoteEndPoint.Address.ToString() + ", Port " + remoteEndPoint.Port.ToString());
                         Server = new TcpClient();
                         Server.Connect(remoteEndPoint);
                         NetConnection = new Connection(Server, _LogHandler, _MessageHandler);
-                        NetConnection.VerboseLogging = VerboseLogging;
+                        NetConnection.VerboseLogging = _VerboseLogging;
                         NetConnection.Initialize();
                         Running = true;
-                        Log.TblSystemLog(Type.INFO, AreaType.AGENT_INITIALIZATION, LOCALHOST, "Agent service connected to server successfully.");
+                        _Log.TblSystemLog(Type.INFO, AreaType.AGENT_INITIALIZATION, LOCALHOST, "Agent service connected to server successfully.");
                     }
 
                     // Wait before the next check, to minimize CPU usage
@@ -156,7 +167,7 @@ namespace Systek.Agent
                 {
                     string message = "There was an exception thrown when trying to connect the Agent to the Server:\n" + e.Message
                         + "\n\n" + e.StackTrace;
-                    Log.TblSystemLog(Type.ERROR, AreaType.AGENT_INITIALIZATION, LOCALHOST, message);
+                    _Log.TblSystemLog(Type.ERROR, AreaType.AGENT_INITIALIZATION, LOCALHOST, message);
                     Thread.Sleep(ReconnectWait * 100);  // Longer timeout to retry if the server appears to be down, to avoid log spam
                 }
             } while (Running);
@@ -174,7 +185,7 @@ namespace Systek.Agent
             {
                 message += "\n" + e.ExceptionDetail.Message + "\n\n" + e.ExceptionDetail.StackTrace;
             }
-            Log.TblSystemLog(e.Type, e.AreaType, LOCALHOST, message);
+            _Log.TblSystemLog(e.Type, e.AreaType, LOCALHOST, message);
         }
 
         /// <summary>
