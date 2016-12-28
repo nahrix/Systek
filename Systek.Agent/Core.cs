@@ -42,7 +42,7 @@ namespace Systek.Agent
         /// <summary>
         /// Gets the period of time between reconnect checks.
         /// </summary>
-        public int ReconnectWait { get; private set; }
+        private int _ReconnectWait;
 
         /// <summary>
         /// Used for writing logs in this class.
@@ -97,7 +97,7 @@ namespace Systek.Agent
             {
                 bool parseResults = true;
                 parseResults = parseResults && bool.TryParse(ConfigurationManager.AppSettings["VerboseLogging"], out _VerboseLogging);
-                parseResults = parseResults && int.TryParse(ConfigurationManager.AppSettings["ReconnectWait"], out ReconnectWait);
+                parseResults = parseResults && int.TryParse(ConfigurationManager.AppSettings["ReconnectWait"], out _ReconnectWait);
                 string logPath = ConfigurationManager.AppSettings["LocalLogPath"];
                 parseResults = parseResults && (logPath != null);
 
@@ -161,14 +161,14 @@ namespace Systek.Agent
                     }
 
                     // Wait before the next check, to minimize CPU usage
-                    Thread.Sleep(ReconnectWait);
+                    Thread.Sleep(_ReconnectWait);
                 }
                 catch (Exception e)
                 {
                     string message = "There was an exception thrown when trying to connect the Agent to the Server:\n" + e.Message
                         + "\n\n" + e.StackTrace;
                     _Log.TblSystemLog(Type.ERROR, AreaType.AGENT_INITIALIZATION, LOCALHOST, message);
-                    Thread.Sleep(ReconnectWait * 100);  // Longer timeout to retry if the server appears to be down, to avoid log spam
+                    Thread.Sleep(_ReconnectWait * 100);  // Longer timeout to retry if the server appears to be down, to avoid log spam
                 }
             } while (Running);
         }
