@@ -109,6 +109,7 @@ namespace Systek.Agent
 
                 _Log = new Logger("AgentLogContext", logPath, "AgentCore");
 
+                Running = true;
                 Thread connector = new Thread(() => _Connector(remoteEndPoint));
                 connector.Start();
 

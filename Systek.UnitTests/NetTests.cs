@@ -121,9 +121,24 @@ namespace Systek.UnitTests
         [TestMethod]
         public void AgentServerConnectorTest()
         {
-            new Server.ServerService().Initialize();
-            new Agent.AgentService().Initialize();
+            Server.ServerService server = new Server.ServerService();
+            Agent.AgentService agent = new Agent.AgentService();
 
+            server.Initialize();
+            agent.Initialize();
+
+            Thread.Sleep(1000);
+
+            Assert.IsTrue(Server.Connector.Instance.Running);
+            Assert.IsTrue(Agent.Core.Instance.Running);
+
+            agent.Stop();
+            server.Stop();
+
+            Thread.Sleep(10000);
+
+            Assert.IsFalse(Server.Connector.Instance.Running);
+            Assert.IsFalse(Agent.Core.Instance.Running);
         }
     }
 }

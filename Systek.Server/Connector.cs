@@ -77,6 +77,20 @@ namespace Systek.Server
         /// </summary>
         public void Initialize()
         {
+            Running = true;
+
+            try
+            {
+                Listener.Start();
+            }
+            catch (Exception e)
+            {
+                string message = "Systek server threw exception while trying to start the TcpListener.\n" + e.Message + "\n\n" + e.StackTrace;
+                Log.TblSystemLog(Type.ERROR, AreaType.SERVER_TCP_LISTENER, SYSTEK_SERVER, message);
+                Running = false;
+                return;
+            }
+
             new Thread(new ThreadStart(_Listen)).Start();
         }
 
@@ -95,19 +109,6 @@ namespace Systek.Server
         /// </summary>
         private void _Listen()
         {
-            try
-            {
-                Listener.Start();
-            }
-            catch(Exception e)
-            {
-                string message = "Systek server threw exception while trying to start the TcpListener.\n" + e.Message + "\n\n" + e.StackTrace;
-                Log.TblSystemLog(Type.ERROR, AreaType.SERVER_TCP_LISTENER, SYSTEK_SERVER, message);
-                return;
-            }
-
-            Running = true;
-            
             while (Running)
             {
                 try
