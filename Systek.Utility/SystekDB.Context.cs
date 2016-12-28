@@ -12,28 +12,85 @@ namespace Systek.Utility
     using System;
     using System.Data.Entity;
     using System.Data.Entity.Infrastructure;
-    
+
+    /// <summary>
+    /// Logging context
+    /// </summary>
+    /// <seealso cref="System.Data.Entity.DbContext" />
     public partial class LoggingContext : DbContext
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="LoggingContext"/> class.
+        /// </summary>
         public LoggingContext()
             : base("name=LoggingContext")
         {
         }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="LoggingContext"/> class.
+        /// </summary>
+        /// <param name="contextName">Name of the context.</param>
         public LoggingContext(string contextName)
             : base("name=" + contextName)
         {
         }
-    
+
+        /// <summary>
+        /// This method is called when the model for a derived context has been initialized, but
+        /// before the model has been locked down and used to initialize the context.  The default
+        /// implementation of this method does nothing, but it can be overridden in a derived class
+        /// such that the model can be further configured before it is locked down.
+        /// </summary>
+        /// <param name="modelBuilder">The builder that defines the model for the context being created.</param>
+        /// <exception cref="UnintentionalCodeFirstException"></exception>
+        /// <remarks>
+        /// Typically, this method is called only once when the first instance of a derived context
+        /// is created.  The model for that context is then cached and is for all further instances of
+        /// the context in the app domain.  This caching can be disabled by setting the ModelCaching
+        /// property on the given ModelBuidler, but note that this can seriously degrade performance.
+        /// More control over caching is provided through use of the DbModelBuilder and DbContextFactory
+        /// classes directly.
+        /// </remarks>
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
             throw new UnintentionalCodeFirstException();
         }
-    
+
+        /// <summary>
+        /// Gets or sets the type of the table area.
+        /// </summary>
+        /// <value>
+        /// The type of the table area.
+        /// </value>
         public virtual DbSet<tblAreaType> tblAreaType { get; set; }
+        /// <summary>
+        /// Gets or sets the table role.
+        /// </summary>
+        /// <value>
+        /// The table role.
+        /// </value>
         public virtual DbSet<tblRole> tblRole { get; set; }
+        /// <summary>
+        /// Gets or sets the table server.
+        /// </summary>
+        /// <value>
+        /// The table server.
+        /// </value>
         public virtual DbSet<tblServer> tblServer { get; set; }
+        /// <summary>
+        /// Gets or sets the table system log.
+        /// </summary>
+        /// <value>
+        /// The table system log.
+        /// </value>
         public virtual DbSet<tblSystemLog> tblSystemLog { get; set; }
+        /// <summary>
+        /// Gets or sets the type of the table.
+        /// </summary>
+        /// <value>
+        /// The type of the table.
+        /// </value>
         public virtual DbSet<tblType> tblType { get; set; }
     }
 }

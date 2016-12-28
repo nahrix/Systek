@@ -11,18 +11,75 @@ namespace Systek.Utility
 {
     using System;
     using System.Collections.Generic;
-    
+
+    /// <summary>
+    /// 
+    /// </summary>
     public partial class tblSystemLog
     {
+        /// <summary>
+        /// Gets or sets the identifier.
+        /// </summary>
+        /// <value>
+        /// The identifier.
+        /// </value>
         public int ID { get; set; }
+        /// <summary>
+        /// Gets or sets the type identifier.
+        /// </summary>
+        /// <value>
+        /// The type identifier.
+        /// </value>
         public int typeID { get; set; }
+        /// <summary>
+        /// Gets or sets the area identifier.
+        /// </summary>
+        /// <value>
+        /// The area identifier.
+        /// </value>
         public int areaID { get; set; }
+        /// <summary>
+        /// Gets or sets the server identifier.
+        /// </summary>
+        /// <value>
+        /// The server identifier.
+        /// </value>
         public int serverID { get; set; }
+        /// <summary>
+        /// Gets or sets the message.
+        /// </summary>
+        /// <value>
+        /// The message.
+        /// </value>
         public string message { get; set; }
+        /// <summary>
+        /// Gets or sets the t stamp.
+        /// </summary>
+        /// <value>
+        /// The t stamp.
+        /// </value>
         public System.DateTime tStamp { get; set; }
-    
+
+        /// <summary>
+        /// Gets or sets the type of the table area.
+        /// </summary>
+        /// <value>
+        /// The type of the table area.
+        /// </value>
         public virtual tblAreaType tblAreaType { get; set; }
+        /// <summary>
+        /// Gets or sets the table server.
+        /// </summary>
+        /// <value>
+        /// The table server.
+        /// </value>
         public virtual tblServer tblServer { get; set; }
+        /// <summary>
+        /// Gets or sets the type of the table.
+        /// </summary>
+        /// <value>
+        /// The type of the table.
+        /// </value>
         public virtual tblType tblType { get; set; }
     }
 }

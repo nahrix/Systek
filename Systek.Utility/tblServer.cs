@@ -11,22 +11,70 @@ namespace Systek.Utility
 {
     using System;
     using System.Collections.Generic;
-    
+
+    /// <summary>
+    /// 
+    /// </summary>
     public partial class tblServer
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="tblServer"/> class.
+        /// </summary>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
         public tblServer()
         {
             this.tblSystemLog = new HashSet<tblSystemLog>();
         }
-    
+
+        /// <summary>
+        /// Gets or sets the identifier.
+        /// </summary>
+        /// <value>
+        /// The identifier.
+        /// </value>
         public int ID { get; set; }
+        /// <summary>
+        /// Gets or sets the hostname.
+        /// </summary>
+        /// <value>
+        /// The hostname.
+        /// </value>
         public string hostname { get; set; }
+        /// <summary>
+        /// Gets or sets the ip.
+        /// </summary>
+        /// <value>
+        /// The ip.
+        /// </value>
         public string ip { get; set; }
+        /// <summary>
+        /// Gets or sets a value indicating whether this <see cref="tblServer"/> is online.
+        /// </summary>
+        /// <value>
+        ///   <c>true</c> if online; otherwise, <c>false</c>.
+        /// </value>
         public bool online { get; set; }
+        /// <summary>
+        /// Gets or sets the role identifier.
+        /// </summary>
+        /// <value>
+        /// The role identifier.
+        /// </value>
         public int roleID { get; set; }
-    
+
+        /// <summary>
+        /// Gets or sets the table role.
+        /// </summary>
+        /// <value>
+        /// The table role.
+        /// </value>
         public virtual tblRole tblRole { get; set; }
+        /// <summary>
+        /// Gets or sets the table system log.
+        /// </summary>
+        /// <value>
+        /// The table system log.
+        /// </value>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<tblSystemLog> tblSystemLog { get; set; }
     }

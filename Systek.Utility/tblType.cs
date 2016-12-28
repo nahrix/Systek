@@ -11,18 +11,42 @@ namespace Systek.Utility
 {
     using System;
     using System.Collections.Generic;
-    
+
+    /// <summary>
+    /// 
+    /// </summary>
     public partial class tblType
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="tblType"/> class.
+        /// </summary>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
         public tblType()
         {
             this.tblSystemLog = new HashSet<tblSystemLog>();
         }
-    
+
+        /// <summary>
+        /// Gets or sets the identifier.
+        /// </summary>
+        /// <value>
+        /// The identifier.
+        /// </value>
         public int ID { get; set; }
+        /// <summary>
+        /// Gets or sets the name.
+        /// </summary>
+        /// <value>
+        /// The name.
+        /// </value>
         public string name { get; set; }
-    
+
+        /// <summary>
+        /// Gets or sets the table system log.
+        /// </summary>
+        /// <value>
+        /// The table system log.
+        /// </value>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<tblSystemLog> tblSystemLog { get; set; }
     }
