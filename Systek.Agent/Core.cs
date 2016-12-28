@@ -47,7 +47,7 @@ namespace Systek.Agent
         /// <summary>
         /// Used for writing logs in this class.
         /// </summary>
-        private Logger _Log { get; set; }
+        private Logger _Log;
 
         /// <summary>
         /// Indicates whether logs should be verbose or not
@@ -57,7 +57,7 @@ namespace Systek.Agent
         /// <summary>
         /// Gets or sets the singleton instance.
         /// </summary>
-        private static Core _Instance { get; set; }
+        private static Core _Instance;
 
         // Used to describe the server ID when logging
         private const int LOCALHOST = 1;

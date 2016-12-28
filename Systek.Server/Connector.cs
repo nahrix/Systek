@@ -24,7 +24,9 @@ namespace Systek.Server
         /// </summary>
         public bool Running { get; private set; }
 
-        // Used to describe the server ID when logging
+        /// <summary>
+        /// The ID of the systek server, as used in tblServer
+        /// </summary>
         private const int SYSTEK_SERVER = 2;
 
         /// <summary>
