@@ -14,11 +14,6 @@ namespace Systek.Net
     public class CommandSet : ICommandSet
     {
         /// <summary>
-        /// Describes whether the CommandSet has its entire sequence of commands defined.
-        /// </summary>
-        public bool Complete { get; private set; }
-
-        /// <summary>
         /// The commands to be run in sequence.  Each command has a sequence number, starting at 1,
         /// to be run from the lowest sequence number to the highest sequence number.
         /// </summary>
@@ -31,21 +26,13 @@ namespace Systek.Net
         public int ID { get; private set; }
 
         /// <summary>
-        /// The highest sequence number in this commandSet.
-        /// </summary>
-        public int Sequence { get; private set; }
-
-        /// <summary>
         /// Initializes a new instance of the <see cref="CommandSet" /> class.
         /// </summary>
         /// <param name="id">The unique ID of this CommandSet.</param>
-        /// <param name="sequence">The highest sequence number that this CommandSet will contain.</param>
-        public CommandSet(int id, int sequence)
+        public CommandSet(int id)
         {
             ID = id;
-            Sequence = sequence;
             Commands = new List<ICommand>();
-            Complete = false;
         }
 
         /// <summary>
@@ -56,7 +43,7 @@ namespace Systek.Net
         public bool AddCommand(ICommand command)
         {
             // Check if the command to add is valid, and return false if not
-            if ((command.CommandSetId != ID) || (command.Sequence > Sequence) || (command.Sequence <= 0))
+            if ((command.CommandSetId != ID) || (command.Sequence <= 0))
             {
                 return false;
             }
@@ -68,13 +55,6 @@ namespace Systek.Net
                 {
                     return false;
                 }
-            }
-
-            // Add the command, and return success
-            Commands.Add(command);
-            if (Commands.Count == Sequence)
-            {
-                Complete = true;
             }
 
             return true;
@@ -93,7 +73,6 @@ namespace Systek.Net
                 if (cmd.Sequence == sequence)
                 {
                     Commands.Remove(cmd);
-                    Complete = false;
                     return true;
                 }
             }
@@ -119,7 +98,7 @@ namespace Systek.Net
             CommandSet test = (CommandSet)other;
 
             // Comparison of primitives
-            if ((Sequence != test.Sequence) || (Complete != test.Complete) || (ID != test.ID))
+            if (ID != test.ID)
             {
                 return false;
             }

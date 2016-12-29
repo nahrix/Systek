@@ -32,22 +32,25 @@ namespace Systek.Server
         /// <summary>
         /// Used for writing logs in this class.
         /// </summary>
-        private Logger Log { get; set; }
+        private Logger _Log { get; set; }
 
         /// <summary>
         /// The singleton instance
         /// </summary>
         private static Connector _Instance = null;
 
-        private TcpListener Listener;
+        /// <summary>
+        /// Listens for incoming connection requests
+        /// </summary>
+        private TcpListener _Listener;
 
         /// <summary>
         /// Constructor, privatized because this class is a singleton.
         /// </summary>
         private Connector()
         {
-            Log = new Logger("ServerLogContext", ConfigurationManager.AppSettings["LocalLogPath"], "ServerConnector");
-            Listener = new TcpListener(IPAddress.Any, Port);
+            _Log = new Logger("ServerLogContext", ConfigurationManager.AppSettings["LocalLogPath"], "ServerConnector");
+            _Listener = new TcpListener(IPAddress.Any, Port);
         }
 
         /// <summary>
@@ -81,12 +84,12 @@ namespace Systek.Server
 
             try
             {
-                Listener.Start();
+                _Listener.Start();
             }
             catch (Exception e)
             {
                 string message = "Systek server threw exception while trying to start the TcpListener.\n" + e.Message + "\n\n" + e.StackTrace;
-                Log.TblSystemLog(Type.ERROR, AreaType.SERVER_TCP_LISTENER, SYSTEK_SERVER, message);
+                _Log.TblSystemLog(Type.ERROR, AreaType.SERVER_TCP_LISTENER, SYSTEK_SERVER, message);
                 Running = false;
                 return;
             }
@@ -100,7 +103,7 @@ namespace Systek.Server
         public void Stop()
         {
             Running = false;
-            Listener.Stop();
+            _Listener.Stop();
         }
 
         /// <summary>
@@ -113,13 +116,13 @@ namespace Systek.Server
             {
                 try
                 {
-                    TcpClient agentSocket = Listener.AcceptTcpClient();
+                    TcpClient agentSocket = _Listener.AcceptTcpClient();
                     IMachine agentMachine = new Machine(agentSocket);
                     agentMachine.Initialize();
 
                     if (!agentMachine.NetConnection.Connected)
                     {
-                        Log.TblSystemLog(Type.ERROR, AreaType.AGENT_INITIALIZATION, SYSTEK_SERVER, "New agent connection failed to initialize.");
+                        _Log.TblSystemLog(Type.ERROR, AreaType.AGENT_INITIALIZATION, SYSTEK_SERVER, "New agent connection failed to initialize.");
                     }
 
                     agentMachine = null;
@@ -130,7 +133,7 @@ namespace Systek.Server
                     if (Running)
                     {
                         string message = "Systek server threw exception while creating new agent connection.\n" + e.Message + "\n\n" + e.StackTrace;
-                        Log.TblSystemLog(Type.ERROR, AreaType.SERVER_TCP_LISTENER, SYSTEK_SERVER, message);
+                        _Log.TblSystemLog(Type.ERROR, AreaType.SERVER_TCP_LISTENER, SYSTEK_SERVER, message);
                     }
                 }
             }

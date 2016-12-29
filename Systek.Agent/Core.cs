@@ -197,6 +197,9 @@ namespace Systek.Agent
         {
             switch (msg.Type)
             {
+                // A message with type UPDATE_BASIC is handled as a request, from the server, for this agent
+                // to provide some basic information about the client.  The data is sent back with the same
+                // UPDATE_BASIC message type.
                 case MessageType.UPDATE_BASIC:
                     NetConnection.Send(new Message()
                     {
@@ -207,6 +210,18 @@ namespace Systek.Agent
                             AuthKey = ConfigurationManager.AppSettings["AuthKey"]
                         }
                     });
+                    break;
+
+                case MessageType.COMMAND:
+                    break;
+
+                case MessageType.CLOSE:
+                    break;
+
+                case MessageType.FAIL:
+                    break;
+
+                case MessageType.LOG:
                     break;
 
                 default:

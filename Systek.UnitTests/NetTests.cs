@@ -36,7 +36,7 @@ namespace Systek.UnitTests
             ICommand command2 = new Command(1, 2, "test command 2");
             ICommand command3 = new Command(1, 3, "1234");
 
-            ICommandSet set = new CommandSet(1, 3);
+            ICommandSet set = new CommandSet(1);
             set.AddCommand(command1);
             set.AddCommand(command2);
             set.AddCommand(command3);
