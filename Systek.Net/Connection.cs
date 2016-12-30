@@ -158,20 +158,24 @@ namespace Systek.Net
         /// <exception cref="System.ArgumentOutOfRangeException">msg;Message size is too large (> 65535 bytes).</exception>
         public void Send(Message msg)
         {
-            // Build the serialized message and header
-            byte[] messageData = _Serialize(msg);
-            byte[] headerData = BitConverter.GetBytes(messageData.Length);
-
-            // Validate message size
-            if (messageData.Length > MESSAGE_MAX)
+            Object lockObj = new Object();
+            lock (lockObj)
             {
-                LogEvent?.Invoke(new LogEventArgs(Type.ERROR, AreaType.NET_LIB, "Message to send is too large. Message size: "
-                    + messageData.Length.ToString() + ".  Max message size: " + MESSAGE_MAX.ToString()));
+                // Build the serialized message and header
+                byte[] messageData = _Serialize(msg);
+                byte[] headerData = BitConverter.GetBytes(messageData.Length);
+
+                // Validate message size
+                if (messageData.Length > MESSAGE_MAX)
+                {
+                    LogEvent?.Invoke(new LogEventArgs(Type.ERROR, AreaType.NET_LIB, "Message to send is too large. Message size: "
+                        + messageData.Length.ToString() + ".  Max message size: " + MESSAGE_MAX.ToString()));
+                }
+
+                // Send the header and the message
+                NetStream.Write(headerData, 0, headerData.Length);
+                NetStream.Write(messageData, 0, messageData.Length);
             }
-            
-            // Send the header and the message
-            NetStream.Write(headerData, 0, headerData.Length);
-            NetStream.Write(messageData, 0, messageData.Length);
         }
 
         /// <summary>

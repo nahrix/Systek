@@ -9,13 +9,13 @@ namespace Systek
     public class AreaType
     {
         public const int
-            UNIT_TEST = 1,
-            NET_LIB = 2,
-            AGENT_MESSAGE_HANDLER = 3,
-            SERVER_MESSAGE_HANDLER = 4,
-            AGENT_INITIALIZATION = 5,
-            SERVER_INITIALIZATION = 6,
-            SERVER_TCP_LISTENER = 7,
-            SERVER_MACHINE = 8;
+            SERVER_INITIALIZATION = 1000,
+            SERVER_TCP_LISTENER = 1001,
+            SERVER_MACHINE = 1002,
+            SERVER_MESSAGE_HANDLER = 1003,
+            AGENT_MESSAGE_HANDLER = 2000,
+            AGENT_INITIALIZATION = 2001,
+            NET_LIB = 3000,
+            UNIT_TEST = 4000;
     }
 }

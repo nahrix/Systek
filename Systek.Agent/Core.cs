@@ -59,7 +59,9 @@ namespace Systek.Agent
         /// </summary>
         private static Core _Instance;
 
-        // Used to describe the server ID when logging
+        /// <summary>
+        /// Describes the localhost ID when logging, as defined in tblServer
+        /// </summary>
         private const int LOCALHOST = 1;
 
         /// <summary>
@@ -150,8 +152,8 @@ namespace Systek.Agent
                     // Rebuild the connection if it's down
                     if (!NetConnection?.Connected ?? true)
                     {
-                        _Log.TblSystemLog(Type.INFO, AreaType.AGENT_INITIALIZATION, LOCALHOST, "Agent service is attempting to connect to server, at:"
-                            + "IP " + remoteEndPoint.Address.ToString() + ", Port " + remoteEndPoint.Port.ToString());
+                        _Log.TblSystemLog(Type.INFO, AreaType.AGENT_INITIALIZATION, LOCALHOST, "Agent service is attempting to connect " +
+                            " to server, at: IP " + remoteEndPoint.Address.ToString() + ", Port " + remoteEndPoint.Port.ToString());
                         Server = new TcpClient();
                         Server.Connect(remoteEndPoint);
                         NetConnection = new Connection(Server, _LogHandler, _MessageHandler);
@@ -169,7 +171,9 @@ namespace Systek.Agent
                     string message = "There was an exception thrown when trying to connect the Agent to the Server:\n" + e.Message
                         + "\n\n" + e.StackTrace;
                     _Log.TblSystemLog(Type.ERROR, AreaType.AGENT_INITIALIZATION, LOCALHOST, message);
-                    Thread.Sleep(_ReconnectWait * 100);  // Longer timeout to retry if the server appears to be down, to avoid log spam
+
+                    // Longer timeout to retry if the server appears to be down, to avoid log spam
+                    Thread.Sleep(_ReconnectWait * 100);
                 }
             } while (Running);
         }
@@ -195,37 +199,52 @@ namespace Systek.Agent
         /// <param name="msg">The MSG.</param>
         private void _MessageHandler(Message msg)
         {
-            switch (msg.Type)
+            try
             {
-                // A message with type UPDATE_BASIC is handled as a request, from the server, for this agent
-                // to provide some basic information about the client.  The data is sent back with the same
-                // UPDATE_BASIC message type.
-                case MessageType.UPDATE_BASIC:
-                    NetConnection.Send(new Message()
-                    {
-                        Type = MessageType.UPDATE_BASIC,
-                        Update = new UpdateData()
+                if (_VerboseLogging)
+                {
+                    _Log.TblSystemLog(Type.INFO, AreaType.SERVER_MACHINE, LOCALHOST, "Agent is handling a message from server, " +
+                        "of type: " + msg.Type.ToString());
+
+                    Console.WriteLine("Message from server of type: " + Enum.GetName(msg.Type.GetType(), msg.Type));
+                }
+
+                switch (msg.Type)
+                {
+                    // A message with type UPDATE_BASIC is handled as a request, from the server, for this agent
+                    // to provide some basic information about the client.  The data is sent back with the same
+                    // UPDATE_BASIC message type.
+                    case MessageType.UPDATE_BASIC:
+                        NetConnection.Send(new Message()
                         {
-                            HostName = Environment.MachineName,
-                            AuthKey = ConfigurationManager.AppSettings["AuthKey"]
-                        }
-                    });
-                    break;
+                            Type = MessageType.UPDATE_BASIC,
+                            Update = new UpdateData()
+                            {
+                                HostName = Environment.MachineName,
+                                AuthKey = ConfigurationManager.AppSettings["AuthKey"]
+                            }
+                        });
+                        break;
 
-                case MessageType.COMMAND:
-                    break;
+                    case MessageType.COMMAND:
+                        break;
 
-                case MessageType.CLOSE:
-                    break;
+                    case MessageType.CLOSE:
+                        break;
 
-                case MessageType.FAIL:
-                    break;
+                    case MessageType.FAIL:
+                        break;
 
-                case MessageType.LOG:
-                    break;
+                    case MessageType.LOG:
+                        break;
 
-                default:
-                    break;
+                    default:
+                        break;
+                }
+            }
+            catch (Exception e)
+            {
+                _Log.TblSystemLog(Type.ERROR, AreaType.AGENT_MESSAGE_HANDLER, LOCALHOST, "Error while processing a message from the server.\n\n" + e.Message);
             }
         }
     }

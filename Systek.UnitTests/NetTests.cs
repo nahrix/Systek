@@ -131,6 +131,8 @@ namespace Systek.UnitTests
             Assert.IsTrue(Server.Connector.Instance.Running);
             Assert.IsTrue(Agent.Core.Instance.Running);
 
+            Agent.Core.Instance.NetConnection.Send(TestMsg);
+
             agent.Stop();
             server.Stop();
 

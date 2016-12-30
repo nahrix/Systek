@@ -223,14 +223,16 @@ namespace Systek.Server
         /// <param name="msg">The message to process.</param>
         public void MessageHandler(Message msg)
         {
-            if (_VerboseLogging)
-            {
-                _Log.TblSystemLog(Type.INFO, AreaType.SERVER_MACHINE, MachineID, "Server is handling a message from machine "
-                    + "with ID: " + MachineID + ".  Message type is: " + msg.Type.ToString());
-            }
-
             try
             {
+                if (_VerboseLogging)
+                {
+                    _Log.TblSystemLog(Type.INFO, AreaType.SERVER_MACHINE, MachineID, "Server is handling a message from machine "
+                        + "with ID: " + MachineID + ".  Message type is: " + msg.Type.ToString());
+
+                    Console.WriteLine("Message from agent of type: " + Enum.GetName(msg.Type.GetType(), msg.Type));
+                }
+
                 // Check for synchrounous message flag first. If the flag is set, add the message to a separate
                 // queue that is dedicated to synchronous messages
                 switch (msg.Synchronized)
