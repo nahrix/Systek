@@ -1,6 +1,7 @@
 ﻿using Systek.Net;
 using Systek.Utility;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
@@ -50,22 +51,28 @@ namespace Systek.Server
         /// <summary>
         /// Used for writing logs in this class.
         /// </summary>
-        private Logger Log { get; set; }
+        private Logger _Log { get; set; }
 
         /// <summary>
         /// Indicates whether verbose logs should be written.
         /// </summary>
-        private bool VerboseLogging = false;
+        private bool _VerboseLogging = false;
 
         /// <summary>
         /// The machine count, for debugging.
         /// </summary>
-        private static int MachineCount = 0;
+        private static int _MachineCount = 0;
 
         /// <summary>
         /// Gets or sets the authentication key.
         /// </summary>
-        private string AuthKey { get; set; }
+        private string _AuthKey { get; set; }
+
+        /// <summary>
+        /// Keeps the status of synchronous communications.  If the value (Message) is null,
+        /// then this 
+        /// </summary>
+        private ConcurrentDictionary<int, Message> SynchronizedMessages;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Machine" /> class.
@@ -73,20 +80,21 @@ namespace Systek.Server
         /// <param name="agent">The connection to the agent.</param>
         public Machine(TcpClient agent)
         {
-            Boolean.TryParse(ConfigurationManager.AppSettings["VerboseLogging"], out VerboseLogging);
+            Boolean.TryParse(ConfigurationManager.AppSettings["VerboseLogging"], out _VerboseLogging);
             Authenticated = false;
             Disposed = false;
             MachineName = null;
             MachineID = 3;
-            MachineCount++;
-            Log = new Logger("ServerLogContext", ConfigurationManager.AppSettings["localLogPath"], "AgentMachine");
+            _MachineCount++;
+            _Log = new Logger("ServerLogContext", ConfigurationManager.AppSettings["localLogPath"], "AgentMachine");
             NetConnection = new Connection(agent, LogHandler, MessageHandler);
-            NetConnection.VerboseLogging = VerboseLogging;
+            NetConnection.VerboseLogging = _VerboseLogging;
+            SynchronizedMessages = new ConcurrentDictionary<int, Message>();
 
-            if (VerboseLogging)
+            if (_VerboseLogging)
             {
-                Log.TblSystemLog(Type.INFO, AreaType.SERVER_MACHINE, MachineID, "New Machine created.  MachineCount: "
-                    + MachineCount.ToString());
+                _Log.TblSystemLog(Type.INFO, AreaType.SERVER_MACHINE, MachineID, "New Machine created.  MachineCount: "
+                    + _MachineCount.ToString());
             }
         }
 
@@ -120,18 +128,19 @@ namespace Systek.Server
 
             if (disposeManaged)
             {
-                // Reserved for disposing any managed resources that this class might add
+                SynchronizedMessages.Clear();
+                SynchronizedMessages = null;
             }
 
-            --MachineCount;
+            --_MachineCount;
 
-            if (VerboseLogging)
+            if (_VerboseLogging)
             {
-                Log?.TblSystemLog(Type.INFO, AreaType.SERVER_MACHINE, MachineID, "Machine destroyed.  MachineCount: "
-                    + MachineCount.ToString());
+                _Log?.TblSystemLog(Type.INFO, AreaType.SERVER_MACHINE, MachineID, "Machine destroyed.  MachineCount: "
+                    + _MachineCount.ToString());
             }
 
-            Log = null;
+            _Log = null;
 
             NetConnection?.Dispose();
             NetConnection = null;
@@ -145,9 +154,9 @@ namespace Systek.Server
         /// <returns></returns>
         public bool Authenticate()
         {
-            if (VerboseLogging)
+            if (_VerboseLogging)
             {
-                Log.TblSystemLog(Type.INFO, AreaType.SERVER_MACHINE, MachineID, "Machine is authenticating.");
+                _Log.TblSystemLog(Type.INFO, AreaType.SERVER_MACHINE, MachineID, "Machine is authenticating.");
             }
 
             Update();
@@ -160,9 +169,9 @@ namespace Systek.Server
         /// </summary>
         public void Initialize()
         {
-            if (VerboseLogging)
+            if (_VerboseLogging)
             {
-                Log.TblSystemLog(Type.INFO, AreaType.SERVER_MACHINE, MachineID, "Machine is initializing.");
+                _Log.TblSystemLog(Type.INFO, AreaType.SERVER_MACHINE, MachineID, "Machine is initializing.");
             }
 
             NetConnection.Initialize();
@@ -180,9 +189,9 @@ namespace Systek.Server
         /// </summary>
         public void Update()
         {
-            if (VerboseLogging)
+            if (_VerboseLogging)
             {
-                Log.TblSystemLog(Type.INFO, AreaType.SERVER_MACHINE, MachineID, "Machine is updating.");
+                _Log.TblSystemLog(Type.INFO, AreaType.SERVER_MACHINE, MachineID, "Machine is updating.");
             }
 
             if (!NetConnection.Connected)
@@ -205,7 +214,7 @@ namespace Systek.Server
             {
                 message += "\n" + e.ExceptionDetail.Message + "\n\n" + e.ExceptionDetail.StackTrace;
             }
-            Log.TblSystemLog(e.Type, e.AreaType, MachineID, message);
+            _Log.TblSystemLog(e.Type, e.AreaType, MachineID, message);
         }
 
         /// <summary>
@@ -214,14 +223,46 @@ namespace Systek.Server
         /// <param name="msg">The message to process.</param>
         public void MessageHandler(Message msg)
         {
-            if (VerboseLogging)
+            if (_VerboseLogging)
             {
-                Log.TblSystemLog(Type.INFO, AreaType.SERVER_MACHINE, MachineID, "Server is handling a message from machine "
+                _Log.TblSystemLog(Type.INFO, AreaType.SERVER_MACHINE, MachineID, "Server is handling a message from machine "
                     + "with ID: " + MachineID + ".  Message type is: " + msg.Type.ToString());
             }
 
             try
             {
+                // Check for synchrounous message flag first. If the flag is set, add the message to a separate
+                // queue that is dedicated to synchronous messages
+                switch (msg.Synchronized)
+                {
+                    // Handle new synchronous communication
+                    case 1:
+                        if (!SynchronizedMessages.ContainsKey(msg.SyncId))
+                        {
+                            SynchronizedMessages.TryAdd(msg.SyncId, msg);
+                        }
+                        return;
+
+                    // Handle existing synchronous communication
+                    case 2:
+                        if ((SynchronizedMessages.ContainsKey(msg.SyncId)) && (SynchronizedMessages[msg.SyncId].Synchronized == 4))
+                        {
+                            Message originalMessage;
+                            SynchronizedMessages.TryRemove(msg.SyncId, out originalMessage);
+                            SynchronizedMessages.TryUpdate(msg.SyncId, msg, originalMessage);
+                        }
+                        return;
+
+                    // Handle a request to close synchronous communication
+                    case 3:
+                        if (SynchronizedMessages.ContainsKey(msg.SyncId))
+                        {
+                            Message originalMessage;
+                            SynchronizedMessages.TryRemove(msg.SyncId, out originalMessage);
+                        }
+                        return;
+                }
+
                 // Process the full set of Messages if the agent is authenticated
                 if (Authenticated)
                 {
@@ -243,7 +284,7 @@ namespace Systek.Server
 
                         // The Agent or Server projects will handle the events generated by LOGs
                         case MessageType.LOG:
-                            Log.TblSystemLog(msg.LogType, msg.AreaType, MachineID, msg.Msg);
+                            _Log.TblSystemLog(msg.LogType, msg.AreaType, MachineID, msg.Msg);
                             break;
 
                         default:
@@ -258,7 +299,7 @@ namespace Systek.Server
                         // Updates the state of the agent
                         case MessageType.UPDATE_BASIC:
                             MachineName = msg.Update.HostName;
-                            AuthKey = msg.Update.AuthKey;
+                            _AuthKey = msg.Update.AuthKey;
                             break;
 
                         // Elegantly close the connection
@@ -275,7 +316,7 @@ namespace Systek.Server
             }
             catch (Exception e)
             {
-                Log.TblSystemLog(Type.ERROR, AreaType.SERVER_MACHINE, MachineID, "Error while processing a message from the agent.\n\n" + e.Message);
+                _Log.TblSystemLog(Type.ERROR, AreaType.SERVER_MACHINE, MachineID, "Error while processing a message from the agent.\n\n" + e.Message);
                 NetConnection.Dispose();
                 Dispose();
             }

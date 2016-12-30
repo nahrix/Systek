@@ -60,9 +60,21 @@ namespace Systek.Net
         public int CmdSetId;
 
         /// <summary>
-        /// The sequence number reference in this message
+        /// Identifies this message as part of a synchronous communication with the connected peer.
+        /// This is used, for example, when a handshake is in progress.
+        /// 0: Unused / asynchronous message
+        /// 1: Begin synchrounous message
+        /// 2: Continue synchrounous message
+        /// 3: End synchronous message
+        /// 4: Local synchronous message has been processed
         /// </summary>
-        public int Sequence;
+        public int Synchronized;
+
+        /// <summary>
+        /// Uniquely identifies the synchronous communication, so that multiple synchronous communications
+        /// can happen in parallel.
+        /// </summary>
+        public int SyncId;
 
         /// <summary>
         /// A human-readable message.  Used to describe a log, for example.
@@ -102,7 +114,7 @@ namespace Systek.Net
             Message test = (Message)other;
 
             // Comparison of primitives
-            if ((Type != test.Type) || (Sequence != test.Sequence) || (Msg != test.Msg)
+            if ((Type != test.Type) || (Synchronized != test.Synchronized) || (SyncId != test.SyncId) || (Msg != test.Msg)
                 || (LogType != test.LogType) || (CmdSetId != test.CmdSetId) || (AreaType != test.AreaType))
             {
                 return false;

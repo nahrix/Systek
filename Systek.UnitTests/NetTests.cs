@@ -44,7 +44,6 @@ namespace Systek.UnitTests
             TestMsg = new Message();
             TestMsg.Type = MessageType.COMMAND;
             TestMsg.CmdSet = set;
-            TestMsg.Sequence = 1;
         }
 
         /// <summary>
