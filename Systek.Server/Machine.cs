@@ -225,6 +225,12 @@ namespace Systek.Server
         {
             try
             {
+                // Template reply.  Its values can be overwritten in custom scenarios.
+                Message reply = new Message();
+                reply.Synchronized = msg.Synchronized;
+                reply.SyncId = msg.SyncId;
+                reply.Type = MessageType.ACK;
+
                 if (_VerboseLogging)
                 {
                     _Log.TblSystemLog(Type.INFO, AreaType.SERVER_MACHINE, MachineID, "Server is handling a message from machine "
@@ -233,52 +239,34 @@ namespace Systek.Server
                     Console.WriteLine("Message from agent of type: " + Enum.GetName(msg.Type.GetType(), msg.Type));
                 }
 
-                // Check for synchrounous message flag first. If the flag is set, add the message to a separate
-                // queue that is dedicated to synchronous messages
-                switch (msg.Synchronized)
+                // Check for replies to a synchronous message.
+                if (msg.Synchronized && SynchronizedMessages.ContainsKey(msg.SyncId))
                 {
-                    // Handle new synchronous communication
-                    case 1:
-                        if (!SynchronizedMessages.ContainsKey(msg.SyncId))
-                        {
-                            SynchronizedMessages.TryAdd(msg.SyncId, msg);
-                        }
-                        return;
-
-                    // Handle existing synchronous communication
-                    case 2:
-                        if ((SynchronizedMessages.ContainsKey(msg.SyncId)) && (SynchronizedMessages[msg.SyncId].Synchronized == 4))
-                        {
-                            Message originalMessage;
-                            SynchronizedMessages.TryRemove(msg.SyncId, out originalMessage);
-                            SynchronizedMessages.TryUpdate(msg.SyncId, msg, originalMessage);
-                        }
-                        return;
-
-                    // Handle a request to close synchronous communication
-                    case 3:
-                        if (SynchronizedMessages.ContainsKey(msg.SyncId))
-                        {
-                            Message originalMessage;
-                            SynchronizedMessages.TryRemove(msg.SyncId, out originalMessage);
-                        }
-                        return;
+                    Message originalMsg;
+                    SynchronizedMessages.TryGetValue(msg.SyncId, out originalMsg);
+                    SynchronizedMessages.TryUpdate(msg.SyncId, msg, originalMsg);
+                    return;
                 }
 
-                // Process the full set of Messages if the agent is authenticated
+                // Process this set of messages only if the machine is authenticated
                 if (Authenticated)
                 {
                     switch (msg.Type)
                     {
+                        // NOTE: Maybe handle asynchronous ACKs in some way in the future
+                        case MessageType.ACK:
+                            return;
+
                         // Execute commands passed in by the agent
                         case MessageType.COMMAND:
                             break;
 
                         // Elegantly close the connection
                         case MessageType.CLOSE:
+                            NetConnection.Send(reply);
                             NetConnection.Dispose();
                             Dispose();
-                            break;
+                            return;
 
                         // TODO:  Handle each FAIL case
                         case MessageType.FAIL:
@@ -293,28 +281,22 @@ namespace Systek.Server
                             break;
                     }
                 }
-                // Process only a select few messages if the agent is not authenticated
-                else
+
+                // Process remaining messages whether or not the machine is authenticated
+                switch (msg.Type)
                 {
-                    switch (msg.Type)
-                    {
-                        // Updates the state of the agent
-                        case MessageType.UPDATE_BASIC:
-                            MachineName = msg.Update.HostName;
-                            _AuthKey = msg.Update.AuthKey;
-                            break;
+                    // Updates the state of the agent
+                    case MessageType.UPDATE_BASIC:
+                        MachineName = msg.Update.HostName;
+                        _AuthKey = msg.Update.AuthKey;
+                        break;
 
-                        // Elegantly close the connection
-                        case MessageType.CLOSE:
-                            NetConnection.Dispose();
-                            Dispose();
-                            break;
-
-                        default:
-                            break;
-                    }
+                    default:
+                        break;
                 }
-                
+
+                // Reply with either the default ACK, or other custom response generated by the message processor above
+                NetConnection.Send(reply);
             }
             catch (Exception e)
             {

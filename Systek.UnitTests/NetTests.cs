@@ -133,10 +133,12 @@ namespace Systek.UnitTests
 
             Agent.Core.Instance.NetConnection.Send(TestMsg);
 
+            Thread.Sleep(1000);
+
             agent.Stop();
             server.Stop();
 
-            Thread.Sleep(10000);
+            Thread.Sleep(1000);
 
             Assert.IsFalse(Server.Connector.Instance.Running);
             Assert.IsFalse(Agent.Core.Instance.Running);

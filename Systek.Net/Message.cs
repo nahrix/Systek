@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace Systek.Net
 {
@@ -31,9 +29,19 @@ namespace Systek.Net
         FAIL = 4,
 
         /// <summary>
+        /// Report a successful command execution.
+        /// </summary>
+        SUCCESS = 5,
+
+        /// <summary>
         /// Send an update of the current state of the machine
         /// </summary>
-        UPDATE_BASIC = 5
+        UPDATE_BASIC = 6,
+
+        /// <summary>
+        /// Acknowledges replies, indicating that no further reply is necessary.
+        /// </summary>
+        ACK = 7
     };
 
     /// <summary>
@@ -62,13 +70,8 @@ namespace Systek.Net
         /// <summary>
         /// Identifies this message as part of a synchronous communication with the connected peer.
         /// This is used, for example, when a handshake is in progress.
-        /// 0: Unused / asynchronous message
-        /// 1: Begin synchrounous message
-        /// 2: Continue synchrounous message
-        /// 3: End synchronous message
-        /// 4: Local synchronous message has been processed
         /// </summary>
-        public int Synchronized;
+        public bool Synchronized;
 
         /// <summary>
         /// Uniquely identifies the synchronous communication, so that multiple synchronous communications
