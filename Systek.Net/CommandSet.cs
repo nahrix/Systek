@@ -25,11 +25,13 @@ namespace Systek.Net
         /// </summary>
         public int ID { get; private set; }
 
+
         /// <summary>
         /// Initializes a new instance of the <see cref="CommandSet" /> class.
         /// </summary>
         /// <param name="id">The unique ID of this CommandSet.</param>
-        public CommandSet(int id)
+        /// <param name="sequence">The highest sequence number that this CommandSet will contain.</param>
+        public CommandSet(int id, int sequence)
         {
             ID = id;
             Commands = new List<ICommand>();
@@ -43,7 +45,7 @@ namespace Systek.Net
         public bool AddCommand(ICommand command)
         {
             // Check if the command to add is valid, and return false if not
-            if ((command.CommandSetId != ID) || (command.Sequence <= 0))
+            if (command.Sequence <= 0)
             {
                 return false;
             }
@@ -57,6 +59,8 @@ namespace Systek.Net
                 }
             }
 
+            // Add the command, and return success
+            Commands.Add(command);
             return true;
         }
 

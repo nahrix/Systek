@@ -48,6 +48,7 @@ namespace Systek.Server
         /// </summary>
         public IConnection NetConnection { get; private set; }
 
+
         /// <summary>
         /// Used for writing logs in this class.
         /// </summary>
@@ -68,11 +69,6 @@ namespace Systek.Server
         /// </summary>
         private string _AuthKey { get; set; }
 
-        /// <summary>
-        /// Keeps the status of synchronous communications.  If the value (Message) is null,
-        /// then this 
-        /// </summary>
-        private ConcurrentDictionary<int, Message> SynchronizedMessages;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Machine" /> class.
@@ -87,9 +83,8 @@ namespace Systek.Server
             MachineID = 3;
             _MachineCount++;
             _Log = new Logger("ServerLogContext", ConfigurationManager.AppSettings["localLogPath"], "AgentMachine");
-            NetConnection = new Connection(agent, LogHandler, MessageHandler);
+            NetConnection = new Connection(agent, LogHandler, MessageHandler, "Server");
             NetConnection.VerboseLogging = _VerboseLogging;
-            SynchronizedMessages = new ConcurrentDictionary<int, Message>();
 
             if (_VerboseLogging)
             {
@@ -128,8 +123,8 @@ namespace Systek.Server
 
             if (disposeManaged)
             {
-                SynchronizedMessages.Clear();
-                SynchronizedMessages = null;
+                NetConnection.Dispose();
+                NetConnection = null;
             }
 
             --_MachineCount;
@@ -141,10 +136,6 @@ namespace Systek.Server
             }
 
             _Log = null;
-
-            NetConnection?.Dispose();
-            NetConnection = null;
-
             Disposed = true;
         }
 
@@ -239,15 +230,6 @@ namespace Systek.Server
                     Console.WriteLine("Message from agent of type: " + Enum.GetName(msg.Type.GetType(), msg.Type));
                 }
 
-                // Check for replies to a synchronous message.
-                if (msg.Synchronized && SynchronizedMessages.ContainsKey(msg.SyncId))
-                {
-                    Message originalMsg;
-                    SynchronizedMessages.TryGetValue(msg.SyncId, out originalMsg);
-                    SynchronizedMessages.TryUpdate(msg.SyncId, msg, originalMsg);
-                    return;
-                }
-
                 // Process this set of messages only if the machine is authenticated
                 if (Authenticated)
                 {
@@ -264,8 +246,7 @@ namespace Systek.Server
                         // Elegantly close the connection
                         case MessageType.CLOSE:
                             NetConnection.Send(reply);
-                            NetConnection.Dispose();
-                            Dispose();
+                            NetConnection.Close();
                             return;
 
                         // TODO:  Handle each FAIL case
@@ -301,8 +282,7 @@ namespace Systek.Server
             catch (Exception e)
             {
                 _Log.TblSystemLog(Type.ERROR, AreaType.SERVER_MACHINE, MachineID, "Error while processing a message from the agent.\n\n" + e.Message);
-                NetConnection.Dispose();
-                Dispose();
+                NetConnection.Close();
             }
         }
     }

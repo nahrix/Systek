@@ -18,6 +18,9 @@ namespace Systek.Agent
         /// </summary>
         private Logger Log { get; set; }
 
+        /// <summary>
+        /// The ID of the localhost, as defined in tblServer
+        /// </summary>
         private const int LOCALHOST = 1;
 
         /// <summary>

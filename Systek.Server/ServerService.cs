@@ -16,8 +16,11 @@ namespace Systek.Server
         /// </summary>
         private Logger Log { get; set; }
 
-        // Used to describe the server ID for logging
+        /// <summary>
+        /// Used to describe the server ID for logging, as defined in tblServer
+        /// </summary>
         private const int SYSTEK_SERVER = 2;
+
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ServerService"/> class.

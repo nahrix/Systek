@@ -14,11 +14,6 @@ namespace Systek.Net
     public class Command : ICommand
     {
         /// <summary>
-        /// The ID of the CommandSet that this command is a member of.
-        /// </summary>
-        public int CommandSetId { get; private set; }
-
-        /// <summary>
         /// The position in the queue of commands to be run within the CommandSet.
         /// </summary>
         public int Sequence { get; private set; }
@@ -33,16 +28,15 @@ namespace Systek.Net
         /// </summary>
         public List<string> Parameters { get; private set; }
 
+
         /// <summary>
         /// Initializes a new instance of the <see cref="Command" /> class.
         /// </summary>
-        /// <param name="cmdSetId">The command set identifier.</param>
         /// <param name="seq">The sequence number of this command.</param>
         /// <param name="cmd">The command to be executed.</param>
         /// <param name="param">The parameters for the command, if any.</param>
-        public Command(int cmdSetId, int seq, string cmd, List<string> param = null)
+        public Command(int seq, string cmd, List<string> param = null)
         {
-            CommandSetId = cmdSetId;
             Sequence = seq;
             Cmd = cmd;
             Parameters = new List<string>();
@@ -74,8 +68,7 @@ namespace Systek.Net
             Command test = (Command)other;
 
             // Comparison of primitives
-            if ((CommandSetId != test.CommandSetId) || (Sequence != test.Sequence) || (Cmd != test.Cmd)
-                || !Parameters.SequenceEqual(test.Parameters))
+            if ((Sequence != test.Sequence) || (Cmd != test.Cmd) || !Parameters.SequenceEqual(test.Parameters))
             {
                 return false;
             }

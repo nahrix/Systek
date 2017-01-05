@@ -12,11 +12,6 @@ namespace Systek.Net
     public interface ICommand
     {
         /// <summary>
-        /// The ID of the CommandSet that this command is a member of.
-        /// </summary>
-        int CommandSetId { get; }
-
-        /// <summary>
         /// The position in the queue of commands to be run within the CommandSet.
         /// </summary>
         int Sequence { get; }

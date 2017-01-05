@@ -39,6 +39,7 @@ namespace Systek.Agent
         /// </summary>
         public string LogPath { get; private set; }
 
+
         /// <summary>
         /// Gets the period of time between reconnect checks.
         /// </summary>
@@ -59,10 +60,12 @@ namespace Systek.Agent
         /// </summary>
         private static Core _Instance;
 
+
         /// <summary>
         /// Describes the localhost ID when logging, as defined in tblServer
         /// </summary>
         private const int LOCALHOST = 1;
+
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Core"/> class.  Privatized because this class is a singleton.
@@ -137,6 +140,7 @@ namespace Systek.Agent
             Running = false;
             _Log.TblSystemLog(Type.INFO, AreaType.AGENT_INITIALIZATION, LOCALHOST, "Agent shutdown requested.");
             NetConnection?.Close();
+            NetConnection = null;
         }
 
         /// <summary>
@@ -147,6 +151,8 @@ namespace Systek.Agent
             // This thread should run until the class' Shutdown function is called.
             do
             {
+                DateTime reconnectLogTimer = DateTime.Now;
+
                 try
                 {
                     // Rebuild the connection if it's down
@@ -156,7 +162,7 @@ namespace Systek.Agent
                             " to server, at: IP " + remoteEndPoint.Address.ToString() + ", Port " + remoteEndPoint.Port.ToString());
                         Server = new TcpClient();
                         Server.Connect(remoteEndPoint);
-                        NetConnection = new Connection(Server, _LogHandler, _MessageHandler);
+                        NetConnection = new Connection(Server, _LogHandler, _MessageHandler, "Agent");
                         NetConnection.VerboseLogging = _VerboseLogging;
                         NetConnection.Initialize();
                         Running = true;
@@ -168,12 +174,17 @@ namespace Systek.Agent
                 }
                 catch (Exception e)
                 {
-                    string message = "There was an exception thrown when trying to connect the Agent to the Server:\n" + e.Message
-                        + "\n\n" + e.StackTrace;
-                    _Log.TblSystemLog(Type.ERROR, AreaType.AGENT_INITIALIZATION, LOCALHOST, message);
+                    if (DateTime.Now > reconnectLogTimer)
+                    {
+                        string message = "There was an exception thrown when trying to connect the Agent to the Server:\n" + e.Message
+                            + "\n\n" + e.StackTrace;
+                        _Log.TblSystemLog(Type.ERROR, AreaType.AGENT_INITIALIZATION, LOCALHOST, message);
+
+                        reconnectLogTimer = DateTime.Now.AddMilliseconds(_ReconnectWait * 100);
+                    }
 
                     // Longer timeout to retry if the server appears to be down, to avoid log spam
-                    Thread.Sleep(_ReconnectWait * 100);
+                    Thread.Sleep(_ReconnectWait);
                 }
             } while (Running);
         }

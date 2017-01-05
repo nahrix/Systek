@@ -48,6 +48,7 @@ namespace Systek.Net
             return true;
         }
 
+
         /// <summary>
         /// Returns a hash code for this instance.
         /// </summary>

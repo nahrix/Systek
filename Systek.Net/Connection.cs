@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.IO;
 using System.Net.Sockets;
 using System.Runtime.Serialization.Formatters.Binary;
@@ -30,17 +31,76 @@ namespace Systek.Net
         /// </value>
         public bool VerboseLogging { get; set; }
 
-        private bool Disposed;                          // Keeps track of whether this object has already been disposed
-        private event LogEventHandler LogEvent;         // Occurs when logging is required.
-        private event MessageEventHandler MessageEvent; // Occurs when a Message needs processing.
-        private LogEventHandler LogHandler;             // Keep track of the delegate, for later removal
-        private MessageEventHandler MessageHandler;     // Keep track of the delegate, for later removal
-        private TcpClient Peer { get; set; }            // The socket that this machine will be connected to
-        private NetworkStream NetStream { get; set; }   // The stream that will read/write data between agent and server
-        private const short HEADER_SIZE = sizeof(int);  // The size of the message header
-        private const int MESSAGE_MAX = 65535;          // The maximum possible size of a Message
-        private const int DEFAULT_TIMEOUT = 5000;       // The default value used for the Timeout property above
-        private static int ObjectCount = 0;             // Used for diagnostics.  Keeps track of the number of active class instantiations.
+
+        /// <summary>
+        /// Keeps track of whether this object has already been disposed.
+        /// </summary>
+        private bool _Disposed;
+
+        /// <summary>
+        /// Occurs when logging is required.
+        /// </summary>
+        private event LogEventHandler _LogEvent;
+
+        /// <summary>
+        /// Occurs when a Message needs processing.
+        /// </summary>
+        private event MessageEventHandler _MessageEvent;
+
+        /// <summary>
+        /// Keep track of the delegate, for later removal
+        /// </summary>
+        private LogEventHandler _LogHandler;
+
+        /// <summary>
+        /// Keep track of the delegate, for later removal
+        /// </summary>
+        private MessageEventHandler _MessageHandler;
+
+        /// <summary>
+        /// The socket that this machine will be connected to
+        /// </summary>
+        private TcpClient _Peer { get; set; }
+
+        /// <summary>
+        /// The stream that will read/write data between agent and server
+        /// </summary>
+        private NetworkStream _NetStream { get; set; }
+
+        /// <summary>
+        /// Used for diagnostics.  Keeps track of the number of active class instantiations.
+        /// </summary>
+        private static int _ObjectCount = 0;
+        
+        /// <summary>
+        /// Keeps the status of synchronous communications.  If the value (Message) is null,
+        /// then this 
+        /// </summary>
+        private ConcurrentDictionary<int, Message> _SynchronizedMessages;
+
+        /// <summary>
+        /// The thread for receiving messages from the connected peer.
+        /// </summary>
+        private Thread _ReceiveThread;
+
+        private string location;
+
+
+        /// <summary>
+        /// The size of the message header
+        /// </summary>
+        private const short HEADER_SIZE = sizeof(int);
+
+        /// <summary>
+        /// The maximum possible size of a Message
+        /// </summary>
+        private const int MESSAGE_MAX = 65535;
+
+        /// <summary>
+        /// The default value used for the Timeout property above
+        /// </summary>
+        private const int DEFAULT_TIMEOUT = 5000;
+
 
         /// <summary>
         /// Constructor
@@ -48,16 +108,18 @@ namespace Systek.Net
         /// <param name="peer">Remote machine that this is connecting to.</param>
         /// <param name="logHandler">The function for handling log events.</param>
         /// <param name="messageHandler">The message handler.</param>
-        public Connection(TcpClient peer, LogEventHandler logHandler, MessageEventHandler messageHandler)
+        public Connection(TcpClient peer, LogEventHandler logHandler, MessageEventHandler messageHandler, string loc)
         {
-            ++ObjectCount;
+            location = loc;
+
+            ++_ObjectCount;
             Connected = false;
             VerboseLogging = false;
-            Peer = peer;
-            LogHandler = logHandler;
-            MessageHandler = messageHandler;
-            LogEvent += logHandler;
-            MessageEvent += messageHandler;
+            _Peer = peer;
+            _LogHandler = logHandler;
+            _MessageHandler = messageHandler;
+            _LogEvent += logHandler;
+            _MessageEvent += messageHandler;
             Timeout = DEFAULT_TIMEOUT;
         }
 
@@ -84,34 +146,43 @@ namespace Systek.Net
         /// <param name="disposeManaged"><c>true</c> to release both managed and unmanaged resources; <c>false</c> to release only unmanaged resources.</param>
         protected virtual void Dispose(bool disposeManaged)
         {
-            if (Disposed)
+            if (_Disposed)
             {
                 return;
             }
 
-            Close();
-
             if (disposeManaged)
             {
-                Peer = null;
-                NetStream = null;
+                _Peer?.Dispose();
+                _Peer = null;
+
+                _NetStream?.Dispose();
+                _NetStream = null;
             }
 
-            --ObjectCount;
+            Connected = false;
+
+            if (_SynchronizedMessages != null)
+            {
+                _SynchronizedMessages.Clear();
+            }
+            _SynchronizedMessages = null;
+
+            --_ObjectCount;
             if (VerboseLogging)
             {
-                LogEvent?.Invoke(new LogEventArgs(Type.INFO, AreaType.NET_LIB, "Connection disposed.  ObjectCount: " + ObjectCount.ToString()));
+                _LogEvent?.Invoke(new LogEventArgs(Type.INFO, AreaType.NET_LIB, "Connection disposed.  ObjectCount: " + _ObjectCount.ToString()));
             }
 
-            MessageEvent -= MessageHandler;
-            MessageEvent = null;
-            MessageHandler = null;
+            _MessageEvent -= _MessageHandler;
+            _MessageEvent = null;
+            _MessageHandler = null;
 
-            LogEvent -= LogHandler;
-            LogEvent = null;
-            LogHandler = null;
+            _LogEvent -= _LogHandler;
+            _LogEvent = null;
+            _LogHandler = null;
 
-            Disposed = true;
+            _Disposed = true;
         }
 
         /// <summary>
@@ -119,14 +190,25 @@ namespace Systek.Net
         /// </summary>
         public void Initialize()
         {
-            NetStream = Peer.GetStream();
-            NetStream.ReadTimeout = Timeout;
-            new Thread(new ThreadStart(_Receive)).Start();
-            Connected = Peer.Connected;
+            // Terminate the receive thread if it's already running, so a new thread can be created.
+            if (_ReceiveThread != null)
+            {
+                Close();
+            }
+
+            _SynchronizedMessages = new ConcurrentDictionary<int, Message>();
+            _NetStream = _Peer.GetStream();
+            _NetStream.ReadTimeout = Timeout;
+
+            Connected = true;
+            _ReceiveThread = new Thread(new ThreadStart(_Receive));
+            _ReceiveThread.Start();
+
+            Connected = _Peer.Connected;
 
             if (VerboseLogging)
             {
-                LogEvent?.Invoke(new LogEventArgs(Type.INFO, AreaType.NET_LIB, "New connection created.  ObjectCount: " + ObjectCount.ToString()));
+                _LogEvent?.Invoke(new LogEventArgs(Type.INFO, AreaType.NET_LIB, "New connection created.  ObjectCount: " + _ObjectCount.ToString()));
             }
         }
 
@@ -142,13 +224,13 @@ namespace Systek.Net
 
             if (VerboseLogging)
             {
-                LogEvent?.Invoke(new LogEventArgs(Type.INFO, AreaType.NET_LIB, "Connection is closing down."));
+                _LogEvent?.Invoke(new LogEventArgs(Type.INFO, AreaType.NET_LIB, "Connection is closing down."));
             }
 
             Connected = false;
-            NetStream?.Flush();
-            NetStream?.Dispose();
-            Peer?.Close();
+            _NetStream?.Flush();
+            _NetStream?.Dispose();
+            _Peer?.Close();
         }
 
         /// <summary>
@@ -168,13 +250,13 @@ namespace Systek.Net
                 // Validate message size
                 if (messageData.Length > MESSAGE_MAX)
                 {
-                    LogEvent?.Invoke(new LogEventArgs(Type.ERROR, AreaType.NET_LIB, "Message to send is too large. Message size: "
+                    _LogEvent?.Invoke(new LogEventArgs(Type.ERROR, AreaType.NET_LIB, "Message to send is too large. Message size: "
                         + messageData.Length.ToString() + ".  Max message size: " + MESSAGE_MAX.ToString()));
                 }
 
                 // Send the header and the message
-                NetStream.Write(headerData, 0, headerData.Length);
-                NetStream.Write(messageData, 0, messageData.Length);
+                _NetStream.Write(headerData, 0, headerData.Length);
+                _NetStream.Write(messageData, 0, messageData.Length);
             }
         }
 
@@ -184,8 +266,8 @@ namespace Systek.Net
         /// </summary>
         private void _Receive()
         {
-            // Listen forever.  Loop exits if an exception is caught
-            while (true)
+            // Listen while the connection is up.
+            while (Connected)
             {
                 try
                 {
@@ -194,15 +276,15 @@ namespace Systek.Net
 
                     // Read the header, which currently is just a short declaring the size of the upcoming message, in bytes.
                     // This first read operation does not time out before the first byte, because messages may occur between large intervals.
-                    NetStream.ReadTimeout = System.Threading.Timeout.Infinite;
+                    _NetStream.ReadTimeout = System.Threading.Timeout.Infinite;
                     if (!_ReadStream(HEADER_SIZE, out inputBuffer))
                     {
                         // If the read failed while we expected to be connected, then log the failure, and handle our side of the closure
                         // gracefully.
                         if (Connected)
                         {
-                            LogEvent?.Invoke(new LogEventArgs(Type.ERROR, AreaType.NET_LIB, "The connection was closed unexpectedly."));
-                            MessageEvent?.Invoke(new Message { Type = MessageType.CLOSE });
+                            _LogEvent?.Invoke(new LogEventArgs(Type.ERROR, AreaType.NET_LIB, "The connection was closed unexpectedly."));
+                            _MessageEvent?.Invoke(new Message { Type = MessageType.CLOSE });
                         }
 
                         Close();
@@ -214,7 +296,7 @@ namespace Systek.Net
                     int bytesToRead = BitConverter.ToInt32(inputBuffer, 0);
                     if (bytesToRead > MESSAGE_MAX)
                     {
-                        LogEvent?.Invoke(new LogEventArgs(Type.ERROR, AreaType.NET_LIB, "Message is too large to receive.  Size requested: "
+                        _LogEvent?.Invoke(new LogEventArgs(Type.ERROR, AreaType.NET_LIB, "Message is too large to receive.  Size requested: "
                             + bytesToRead + " bytes."));
                         Close();
                         break;
@@ -227,8 +309,8 @@ namespace Systek.Net
                         // gracefully.
                         if (Connected)
                         {
-                            LogEvent?.Invoke(new LogEventArgs(Type.ERROR, AreaType.NET_LIB, "The connection was closed unexpectedly."));
-                            MessageEvent?.Invoke(new Message { Type = MessageType.CLOSE });
+                            _LogEvent?.Invoke(new LogEventArgs(Type.ERROR, AreaType.NET_LIB, "The connection was closed unexpectedly."));
+                            _MessageEvent?.Invoke(new Message { Type = MessageType.CLOSE });
                         }
 
                         Close();
@@ -238,18 +320,29 @@ namespace Systek.Net
                     // Convert the byte array into a Message object
                     Message msg = (Message)_Deserialize(inputBuffer);
 
-                    // Pass the message to the message processor
-                    MessageEvent?.Invoke(msg);
+                    // Check for replies to a synchronous message.
+                    if (msg.Synchronized && _SynchronizedMessages.ContainsKey(msg.SyncId))
+                    {
+                        Message originalMsg;
+                        _SynchronizedMessages.TryGetValue(msg.SyncId, out originalMsg);
+                        _SynchronizedMessages.TryUpdate(msg.SyncId, msg, originalMsg);
+                        return;
+                    }
+                    else
+                    {
+                        // Pass the message to the message processor
+                        _MessageEvent?.Invoke(msg);
+                    }
                 }
                 catch (Exception e)
                 {
                     // If we expected to be connected, log the failure, and close our side of the connection gracefully
                     if (Connected)
                     {
-                        LogEvent?.Invoke(new LogEventArgs(Type.ERROR, AreaType.NET_LIB, "Exception caught while receiving data from peer.", e));
-                        MessageEvent?.Invoke(new Message { Type = MessageType.CLOSE });
+                        Connected = false;
+                        _LogEvent?.Invoke(new LogEventArgs(Type.ERROR, AreaType.NET_LIB, "Exception caught while receiving data from peer.", e));
+                        _MessageEvent?.Invoke(new Message { Type = MessageType.CLOSE });
                     }
-                    Close();
                     break;
                 }
             }
@@ -272,20 +365,20 @@ namespace Systek.Net
             // Loop read operation until the specified number of bytes have been read from the network stream
             while (totalBytesRead < bytesToRead)
             {
-                int bytesRead = NetStream.Read(inputBuffer, totalBytesRead, bytesToRead - totalBytesRead);
+                int bytesRead = _NetStream.Read(inputBuffer, totalBytesRead, bytesToRead - totalBytesRead);
 
                 // This will occur if the socket has been closed
                 if (bytesRead == 0)
                 {
                     if (VerboseLogging)
                     {
-                        LogEvent?.Invoke(new LogEventArgs(Type.INFO, AreaType.NET_LIB, "Connection to peer has been closed."));
+                        _LogEvent?.Invoke(new LogEventArgs(Type.INFO, AreaType.NET_LIB, "Connection to peer has been closed."));
                     }
                     return false;
                 }
 
                 totalBytesRead += bytesRead;
-                NetStream.ReadTimeout = Timeout;
+                _NetStream.ReadTimeout = Timeout;
             }
 
             return true;

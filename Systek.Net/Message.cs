@@ -44,6 +44,7 @@ namespace Systek.Net
         ACK = 7
     };
 
+
     /// <summary>
     /// A Message contains either a low-level control code, or a high-level CommandSet.
     /// The Systek.Net library will attempt to handle any control code, while the

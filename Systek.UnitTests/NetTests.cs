@@ -17,7 +17,11 @@ namespace Systek.UnitTests
         private static Message TestMsg;
         private static bool Finished;
 
-        // Initialize the variables for testing
+
+        /// <summary>
+        /// Initializes the specified context.
+        /// </summary>
+        /// <param name="context">The context containing test-specific data.</param>
         [ClassInitialize]
         public static void Initialize(TestContext context)
         {
@@ -32,11 +36,11 @@ namespace Systek.UnitTests
             Finished = false;
 
             // Mock Message to be passed from agent to server
-            ICommand command1 = new Command(1, 1, "test command");
-            ICommand command2 = new Command(1, 2, "test command 2");
-            ICommand command3 = new Command(1, 3, "1234");
+            ICommand command1 = new Command(1, "test command");
+            ICommand command2 = new Command(2, "test command 2");
+            ICommand command3 = new Command(3, "1234");
 
-            ICommandSet set = new CommandSet(1);
+            ICommandSet set = new CommandSet(1, 3);
             set.AddCommand(command1);
             set.AddCommand(command2);
             set.AddCommand(command3);
@@ -70,8 +74,8 @@ namespace Systek.UnitTests
             TcpClient server = serverListener.EndAcceptTcpClient(ar);
 
             // Build the IConnections representing agent/server
-            IConnection agentConnection = new Connection(agent, _LogHandler, _AgentMessageHandler);
-            IConnection serverConnection = new Connection(server, _LogHandler, _ServerMessageHandler);
+            IConnection agentConnection = new Connection(agent, _LogHandler, _AgentMessageHandler, "Agent");
+            IConnection serverConnection = new Connection(server, _LogHandler, _ServerMessageHandler, "Server");
 
             agentConnection.Initialize();
             serverConnection.Initialize();
@@ -138,7 +142,7 @@ namespace Systek.UnitTests
             agent.Stop();
             server.Stop();
 
-            Thread.Sleep(1000);
+            Thread.Sleep(5000);
 
             Assert.IsFalse(Server.Connector.Instance.Running);
             Assert.IsFalse(Agent.Core.Instance.Running);

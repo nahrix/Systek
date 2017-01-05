@@ -18,7 +18,12 @@ namespace Systek.Server
         string MachineName { get; }
 
         /// <summary>
-        /// Gets the Connection used to communicate with the 
+        /// Gets the machine identifier.
+        /// </summary>
+        int MachineID { get; }
+
+        /// <summary>
+        /// Gets the Connection used to communicate with the agent
         /// </summary>
         IConnection NetConnection { get; }
 
