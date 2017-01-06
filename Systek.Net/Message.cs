@@ -41,7 +41,12 @@ namespace Systek.Net
         /// <summary>
         /// Acknowledges replies, indicating that no further reply is necessary.
         /// </summary>
-        ACK = 7
+        ACK = 7,
+
+        /// <summary>
+        /// Indicates the message has timed out.
+        /// </summary>
+        TIMEOUT = 8
     };
 
 

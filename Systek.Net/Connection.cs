@@ -79,6 +79,11 @@ namespace Systek.Net
         private ConcurrentDictionary<int, Message> _SynchronizedMessages;
 
         /// <summary>
+        /// A counter for synchronized message IDs, to ensure they're all unique
+        /// </summary>
+        private int _CurrentSyncID;
+
+        /// <summary>
         /// The thread for receiving messages from the connected peer.
         /// </summary>
         private Thread _ReceiveThread;
@@ -253,6 +258,46 @@ namespace Systek.Net
                 // Send the header and the message
                 _NetStream.Write(headerData, 0, headerData.Length);
                 _NetStream.Write(messageData, 0, messageData.Length);
+            }
+        }
+
+        public Message SendSync(Message msg)
+        {
+            Message reply = new Message();
+
+            try
+            {
+                // Used for message timeout logic
+                DateTime endTime = DateTime.Now.AddMilliseconds(Timeout);
+
+                // Set up the synchronized send
+                msg.SyncId = _CurrentSyncID++;
+                Send(msg);
+                msg.Synchronized = false;
+                _SynchronizedMessages.TryAdd(msg.SyncId, msg);
+
+                // Spin loop until reply is received, or a timeout
+                while (!reply.Synchronized && (DateTime.Now < endTime))
+                {
+                    _SynchronizedMessages.TryGetValue(msg.SyncId, out reply);
+                    Thread.Sleep(Timeout / 10);
+                }
+
+                // Handle timeout case
+                if (!reply.Synchronized)
+                {
+                    reply.Type = MessageType.TIMEOUT;
+                    reply.Msg = "Reply timed out.";
+                }
+
+                return reply;
+            }
+            catch (Exception e)
+            {
+                reply.Type = MessageType.FAIL;
+                reply.Msg = "Exception caught while handling a synchronized message.";
+                _LogEvent?.Invoke(new LogEventArgs(Type.ERROR, AreaType.NET_LIB, reply.Msg, e));
+                return reply;
             }
         }
 
