@@ -14,7 +14,7 @@ namespace Systek.Server
         /// <summary>
         /// Used for writing logs in this class.
         /// </summary>
-        private Logger Log { get; set; }
+        private Logger _Log { get; set; }
 
         /// <summary>
         /// Used to describe the server ID for logging, as defined in tblServer
@@ -27,7 +27,7 @@ namespace Systek.Server
         /// </summary>
         public ServerService()
         {
-            Log = new Logger("ServerLogContext", ConfigurationManager.AppSettings["LocalLogPath"], "ServerService");
+            _Log = new Logger("ServerLogContext", ConfigurationManager.AppSettings["LocalLogPath"], "ServerService");
             InitializeComponent();
         }
 
@@ -48,7 +48,7 @@ namespace Systek.Server
         protected override void OnStop()
         {
             Connector.Instance?.Stop();
-            Log.TblSystemLog(Type.INFO, AreaType.SERVER_INITIALIZATION, SYSTEK_SERVER, "Systek server shutdown successfully.");
+            _Log?.TblSystemLog(Type.INFO, AreaType.SERVER_INITIALIZATION, SYSTEK_SERVER, "Systek server shutdown successfully.");
         }
 
         /// <summary>
@@ -62,12 +62,12 @@ namespace Systek.Server
 
                 Connector.Port = port;
                 Connector.Instance.Initialize();
-                Log.TblSystemLog(Type.INFO, AreaType.SERVER_INITIALIZATION, SYSTEK_SERVER, "Systek server started successfully.");
+                _Log?.TblSystemLog(Type.INFO, AreaType.SERVER_INITIALIZATION, SYSTEK_SERVER, "Systek server started successfully.");
             }
             catch (Exception e)
             {
                 string message = "Exception thrown while trying to initialize server:\n" + e.Message + "\n\n" + e.StackTrace;
-                Log.TblSystemLog(Type.ERROR, AreaType.SERVER_INITIALIZATION, SYSTEK_SERVER, message);
+                _Log?.TblSystemLog(Type.ERROR, AreaType.SERVER_INITIALIZATION, SYSTEK_SERVER, message);
                 Stop();
             }
         }

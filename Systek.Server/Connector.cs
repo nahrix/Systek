@@ -89,7 +89,7 @@ namespace Systek.Server
             catch (Exception e)
             {
                 string message = "Systek server threw exception while trying to start the TcpListener.\n" + e.Message + "\n\n" + e.StackTrace;
-                _Log.TblSystemLog(Type.ERROR, AreaType.SERVER_TCP_LISTENER, SYSTEK_SERVER, message);
+                _Log?.TblSystemLog(Type.ERROR, AreaType.SERVER_TCP_LISTENER, SYSTEK_SERVER, message);
                 Running = false;
                 return;
             }
@@ -122,7 +122,7 @@ namespace Systek.Server
 
                     if (!agentMachine.NetConnection.Connected)
                     {
-                        _Log.TblSystemLog(Type.ERROR, AreaType.AGENT_INITIALIZATION, SYSTEK_SERVER, "New agent connection failed to initialize.");
+                        _Log?.TblSystemLog(Type.ERROR, AreaType.AGENT_INITIALIZATION, SYSTEK_SERVER, "New agent connection failed to initialize.");
                     }
 
                     agentMachine = null;
@@ -133,7 +133,7 @@ namespace Systek.Server
                     if (Running)
                     {
                         string message = "Systek server threw exception while creating new agent connection.\n" + e.Message + "\n\n" + e.StackTrace;
-                        _Log.TblSystemLog(Type.ERROR, AreaType.SERVER_TCP_LISTENER, SYSTEK_SERVER, message);
+                        _Log?.TblSystemLog(Type.ERROR, AreaType.SERVER_TCP_LISTENER, SYSTEK_SERVER, message);
                     }
                 }
             }

@@ -16,7 +16,7 @@ namespace Systek.Agent
         /// <summary>
         /// Used for writing logs in this class.
         /// </summary>
-        private Logger Log { get; set; }
+        private Logger _Log { get; set; }
 
         /// <summary>
         /// The ID of the localhost, as defined in tblServer
@@ -28,7 +28,7 @@ namespace Systek.Agent
         /// </summary>
         public AgentService()
         {
-            Log = new Logger("AgentLogContext", ConfigurationManager.AppSettings["LocalLogPath"], "AgentService");
+            _Log = new Logger("AgentLogContext", ConfigurationManager.AppSettings["LocalLogPath"], "AgentService");
             InitializeComponent();
         }
 
@@ -50,7 +50,7 @@ namespace Systek.Agent
         protected override void OnStop()
         {
             Core.Instance?.Shutdown();
-            Log.TblSystemLog(Type.INFO, AreaType.AGENT_INITIALIZATION, LOCALHOST, "Agent service stopped successfully.");
+            _Log?.TblSystemLog(Type.INFO, AreaType.AGENT_INITIALIZATION, LOCALHOST, "Agent service stopped successfully.");
         }
 
         /// <summary>
@@ -69,16 +69,16 @@ namespace Systek.Agent
                 // Initialize the Agent Core, and shutdown the service if the initialization fails
                 if (!Core.Instance.Initialize(remoteEndPoint))
                 {
-                    Log.TblSystemLog(Type.ERROR, AreaType.AGENT_INITIALIZATION, LOCALHOST, "Unable to initialize agent");
+                    _Log?.TblSystemLog(Type.ERROR, AreaType.AGENT_INITIALIZATION, LOCALHOST, "Unable to initialize agent");
                     Stop();
                     return;
                 }
 
-                Log.TblSystemLog(Type.INFO, AreaType.AGENT_INITIALIZATION, LOCALHOST, "Agent service started successfully.");
+                _Log?.TblSystemLog(Type.INFO, AreaType.AGENT_INITIALIZATION, LOCALHOST, "Agent service started successfully.");
             }
             catch (Exception e)
             {
-                Log.TblSystemLog(Type.ERROR, AreaType.AGENT_INITIALIZATION, LOCALHOST, "Exception thrown while trying to initialize:\n" + e.Message + "\n\n" + e.StackTrace);
+                _Log?.TblSystemLog(Type.ERROR, AreaType.AGENT_INITIALIZATION, LOCALHOST, "Exception thrown while trying to initialize:\n" + e.Message + "\n\n" + e.StackTrace);
                 Stop();
                 return;
             }

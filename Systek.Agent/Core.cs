@@ -126,7 +126,7 @@ namespace Systek.Agent
 
                 string message = "There was an exception thrown when trying to initialize the Agent:\n"
                     + e.Message + "\n\n" + e.StackTrace;
-                _Log.TblSystemLog(Type.ERROR, AreaType.AGENT_INITIALIZATION, LOCALHOST, message);
+                _Log?.TblSystemLog(Type.ERROR, AreaType.AGENT_INITIALIZATION, LOCALHOST, message);
 
                 return false;
             }
@@ -138,7 +138,7 @@ namespace Systek.Agent
         public void Shutdown()
         {
             Running = false;
-            _Log.TblSystemLog(Type.INFO, AreaType.AGENT_INITIALIZATION, LOCALHOST, "Agent shutdown requested.");
+            _Log?.TblSystemLog(Type.INFO, AreaType.AGENT_INITIALIZATION, LOCALHOST, "Agent shutdown requested.");
             NetConnection?.Close();
             NetConnection = null;
         }
@@ -158,7 +158,7 @@ namespace Systek.Agent
                     // Rebuild the connection if it's down
                     if (!NetConnection?.Connected ?? true)
                     {
-                        _Log.TblSystemLog(Type.INFO, AreaType.AGENT_INITIALIZATION, LOCALHOST, "Agent service is attempting to connect " +
+                        _Log?.TblSystemLog(Type.INFO, AreaType.AGENT_INITIALIZATION, LOCALHOST, "Agent service is attempting to connect " +
                             " to server, at: IP " + remoteEndPoint.Address.ToString() + ", Port " + remoteEndPoint.Port.ToString());
                         Server = new TcpClient();
                         Server.Connect(remoteEndPoint);
@@ -166,7 +166,7 @@ namespace Systek.Agent
                         NetConnection.VerboseLogging = _VerboseLogging;
                         NetConnection.Initialize();
                         Running = true;
-                        _Log.TblSystemLog(Type.INFO, AreaType.AGENT_INITIALIZATION, LOCALHOST, "Agent service connected to server successfully.");
+                        _Log?.TblSystemLog(Type.INFO, AreaType.AGENT_INITIALIZATION, LOCALHOST, "Agent service connected to server successfully.");
                     }
 
                     // Wait before the next check, to minimize CPU usage
@@ -178,7 +178,7 @@ namespace Systek.Agent
                     {
                         string message = "There was an exception thrown when trying to connect the Agent to the Server:\n" + e.Message
                             + "\n\n" + e.StackTrace;
-                        _Log.TblSystemLog(Type.ERROR, AreaType.AGENT_INITIALIZATION, LOCALHOST, message);
+                        _Log?.TblSystemLog(Type.ERROR, AreaType.AGENT_INITIALIZATION, LOCALHOST, message);
 
                         reconnectLogTimer = DateTime.Now.AddMilliseconds(_ReconnectWait * 100);
                     }
@@ -201,7 +201,7 @@ namespace Systek.Agent
             {
                 message += "\n" + e.ExceptionDetail.Message + "\n\n" + e.ExceptionDetail.StackTrace;
             }
-            _Log.TblSystemLog(e.Type, e.AreaType, LOCALHOST, message);
+            _Log?.TblSystemLog(e.Type, e.AreaType, LOCALHOST, message);
         }
 
         /// <summary>
@@ -220,7 +220,7 @@ namespace Systek.Agent
 
                 if (_VerboseLogging)
                 {
-                    _Log.TblSystemLog(Type.INFO, AreaType.SERVER_MACHINE, LOCALHOST, "Agent is handling a message from server, " +
+                    _Log?.TblSystemLog(Type.INFO, AreaType.SERVER_MACHINE, LOCALHOST, "Agent is handling a message from server, " +
                         "of type: " + msg.Type.ToString());
 
                     Console.WriteLine("Message from server of type: " + Enum.GetName(msg.Type.GetType(), msg.Type));
@@ -265,7 +265,7 @@ namespace Systek.Agent
             }
             catch (Exception e)
             {
-                _Log.TblSystemLog(Type.ERROR, AreaType.AGENT_MESSAGE_HANDLER, LOCALHOST, "Error while processing a message from the server.\n\n" + e.Message);
+                _Log?.TblSystemLog(Type.ERROR, AreaType.AGENT_MESSAGE_HANDLER, LOCALHOST, "Error while processing a message from the server.\n\n" + e.Message);
             }
         }
     }
