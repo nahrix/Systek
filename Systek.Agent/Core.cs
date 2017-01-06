@@ -195,6 +195,11 @@ namespace Systek.Agent
         /// <param name="e">The <see cref="LogEventArgs"/> instance containing the event data.</param>
         private void _LogHandler(LogEventArgs e)
         {
+            if (!Running)
+            {
+                return;
+            }
+
             string message = "Agent log handler: " + e.Message;
 
             if (e.ExceptionDetail != null)
