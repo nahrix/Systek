@@ -145,14 +145,21 @@ namespace Systek.Server
         /// <returns></returns>
         public bool Authenticate()
         {
-            if (_VerboseLogging)
+            try
             {
-                _Log?.TblSystemLog(Type.INFO, AreaType.SERVER_MACHINE, MachineID, "Machine is authenticating.");
+                if (_VerboseLogging)
+                {
+                    _Log?.TblSystemLog(Type.INFO, AreaType.SERVER_MACHINE, MachineID, "Machine is authenticating.");
+                }
+
+                Authenticated = (ConfigurationManager.AppSettings["authKey"].Equals(_AuthKey));
+            }
+            catch (Exception)
+            {
+                return false;
             }
 
-            Update();
-
-            return true;
+            return Authenticated;
         }
 
         /// <summary>
@@ -173,6 +180,7 @@ namespace Systek.Server
             }
 
             Update();
+            Authenticate();
         }
 
         /// <summary>
@@ -180,17 +188,30 @@ namespace Systek.Server
         /// </summary>
         public void Update()
         {
-            if (_VerboseLogging)
+            try
             {
-                _Log?.TblSystemLog(Type.INFO, AreaType.SERVER_MACHINE, MachineID, "Machine is updating.");
-            }
+                if (_VerboseLogging)
+                {
+                    _Log?.TblSystemLog(Type.INFO, AreaType.SERVER_MACHINE, MachineID, "Machine is updating.");
+                }
 
-            if (!NetConnection.Connected)
+                if (!NetConnection.Connected)
+                {
+                    return;
+                }
+
+                Message reply = NetConnection.SendSync(new Message() { Type = MessageType.UPDATE_BASIC });
+
+                if (reply.Type == MessageType.UPDATE_BASIC)
+                {
+                    MachineName = reply.Update.HostName;
+                    _AuthKey = reply.Update.AuthKey;
+                }
+            }
+            catch (Exception e)
             {
-                return;
+                _Log?.TblSystemLog(Type.INFO, AreaType.SERVER_MACHINE, MachineID, "Exception caught while updating machine: " + e.Message);
             }
-
-            NetConnection.Send(new Message() { Type = MessageType.UPDATE_BASIC });
         }
 
         /// <summary>

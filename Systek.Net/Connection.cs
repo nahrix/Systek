@@ -281,6 +281,7 @@ namespace Systek.Net
 
                 // Set up the synchronized send
                 msg.SyncId = _CurrentSyncID++;
+                msg.Synchronized = true;
                 Send(msg);
                 msg.Synchronized = false;
                 _SynchronizedMessages.TryAdd(msg.SyncId, msg);
