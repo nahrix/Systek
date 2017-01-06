@@ -162,7 +162,7 @@ namespace Systek.Agent
                             " to server, at: IP " + remoteEndPoint.Address.ToString() + ", Port " + remoteEndPoint.Port.ToString());
                         Server = new TcpClient();
                         Server.Connect(remoteEndPoint);
-                        NetConnection = new Connection(Server, _LogHandler, _MessageHandler, "Agent");
+                        NetConnection = new Connection(Server, _LogHandler, _MessageHandler);
                         NetConnection.VerboseLogging = _VerboseLogging;
                         NetConnection.Initialize();
                         Running = true;
@@ -195,6 +195,8 @@ namespace Systek.Agent
         /// <param name="e">The <see cref="LogEventArgs"/> instance containing the event data.</param>
         private void _LogHandler(LogEventArgs e)
         {
+            // Prevents an attempt at logging while agent is shutting down, and the logging context
+            // has been released from memory
             if (!Running)
             {
                 return;

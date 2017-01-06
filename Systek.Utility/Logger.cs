@@ -49,7 +49,7 @@ namespace Systek.Utility
         /// <param name="area">The ID of the area in code being logged.</param>
         /// <param name="server">The ID of the server generating the log.</param>
         /// <param name="msg">The log's content (error message, stack trace, etc)</param>
-        public void TblSystemLog(int type, int area, int server, string msg)
+        public void TblSystemLog(Type type, AreaType area, int server, string msg)
         {
             try
             {
@@ -58,8 +58,8 @@ namespace Systek.Utility
                     tblSystemLog log = new tblSystemLog
                     {
                         tStamp = DateTime.UtcNow,
-                        typeID = type,
-                        areaID = area,
+                        typeID = (int)type,
+                        areaID = (int)area,
                         serverID = server,
                         message = msg
                     };
@@ -82,7 +82,7 @@ namespace Systek.Utility
         /// <param name="type">The type of log being written.  These types are defined in tblType in the database.</param>
         /// <param name="area">The area being affected, as defined in tblAreaType.</param>
         /// <param name="message">The content of the log to write to the file.</param>
-        public void FileLog(int type, int area, string message)
+        public void FileLog(Type type, AreaType area, string message)
         {
             try
             {
@@ -112,14 +112,14 @@ namespace Systek.Utility
                 // If an invalid log type is specified, log that too
                 if (logType == null)
                 {
-                    file.WriteLine("[" + timeStamp + "] Logger: Type not found.  TypeID specified: " + type);
+                    file.WriteLine("[" + timeStamp + "] Logger: Type not found.  TypeID specified: " + (int)type);
                     logType = "unknown";
                 }
 
                 // If an invalid area type is specified, log that too
                 if (areaType == null)
                 {
-                    file.WriteLine("[" + timeStamp + "] Logger: AreaType not found.  AreaTypeID specified: " + area);
+                    file.WriteLine("[" + timeStamp + "] Logger: AreaType not found.  AreaTypeID specified: " + (int)area);
                     areaType = "unknown";
                 }
 

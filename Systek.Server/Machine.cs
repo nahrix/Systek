@@ -83,7 +83,7 @@ namespace Systek.Server
             MachineID = 3;
             _MachineCount++;
             _Log = new Logger("ServerLogContext", ConfigurationManager.AppSettings["localLogPath"], "AgentMachine");
-            NetConnection = new Connection(agent, LogHandler, MessageHandler, "Server");
+            NetConnection = new Connection(agent, LogHandler, MessageHandler);
             NetConnection.VerboseLogging = _VerboseLogging;
 
             if (_VerboseLogging)

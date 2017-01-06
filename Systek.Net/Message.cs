@@ -88,12 +88,12 @@ namespace Systek.Net
         /// <summary>
         /// The type of log, if there is one, defined in tblType.
         /// </summary>
-        public int LogType;
+        public Type LogType;
 
         /// <summary>
         /// The area type, as defined in tblAreaType, if applicable.
         /// </summary>
-        public int AreaType;
+        public AreaType AreaType;
 
         /// <summary>
         /// The current state of the machine.

@@ -83,8 +83,6 @@ namespace Systek.Net
         /// </summary>
         private Thread _ReceiveThread;
 
-        private string location;
-
 
         /// <summary>
         /// The size of the message header
@@ -108,10 +106,8 @@ namespace Systek.Net
         /// <param name="peer">Remote machine that this is connecting to.</param>
         /// <param name="logHandler">The function for handling log events.</param>
         /// <param name="messageHandler">The message handler.</param>
-        public Connection(TcpClient peer, LogEventHandler logHandler, MessageEventHandler messageHandler, string loc)
+        public Connection(TcpClient peer, LogEventHandler logHandler, MessageEventHandler messageHandler)
         {
-            location = loc;
-
             ++_ObjectCount;
             Connected = false;
             VerboseLogging = false;

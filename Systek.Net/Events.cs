@@ -26,12 +26,12 @@ namespace Systek.Net
         /// <summary>
         /// Gets the type of log to write, as defined in tblType.
         /// </summary>
-        public int Type { get; private set; }
+        public Type Type { get; private set; }
 
         /// <summary>
         /// Gets the area in the code that is being affected, as defined in tblAreaType
         /// </summary>
-        public int AreaType { get; private set; }
+        public AreaType AreaType { get; private set; }
 
         /// <summary>
         /// The exception to be logged, if any.
@@ -45,7 +45,7 @@ namespace Systek.Net
         /// <param name="area">The area.</param>
         /// <param name="msg">The message to be logged.</param>
         /// <param name="e">The exception data related to this log, if any.</param>
-        public LogEventArgs(int type, int area, string msg, Exception e = null)
+        public LogEventArgs(Type type, AreaType area, string msg, Exception e = null)
         {
             Type = type;
             AreaType = area;

@@ -1,15 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Systek
+﻿namespace Systek
 {
-    public class Type
+    /// <summary>
+    /// Code implementation of types defined in tblType
+    /// </summary>
+    public enum Type
     {
-        public const int
             ERROR = 1,
-            INFO = 2;
-    }
+            INFO = 2
+    };
 }
