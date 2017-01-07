@@ -378,7 +378,7 @@ namespace Systek.Net
                         Message originalMsg;
                         _SynchronizedMessages.TryGetValue(msg.SyncId, out originalMsg);
                         _SynchronizedMessages.TryUpdate(msg.SyncId, msg, originalMsg);
-                        return;
+                        continue;
                     }
                     else
                     {
