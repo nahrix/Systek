@@ -1,10 +1,12 @@
 ﻿using Systek.Net;
 using Systek.Utility;
 using System;
+using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using System.ServiceProcess;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -248,6 +250,21 @@ namespace Systek.Agent
                         {
                             HostName = Environment.MachineName,
                             AuthKey = ConfigurationManager.AppSettings["AuthKey"]
+                        };
+                        break;
+
+                    case MessageType.UPDATE_SERVICES:
+                        Dictionary<string, int> services = new Dictionary<string, int>();
+
+                        foreach (ServiceController service in ServiceController.GetServices())
+                        {
+                            services.Add(service.ServiceName, (int)service.Status);
+                        }
+
+                        reply.Type = MessageType.UPDATE_SERVICES;
+                        reply.Update = new UpdateData()
+                        {
+                            Services = services
                         };
                         break;
 

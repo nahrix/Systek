@@ -48,6 +48,11 @@ namespace Systek.Server
         /// </summary>
         public IConnection NetConnection { get; private set; }
 
+        /// <summary>
+        /// Gets the services that are running on this machine.
+        /// </summary>
+        public Dictionary<string, int> Services { get; private set; }
+
 
         /// <summary>
         /// Used for writing logs in this class.
@@ -85,6 +90,7 @@ namespace Systek.Server
             _Log = new Logger("ServerLogContext", ConfigurationManager.AppSettings["localLogPath"], "AgentMachine");
             NetConnection = new Connection(agent, LogHandler, MessageHandler);
             NetConnection.VerboseLogging = _VerboseLogging;
+            Services = new Dictionary<string, int>();
 
             if (_VerboseLogging)
             {
@@ -179,14 +185,15 @@ namespace Systek.Server
                 return;
             }
 
-            Update();
+            BasicUpdate();
             Authenticate();
+            NetConnection.Send(new Message() { Type = MessageType.UPDATE_SERVICES });
         }
 
         /// <summary>
         /// Updates this instance with the latest state.
         /// </summary>
-        public void Update()
+        public void BasicUpdate()
         {
             try
             {
@@ -206,6 +213,10 @@ namespace Systek.Server
                 {
                     MachineName = reply.Update.HostName;
                     _AuthKey = reply.Update.AuthKey;
+                }
+                else if (reply.Type == MessageType.TIMEOUT)
+                {
+                    _Log?.TblSystemLog(Type.INFO, AreaType.SERVER_MACHINE, MachineID, "Reply to UPDATE_BASIC request timed out.");
                 }
             }
             catch (Exception e)
@@ -259,6 +270,18 @@ namespace Systek.Server
                         // NOTE: Maybe handle asynchronous ACKs in some way in the future
                         case MessageType.ACK:
                             return;
+
+                        // Modify 
+                        case MessageType.UPDATE_SERVICES:
+                            Services.Clear();
+                            Services = msg.Update.Services;
+
+                            Console.WriteLine("Updating services list on machine with ID: " + MachineID);
+                            foreach (KeyValuePair<string, int> service in Services)
+                            {
+                                Console.WriteLine(service.Key + " " + service.Value);
+                            }
+                            break;
 
                         // Execute commands passed in by the agent
                         case MessageType.COMMAND:

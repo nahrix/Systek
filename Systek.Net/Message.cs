@@ -34,19 +34,24 @@ namespace Systek.Net
         SUCCESS = 5,
 
         /// <summary>
-        /// Send an update of the current state of the machine
-        /// </summary>
-        UPDATE_BASIC = 6,
-
-        /// <summary>
         /// Acknowledges replies, indicating that no further reply is necessary.
         /// </summary>
-        ACK = 7,
+        ACK = 6,
 
         /// <summary>
         /// Indicates the message has timed out.
         /// </summary>
-        TIMEOUT = 8
+        TIMEOUT = 7,
+
+        /// <summary>
+        /// Send an update of the current state of the machine
+        /// </summary>
+        UPDATE_BASIC = 8,
+
+        /// <summary>
+        /// Sends an update of the state of services on the machine
+        /// </summary>
+        UPDATE_SERVICES = 9
     };
 
 

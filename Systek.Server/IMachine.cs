@@ -23,6 +23,11 @@ namespace Systek.Server
         int MachineID { get; }
 
         /// <summary>
+        /// Gets the services that are running on this machine.
+        /// </summary>
+        Dictionary<string, int> Services { get; }
+
+        /// <summary>
         /// Gets the Connection used to communicate with the agent
         /// </summary>
         IConnection NetConnection { get; }
@@ -49,6 +54,6 @@ namespace Systek.Server
         /// <summary>
         /// Updates this instance with the latest state.
         /// </summary>
-        void Update();
+        void BasicUpdate();
     }
 }

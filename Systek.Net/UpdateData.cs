@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.ServiceProcess;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -23,6 +24,22 @@ namespace Systek.Net
         public string AuthKey { get; set; }
 
         /// <summary>
+        /// The services running on the machine.
+        /// They key represents the service name, and the value represents the service's state, as
+        /// defined in <see cref="System.ServiceProcess.ServiceControllerStatus" />
+        /// 1: stopped
+        /// 2: start pending
+        /// 3: stop pending
+        /// 4: running
+        /// 5: continue pending
+        /// 6: pause pending
+        /// 7: paused
+        /// </summary>
+        /// 
+
+        public Dictionary<string, int> Services;
+
+        /// <summary>
         /// Determines whether the specified <see cref="System.Object" />, is equal to this instance.
         /// </summary>
         /// <param name="other">The <see cref="System.Object" /> to compare with this instance.</param>
@@ -41,6 +58,12 @@ namespace Systek.Net
 
             // Comparison of primitives
             if ((HostName != test.HostName) || (AuthKey != test.AuthKey))
+            {
+                return false;
+            }
+
+            // Comparison of objects
+            if (!(Services.SequenceEqual(test.Services)))
             {
                 return false;
             }

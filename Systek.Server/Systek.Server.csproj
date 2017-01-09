@@ -59,7 +59,6 @@
   <ItemGroup>
     <Compile Include="Connector.cs" />
     <Compile Include="IMachine.cs" />
-    <Compile Include="IManagedServer.cs" />
     <Compile Include="Machine.cs" />
     <Compile Include="ServerService.cs">
       <SubType>Component</SubType>

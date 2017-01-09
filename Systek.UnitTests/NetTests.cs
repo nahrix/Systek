@@ -1,6 +1,7 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Systek.Net;
 using System;
+using System.Collections.Generic;
 using System.Configuration;
 using System.Net;
 using System.Net.Sockets;
@@ -45,9 +46,18 @@ namespace Systek.UnitTests
             set.AddCommand(command2);
             set.AddCommand(command3);
 
+            Dictionary<string, int> services = new Dictionary<string, int>();
+            services.Add("test1", 1);
+            services.Add("another", 2);
+            services.Add("boing", 3);
+
+            UpdateData data = new UpdateData();
+            data.Services = services;
+
             TestMsg = new Message();
             TestMsg.Type = MessageType.COMMAND;
             TestMsg.CmdSet = set;
+            TestMsg.Update = data;
         }
 
         /// <summary>
@@ -130,19 +140,19 @@ namespace Systek.UnitTests
             server.Initialize();
             agent.Initialize();
 
-            Thread.Sleep(5000);
+            Thread.Sleep(1000);
 
             Assert.IsTrue(Server.Connector.Instance.Running);
             Assert.IsTrue(Agent.Core.Instance.Running);
 
             Agent.Core.Instance.NetConnection.Send(TestMsg);
 
-            Thread.Sleep(5000);
+            Thread.Sleep(1000);
 
             agent.Stop();
             server.Stop();
 
-            Thread.Sleep(5000);
+            Thread.Sleep(1000);
 
             Assert.IsFalse(Server.Connector.Instance.Running);
             Assert.IsFalse(Agent.Core.Instance.Running);
