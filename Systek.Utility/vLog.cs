@@ -15,17 +15,8 @@ namespace Systek.Utility
     /// <summary>
     /// 
     /// </summary>
-    public partial class tblServer
+    public partial class vLog
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="tblServer"/> class.
-        /// </summary>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
-        public tblServer()
-        {
-            this.tblSystemLog = new HashSet<tblSystemLog>();
-        }
-
         /// <summary>
         /// Gets or sets the identifier.
         /// </summary>
@@ -33,6 +24,20 @@ namespace Systek.Utility
         /// The identifier.
         /// </value>
         public int ID { get; set; }
+        /// <summary>
+        /// Gets or sets the t stamp.
+        /// </summary>
+        /// <value>
+        /// The t stamp.
+        /// </value>
+        public System.DateTime tStamp { get; set; }
+        /// <summary>
+        /// Gets or sets the name.
+        /// </summary>
+        /// <value>
+        /// The name.
+        /// </value>
+        public string name { get; set; }
         /// <summary>
         /// Gets or sets the hostname.
         /// </summary>
@@ -48,41 +53,25 @@ namespace Systek.Utility
         /// </value>
         public string ip { get; set; }
         /// <summary>
-        /// Gets or sets a value indicating whether this <see cref="tblServer"/> is online.
-        /// </summary>
-        /// <value>
-        ///   <c>true</c> if online; otherwise, <c>false</c>.
-        /// </value>
-        public bool online { get; set; }
-        /// <summary>
-        /// Gets or sets the role identifier.
-        /// </summary>
-        /// <value>
-        /// The role identifier.
-        /// </value>
-        public int roleID { get; set; }
-        /// <summary>
         /// Gets or sets the name of the friendly.
         /// </summary>
         /// <value>
         /// The name of the friendly.
         /// </value>
         public string friendlyName { get; set; }
-
         /// <summary>
-        /// Gets or sets the table role.
+        /// Gets or sets the type of the area.
         /// </summary>
         /// <value>
-        /// The table role.
+        /// The type of the area.
         /// </value>
-        public virtual tblRole tblRole { get; set; }
+        public string areaType { get; set; }
         /// <summary>
-        /// Gets or sets the table system log.
+        /// Gets or sets the message.
         /// </summary>
         /// <value>
-        /// The table system log.
+        /// The message.
         /// </value>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<tblSystemLog> tblSystemLog { get; set; }
+        public string message { get; set; }
     }
 }

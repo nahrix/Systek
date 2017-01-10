@@ -73,6 +73,18 @@
     <Compile Include="tblAreaType.cs">
       <DependentUpon>SystekDB.tt</DependentUpon>
     </Compile>
+    <Compile Include="tblCommand.cs">
+      <DependentUpon>SystekDB.tt</DependentUpon>
+    </Compile>
+    <Compile Include="tblCommandSet.cs">
+      <DependentUpon>SystekDB.tt</DependentUpon>
+    </Compile>
+    <Compile Include="tblMessageLog.cs">
+      <DependentUpon>SystekDB.tt</DependentUpon>
+    </Compile>
+    <Compile Include="tblMessageType.cs">
+      <DependentUpon>SystekDB.tt</DependentUpon>
+    </Compile>
     <Compile Include="tblRole.cs">
       <DependentUpon>SystekDB.tt</DependentUpon>
     </Compile>
@@ -85,8 +97,15 @@
     <Compile Include="tblType.cs">
       <DependentUpon>SystekDB.tt</DependentUpon>
     </Compile>
+    <Compile Include="tblUser.cs">
+      <DependentUpon>SystekDB.tt</DependentUpon>
+    </Compile>
+    <Compile Include="vLog.cs">
+      <DependentUpon>SystekDB.tt</DependentUpon>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
+    <None Include="App.Config" />
     <None Include="packages.config" />
     <EntityDeploy Include="SystekDB.edmx">
       <Generator>EntityModelCodeGenerator</Generator>

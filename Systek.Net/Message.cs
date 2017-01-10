@@ -51,7 +51,21 @@ namespace Systek.Net
         /// <summary>
         /// Sends an update of the state of services on the machine
         /// </summary>
-        UPDATE_SERVICES = 9
+        UPDATE_SERVICES = 9,
+
+        /// <summary>
+        /// Run a powershell script from a file.  The file path is defined in a <see cref="Systek.Net.Command" />
+        /// <see cref="Systek.Net.Command.Cmd" /> defines the file path.
+        /// <see cref="Systek.Net.Command.Parameters" /> defines the parameters, as a single string.  ie: "-Path C:\temp -Recurse -Force"
+        /// </summary>
+        RUN_POWERSHELL_SCRIPT = 10,
+
+        /// <summary>
+        /// Run a SQL script from a file.  The file path is defined in a <see cref="Systek.Net.Command" />
+        /// <see cref="Systek.Net.Command.Cmd" /> defines the file path.
+        /// <see cref="Systek.Net.Command.Parameters" /> defines the parameters, as a single string, with parameters separated by a space.
+        /// </summary>
+        RUN_SQL_SCRIPT = 11
     };
 
 

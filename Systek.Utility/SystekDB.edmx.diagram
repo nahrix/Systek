@@ -5,15 +5,25 @@
     <!-- Diagram content (shape and connector positions) -->
     <edmx:Diagrams>
       <Diagram DiagramId="adeff6664b754acb984dfcab00d928cf" Name="Diagram1">
-        <EntityTypeShape EntityType="SystekModel.tblAreaType" Width="1.5" PointX="3" PointY="4.625" IsExpanded="true" />
-        <EntityTypeShape EntityType="SystekModel.tblRole" Width="1.5" PointX="0.75" PointY="1.375" IsExpanded="true" />
-        <EntityTypeShape EntityType="SystekModel.tblServer" Width="1.5" PointX="3" PointY="1" IsExpanded="true" />
-        <EntityTypeShape EntityType="SystekModel.tblSystemLog" Width="1.5" PointX="5.25" PointY="1" IsExpanded="true" />
-        <EntityTypeShape EntityType="SystekModel.tblType" Width="1.5" PointX="3" PointY="6.875" IsExpanded="true" />
+        <EntityTypeShape EntityType="SystekModel.tblAreaType" Width="1.5" PointX="2.5" PointY="0.5" IsExpanded="true" />
+        <EntityTypeShape EntityType="SystekModel.tblRole" Width="1.5" PointX="0.5" PointY="0.5" IsExpanded="true" />
+        <EntityTypeShape EntityType="SystekModel.tblServer" Width="1.5" PointX="0.5" PointY="2.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="SystekModel.tblSystemLog" Width="1.5" PointX="2.5" PointY="2.625" IsExpanded="true" />
+        <EntityTypeShape EntityType="SystekModel.tblType" Width="1.5" PointX="4.5" PointY="2.75" IsExpanded="true" />
         <AssociationConnector Association="SystekModel.FK_tblSystemLog_tblAreaType" ManuallyRouted="false" />
         <AssociationConnector Association="SystekModel.FK_tblServer_tblRole" ManuallyRouted="false" />
         <AssociationConnector Association="SystekModel.FK_tblSystemLog_tblServer" ManuallyRouted="false" />
         <AssociationConnector Association="SystekModel.FK_tblSystemLog_tblType" ManuallyRouted="false" />
+        <EntityTypeShape EntityType="SystekModel.tblCommand" Width="1.5" PointX="6.75" PointY="2.75" />
+        <EntityTypeShape EntityType="SystekModel.tblCommandSet" Width="1.5" PointX="6.75" PointY="0.5" />
+        <EntityTypeShape EntityType="SystekModel.tblMessageLog" Width="1.5" PointX="8.875" PointY="0.5" />
+        <EntityTypeShape EntityType="SystekModel.tblMessageType" Width="1.5" PointX="8.875" PointY="3.75" />
+        <EntityTypeShape EntityType="SystekModel.tblUser" Width="1.5" PointX="10.875" PointY="1" />
+        <EntityTypeShape EntityType="SystekModel.vLog" Width="1.5" PointX="11.5" PointY="3.875" />
+        <AssociationConnector Association="SystekModel.FK_tblCommand_tblCommandSet" />
+        <AssociationConnector Association="SystekModel.FK_tblMessageLog_tblCommandSet" />
+        <AssociationConnector Association="SystekModel.FK_tblMessageLog_tblMessageType" />
+        <AssociationConnector Association="SystekModel.FK_tblMessageLog_tblUser" />
       </Diagram>
     </edmx:Diagrams>
   </edmx:Designer>

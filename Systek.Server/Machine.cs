@@ -187,7 +187,6 @@ namespace Systek.Server
 
             BasicUpdate();
             Authenticate();
-            NetConnection.Send(new Message() { Type = MessageType.UPDATE_SERVICES });
         }
 
         /// <summary>
@@ -275,12 +274,6 @@ namespace Systek.Server
                         case MessageType.UPDATE_SERVICES:
                             Services.Clear();
                             Services = msg.Update.Services;
-
-                            Console.WriteLine("Updating services list on machine with ID: " + MachineID);
-                            foreach (KeyValuePair<string, int> service in Services)
-                            {
-                                Console.WriteLine(service.Key + " " + service.Value);
-                            }
                             break;
 
                         // Execute commands passed in by the agent

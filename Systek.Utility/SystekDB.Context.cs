@@ -14,7 +14,7 @@ namespace Systek.Utility
     using System.Data.Entity.Infrastructure;
 
     /// <summary>
-    /// Logging context
+    /// 
     /// </summary>
     /// <seealso cref="System.Data.Entity.DbContext" />
     public partial class LoggingContext : DbContext
@@ -92,5 +92,47 @@ namespace Systek.Utility
         /// The type of the table.
         /// </value>
         public virtual DbSet<tblType> tblType { get; set; }
+        /// <summary>
+        /// Gets or sets the table command.
+        /// </summary>
+        /// <value>
+        /// The table command.
+        /// </value>
+        public virtual DbSet<tblCommand> tblCommand { get; set; }
+        /// <summary>
+        /// Gets or sets the table command set.
+        /// </summary>
+        /// <value>
+        /// The table command set.
+        /// </value>
+        public virtual DbSet<tblCommandSet> tblCommandSet { get; set; }
+        /// <summary>
+        /// Gets or sets the table message log.
+        /// </summary>
+        /// <value>
+        /// The table message log.
+        /// </value>
+        public virtual DbSet<tblMessageLog> tblMessageLog { get; set; }
+        /// <summary>
+        /// Gets or sets the type of the table message.
+        /// </summary>
+        /// <value>
+        /// The type of the table message.
+        /// </value>
+        public virtual DbSet<tblMessageType> tblMessageType { get; set; }
+        /// <summary>
+        /// Gets or sets the table user.
+        /// </summary>
+        /// <value>
+        /// The table user.
+        /// </value>
+        public virtual DbSet<tblUser> tblUser { get; set; }
+        /// <summary>
+        /// Gets or sets the v log.
+        /// </summary>
+        /// <value>
+        /// The v log.
+        /// </value>
+        public virtual DbSet<vLog> vLog { get; set; }
     }
 }

@@ -253,6 +253,7 @@ namespace Systek.Agent
                         };
                         break;
 
+                    // Gather a list of all services, along with their current state, and send the list to the server
                     case MessageType.UPDATE_SERVICES:
                         Dictionary<string, int> services = new Dictionary<string, int>();
 
@@ -268,15 +269,20 @@ namespace Systek.Agent
                         };
                         break;
 
+                    // Execute a set of commands, defined by CommandSet.  Single commands are treated as
+                    // a CommandSet of size 1.
                     case MessageType.COMMAND:
                         break;
-
+                    
+                    // Close the network connection down, and shut down the agent service.
                     case MessageType.CLOSE:
                         break;
 
+                    // Handle situations where a request from this agent has failed to execute on the server
                     case MessageType.FAIL:
                         break;
 
+                    // Handle log requests from the server.
                     case MessageType.LOG:
                         break;
 
