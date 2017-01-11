@@ -7,7 +7,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace Systek.Utility
+namespace Systek.Server
 {
     using System;
     using System.Collections.Generic;

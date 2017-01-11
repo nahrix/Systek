@@ -48,6 +48,8 @@
     <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.Security" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -69,6 +71,54 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SystekDB.Context.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>SystekDB.Context.tt</DependentUpon>
+    </Compile>
+    <Compile Include="SystekDB.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>SystekDB.tt</DependentUpon>
+    </Compile>
+    <Compile Include="SystekDB.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>SystekDB.edmx</DependentUpon>
+    </Compile>
+    <Compile Include="tblAreaType.cs">
+      <DependentUpon>SystekDB.tt</DependentUpon>
+    </Compile>
+    <Compile Include="tblCommand.cs">
+      <DependentUpon>SystekDB.tt</DependentUpon>
+    </Compile>
+    <Compile Include="tblCommandSet.cs">
+      <DependentUpon>SystekDB.tt</DependentUpon>
+    </Compile>
+    <Compile Include="tblMessageLog.cs">
+      <DependentUpon>SystekDB.tt</DependentUpon>
+    </Compile>
+    <Compile Include="tblMessageType.cs">
+      <DependentUpon>SystekDB.tt</DependentUpon>
+    </Compile>
+    <Compile Include="tblRole.cs">
+      <DependentUpon>SystekDB.tt</DependentUpon>
+    </Compile>
+    <Compile Include="tblServer.cs">
+      <DependentUpon>SystekDB.tt</DependentUpon>
+    </Compile>
+    <Compile Include="tblSystemLog.cs">
+      <DependentUpon>SystekDB.tt</DependentUpon>
+    </Compile>
+    <Compile Include="tblType.cs">
+      <DependentUpon>SystekDB.tt</DependentUpon>
+    </Compile>
+    <Compile Include="tblUser.cs">
+      <DependentUpon>SystekDB.tt</DependentUpon>
+    </Compile>
+    <Compile Include="vLog.cs">
+      <DependentUpon>SystekDB.tt</DependentUpon>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
@@ -79,6 +129,13 @@
       <DependentUpon>App.config</DependentUpon>
     </None>
     <None Include="packages.config" />
+    <EntityDeploy Include="SystekDB.edmx">
+      <Generator>EntityModelCodeGenerator</Generator>
+      <LastGenOutput>SystekDB.Designer.cs</LastGenOutput>
+    </EntityDeploy>
+    <None Include="SystekDB.edmx.diagram">
+      <DependentUpon>SystekDB.edmx</DependentUpon>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Systek.Net\Systek.Net.csproj">
@@ -93,6 +150,21 @@
       <Project>{8ead6285-a668-498e-9751-c7dde6b75a92}</Project>
       <Name>Systek</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="SystekDB.Context.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <DependentUpon>SystekDB.edmx</DependentUpon>
+      <LastGenOutput>SystekDB.Context.cs</LastGenOutput>
+    </Content>
+    <Content Include="SystekDB.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <DependentUpon>SystekDB.edmx</DependentUpon>
+      <LastGenOutput>SystekDB.cs</LastGenOutput>
+    </Content>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

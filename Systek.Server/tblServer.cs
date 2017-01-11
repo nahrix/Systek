@@ -7,7 +7,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace Systek.Utility
+namespace Systek.Server
 {
     using System;
     using System.Collections.Generic;
@@ -25,6 +25,7 @@ namespace Systek.Utility
         public string ip { get; set; }
         public bool online { get; set; }
         public int roleID { get; set; }
+        public string friendlyName { get; set; }
     
         public virtual tblRole tblRole { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]

@@ -39,10 +39,11 @@ namespace Systek.Net
         {
             Sequence = seq;
             Cmd = cmd;
-            Parameters = new List<string>();
 
             if (param != null)
             {
+                Parameters = new List<string>();
+
                 foreach (string value in param)
                 {
                     Parameters.Add(value);

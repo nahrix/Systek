@@ -7,15 +7,15 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace Systek.Utility
+namespace Systek.Server
 {
     using System;
     using System.Collections.Generic;
     
-    public partial class tblType
+    public partial class tblAreaType
     {
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
-        public tblType()
+        public tblAreaType()
         {
             this.tblSystemLog = new HashSet<tblSystemLog>();
         }

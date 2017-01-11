@@ -7,7 +7,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace Systek.Utility
+namespace Systek.Server
 {
     using System;
     using System.Collections.Generic;
@@ -15,6 +15,7 @@ namespace Systek.Utility
     public partial class tblSystemLog
     {
         public int ID { get; set; }
+        public System.DateTime tStamp { get; set; }
         public int typeID { get; set; }
         public int areaID { get; set; }
         public int serverID { get; set; }

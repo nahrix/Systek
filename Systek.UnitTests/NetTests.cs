@@ -58,6 +58,7 @@ namespace Systek.UnitTests
             TestMsg.Type = MessageType.COMMAND;
             TestMsg.CmdSet = set;
             TestMsg.Update = data;
+            TestMsg.CmdSetId = 1;
         }
 
         /// <summary>
@@ -148,6 +149,11 @@ namespace Systek.UnitTests
             Agent.Core.Instance.NetConnection.Send(TestMsg);
 
             Thread.Sleep(1000);
+
+            Server.IMachine agentMachine = Server.ConnectionManager.GetInstance().GetMachine(3);
+            agentMachine.NetConnection.Send(TestMsg);
+
+            Thread.Sleep(5000);
 
             agent.Stop();
             server.Stop();

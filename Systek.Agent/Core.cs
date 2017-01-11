@@ -289,12 +289,29 @@ namespace Systek.Agent
                             // Redirect the output stream of the child process.
                             p.StartInfo.UseShellExecute = false;
                             p.StartInfo.RedirectStandardOutput = true;
-                            p.StartInfo.FileName = "cmd.exe";
-                            p.Start();
+                            p.StartInfo.FileName = cmd.Cmd;
 
-                            string output = p.StandardOutput.ReadToEnd();
-                            p.WaitForExit();
+                            if (cmd.Parameters != null)
+                            {
+                                string paramString = "/" + string.Join(" /", cmd.Parameters.ToArray());
+                                p.StartInfo.Arguments = paramString;
+                            }
 
+                            string output;
+
+                            try
+                            {
+                                p.Start();
+                                reply.Type = MessageType.SUCCESS;
+                                output = p.StandardOutput.ReadToEnd();
+                                p.WaitForExit();
+                            }
+                            catch (Exception e)
+                            {
+                                reply.Type = MessageType.FAIL;
+                                output = e.Message;
+                            }
+                            
                             reply.Msg.Add(output);
                         }
                         break;
@@ -305,6 +322,13 @@ namespace Systek.Agent
 
                     // Handle situations where a request from this agent has failed to execute on the server
                     case MessageType.FAIL:
+                        if (msg.Msg != null)
+                        {
+                            foreach (string failMessage in msg.Msg)
+                            {
+                                _Log?.TblSystemLog(Type.ERROR, AreaType.AGENT_MESSAGE_HANDLER, LOCALHOST, failMessage);
+                            }
+                        }
                         break;
 
                     // Handle log requests from the server.

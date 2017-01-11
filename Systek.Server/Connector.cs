@@ -45,6 +45,10 @@ namespace Systek.Server
         /// </summary>
         private TcpListener _Listener;
 
+        /// <summary>
+        /// Defines whether logs are verbose or not.
+        /// </summary>
+        private bool _VerboseLogging;
 
         /// <summary>
         /// Constructor, privatized because this class is a singleton.
@@ -53,6 +57,7 @@ namespace Systek.Server
         {
             _Log = new Logger("ServerLogContext", ConfigurationManager.AppSettings["LocalLogPath"], "ServerConnector");
             _Listener = new TcpListener(IPAddress.Any, Port);
+            _VerboseLogging = bool.TryParse(ConfigurationManager.AppSettings["VerboseLogging"], out _VerboseLogging);
         }
 
         /// <summary>
@@ -126,9 +131,14 @@ namespace Systek.Server
                     {
                         _Log?.TblSystemLog(Type.ERROR, AreaType.AGENT_INITIALIZATION, SYSTEK_SERVER, "New agent connection failed to initialize.");
                     }
-
-                    agentMachine = null;
-                    agentSocket = null;
+                    else if (!ConnectionManager.GetInstance().Add(agentMachine))
+                    {
+                        _Log?.TblSystemLog(Type.ERROR, AreaType.AGENT_INITIALIZATION, SYSTEK_SERVER, "ConnectionManager failed to add IMachine to its list.");
+                    }
+                    else if (_VerboseLogging)
+                    {
+                        _Log?.TblSystemLog(Type.INFO, AreaType.AGENT_INITIALIZATION, SYSTEK_SERVER, "New machine successfully connected to server.");
+                    }
                 }
                 catch (Exception e)
                 {

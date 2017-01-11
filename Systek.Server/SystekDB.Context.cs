@@ -7,16 +7,16 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace Systek.Utility
+namespace Systek.Server
 {
     using System;
     using System.Data.Entity;
     using System.Data.Entity.Infrastructure;
     
-    public partial class LoggingContext : DbContext
+    public partial class ServerContext : DbContext
     {
-        public LoggingContext()
-            : base("name=LoggingContext")
+        public ServerContext()
+            : base("name=ServerContext")
         {
         }
     
@@ -26,9 +26,15 @@ namespace Systek.Utility
         }
     
         public virtual DbSet<tblAreaType> tblAreaType { get; set; }
+        public virtual DbSet<tblCommand> tblCommand { get; set; }
+        public virtual DbSet<tblCommandSet> tblCommandSet { get; set; }
+        public virtual DbSet<tblMessageLog> tblMessageLog { get; set; }
+        public virtual DbSet<tblMessageType> tblMessageType { get; set; }
         public virtual DbSet<tblRole> tblRole { get; set; }
         public virtual DbSet<tblServer> tblServer { get; set; }
         public virtual DbSet<tblSystemLog> tblSystemLog { get; set; }
         public virtual DbSet<tblType> tblType { get; set; }
+        public virtual DbSet<tblUser> tblUser { get; set; }
+        public virtual DbSet<vLog> vLog { get; set; }
     }
 }
