@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.IO;
 using System.Net.Sockets;
 using System.Runtime.Serialization.Formatters.Binary;
@@ -297,7 +298,8 @@ namespace Systek.Net
                 if (!reply.Synchronized)
                 {
                     reply.Type = MessageType.TIMEOUT;
-                    reply.Msg = "Reply timed out.";
+                    reply.Msg = new List<string>();
+                    reply.Msg.Add("Reply timed out.");
                 }
 
                 _SynchronizedMessages.TryRemove(msg.SyncId, out msg);
@@ -305,9 +307,11 @@ namespace Systek.Net
             }
             catch (Exception e)
             {
+                string errorMsg = "Exception caught while handling a synchronized message.";
                 reply.Type = MessageType.FAIL;
-                reply.Msg = "Exception caught while handling a synchronized message.";
-                _LogEvent?.Invoke(new LogEventArgs(Type.ERROR, AreaType.NET_LIB, reply.Msg, e));
+                reply.Msg = new List<string>();
+                reply.Msg.Add(errorMsg);
+                _LogEvent?.Invoke(new LogEventArgs(Type.ERROR, AreaType.NET_LIB, errorMsg, e));
                 return reply;
             }
         }

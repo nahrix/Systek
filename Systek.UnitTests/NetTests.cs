@@ -152,7 +152,7 @@ namespace Systek.UnitTests
             agent.Stop();
             server.Stop();
 
-            Thread.Sleep(1000);
+            Thread.Sleep(5000);
 
             Assert.IsFalse(Server.Connector.Instance.Running);
             Assert.IsFalse(Agent.Core.Instance.Running);

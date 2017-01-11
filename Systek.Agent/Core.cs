@@ -3,6 +3,7 @@ using Systek.Utility;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
+using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
@@ -272,6 +273,30 @@ namespace Systek.Agent
                     // Execute a set of commands, defined by CommandSet.  Single commands are treated as
                     // a CommandSet of size 1.
                     case MessageType.COMMAND:
+                        if (msg.CmdSet == null || msg.CmdSetId == 0)
+                        {
+                            reply.Type = MessageType.FAIL;
+                            break;
+                        }
+
+                        reply.Msg = new List<string>();
+
+                        foreach (ICommand cmd in msg.CmdSet)
+                        {
+                            // Start the child process.
+                            Process p = new Process();
+
+                            // Redirect the output stream of the child process.
+                            p.StartInfo.UseShellExecute = false;
+                            p.StartInfo.RedirectStandardOutput = true;
+                            p.StartInfo.FileName = "cmd.exe";
+                            p.Start();
+
+                            string output = p.StandardOutput.ReadToEnd();
+                            p.WaitForExit();
+
+                            reply.Msg.Add(output);
+                        }
                         break;
                     
                     // Close the network connection down, and shut down the agent service.

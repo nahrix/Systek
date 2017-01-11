@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Systek.Net
 {
@@ -107,7 +109,7 @@ namespace Systek.Net
         /// <summary>
         /// A human-readable message.  Used to describe a log, for example.
         /// </summary>
-        public string Msg;
+        public List<string> Msg;
 
         /// <summary>
         /// The type of log, if there is one, defined in tblType.
@@ -142,7 +144,7 @@ namespace Systek.Net
             Message test = (Message)other;
 
             // Comparison of primitives
-            if ((Type != test.Type) || (Synchronized != test.Synchronized) || (SyncId != test.SyncId) || (Msg != test.Msg)
+            if ((Type != test.Type) || (Synchronized != test.Synchronized) || (SyncId != test.SyncId)
                 || (LogType != test.LogType) || (CmdSetId != test.CmdSetId) || (AreaType != test.AreaType))
             {
                 return false;
@@ -150,7 +152,8 @@ namespace Systek.Net
 
             // Comparison of objects
             if ((!CmdSet?.Equals(test.CmdSet) ?? (test.CmdSet != null))
-                || (!Update?.Equals(test.Update) ?? (test.Update != null)))
+                || (!Update?.Equals(test.Update) ?? (test.Update != null))
+                || (Msg != null && test.Msg != null && !Enumerable.SequenceEqual(Msg, test.Msg)))
             {
                 return false;
             }

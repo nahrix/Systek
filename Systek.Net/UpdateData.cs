@@ -63,7 +63,7 @@ namespace Systek.Net
             }
 
             // Comparison of objects
-            if (!(Services.SequenceEqual(test.Services)))
+            if (Services != null && test.Services != null && !(Services.SequenceEqual(test.Services)))
             {
                 return false;
             }

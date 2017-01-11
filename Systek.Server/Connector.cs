@@ -24,6 +24,7 @@ namespace Systek.Server
         /// </summary>
         public bool Running { get; private set; }
 
+
         /// <summary>
         /// The ID of the systek server, as used in tblServer
         /// </summary>
@@ -43,6 +44,7 @@ namespace Systek.Server
         /// Listens for incoming connection requests
         /// </summary>
         private TcpListener _Listener;
+
 
         /// <summary>
         /// Constructor, privatized because this class is a singleton.

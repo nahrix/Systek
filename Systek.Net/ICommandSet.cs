@@ -5,7 +5,7 @@ namespace Systek.Net
     /// <summary>
     /// Defines a set of commands to be run sequentially.
     /// </summary>
-    public interface ICommandSet
+    public interface ICommandSet : IEnumerable<ICommand>
     {
         /// <summary>
         /// The commands to be run in sequence.  Each command has a sequence number, starting at 1,
