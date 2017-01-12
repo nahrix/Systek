@@ -37,8 +37,8 @@ namespace Systek.UnitTests
             Finished = false;
 
             // Mock Message to be passed from agent to server
-            ICommand command1 = new Command(CommandType.CONSOLE, 1, "test command");
-            ICommand command2 = new Command(CommandType.CONSOLE, 2, "test command 2");
+            ICommand command1 = new Command(CommandType.CONSOLE, 1, "badcommand");
+            ICommand command2 = new Command(CommandType.CONSOLE, 2, "ipconfig");
             ICommand command3 = new Command(CommandType.CONSOLE, 3, "ipconfig", new List<string> { "badflag1" });
 
             ICommandSet set = new CommandSet(1, 3);
@@ -158,7 +158,7 @@ namespace Systek.UnitTests
             agent.Stop();
             server.Stop();
 
-            Thread.Sleep(5000);
+            Thread.Sleep(3000);
 
             Assert.IsFalse(Server.Connector.Instance.Running);
             Assert.IsFalse(Agent.Core.Instance.Running);

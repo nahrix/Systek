@@ -230,6 +230,11 @@ namespace Systek.Server
         /// <param name="e">The <see cref="LogEventArgs"/> instance containing the event data.</param>
         public void LogHandler(LogEventArgs e)
         {
+            if (NetConnection == null || !NetConnection.Connected)
+            {
+                return;
+            }
+
             string message = "Server log handler: " + e.Message;
 
             if (e.ExceptionDetail != null)
