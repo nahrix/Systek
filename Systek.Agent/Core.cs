@@ -273,47 +273,7 @@ namespace Systek.Agent
                     // Execute a set of commands, defined by CommandSet.  Single commands are treated as
                     // a CommandSet of size 1.
                     case MessageType.COMMAND:
-                        if (msg.CmdSet == null || msg.CmdSetId == 0)
-                        {
-                            reply.Type = MessageType.FAIL;
-                            break;
-                        }
-
-                        reply.Msg = new List<string>();
-
-                        foreach (ICommand cmd in msg.CmdSet)
-                        {
-                            // Start the child process.
-                            Process p = new Process();
-
-                            // Redirect the output stream of the child process.
-                            p.StartInfo.UseShellExecute = false;
-                            p.StartInfo.RedirectStandardOutput = true;
-                            p.StartInfo.FileName = cmd.Cmd;
-
-                            if (cmd.Parameters != null)
-                            {
-                                string paramString = "/" + string.Join(" /", cmd.Parameters.ToArray());
-                                p.StartInfo.Arguments = paramString;
-                            }
-
-                            string output;
-
-                            try
-                            {
-                                p.Start();
-                                reply.Type = MessageType.SUCCESS;
-                                output = p.StandardOutput.ReadToEnd();
-                                p.WaitForExit();
-                            }
-                            catch (Exception e)
-                            {
-                                reply.Type = MessageType.FAIL;
-                                output = e.Message;
-                            }
-                            
-                            reply.Msg.Add(output);
-                        }
+                        reply = _ExecuteCommands(msg, reply);
                         break;
                     
                     // Close the network connection down, and shut down the agent service.
@@ -346,6 +306,80 @@ namespace Systek.Agent
             {
                 _Log?.TblSystemLog(Type.ERROR, AreaType.AGENT_MESSAGE_HANDLER, LOCALHOST, "Error while processing a message from the server.\n\n" + e.Message);
             }
+        }
+
+        /// <summary>
+        /// Executes commands that were passed in from the server via a COMMAND message.
+        /// </summary>
+        /// <param name="msg">The original COMMAND message from the server.</param>
+        /// <param name="reply">The reply, which will contain the results of the execution.</param>
+        /// <returns></returns>
+        private Message _ExecuteCommands(Message msg, Message reply)
+        {
+            if (msg.CmdSet == null || msg.CmdSetId == 0)
+            {
+                reply.Type = MessageType.FAIL;
+                return reply;
+            }
+
+            reply.Msg = new List<string>();
+
+            foreach (ICommand cmd in msg.CmdSet)
+            {
+                switch (cmd.CmdType)
+                {
+                    // ---------------------------------------------------------------------------------------
+                    // Process windows-console commands ------------------------------------------------------
+                    // ---------------------------------------------------------------------------------------
+                    case CommandType.CONSOLE:
+                        // Start the child process.
+                        Process p = new Process();
+
+                        // Redirect the output stream of the child process.
+                        p.StartInfo.UseShellExecute = false;
+                        p.StartInfo.RedirectStandardOutput = true;
+                        p.StartInfo.FileName = cmd.Cmd;
+
+                        if (cmd.Parameters != null)
+                        {
+                            string paramString = "/" + string.Join(" /", cmd.Parameters.ToArray());
+                            p.StartInfo.Arguments = paramString;
+                        }
+
+                        string output;
+
+                        // Try to execute the command, and record its success or failure
+                        try
+                        {
+                            p.Start();
+                            reply.Type = MessageType.SUCCESS;
+                            output = p.StandardOutput.ReadToEnd();
+                            p.WaitForExit();
+                        }
+                        catch (Exception e)
+                        {
+                            reply.Type = MessageType.FAIL;
+                            output = e.Message;
+                        }
+
+                        reply.Msg.Add(output);
+                        break;
+
+                    // ---------------------------------------------------------------------------------------
+                    // Process Powershell commands -----------------------------------------------------------
+                    // ---------------------------------------------------------------------------------------
+                    case CommandType.POWERSHELL:
+                        break;
+
+                    // ---------------------------------------------------------------------------------------
+                    // Process SQL commands ------------------------------------------------------------------
+                    // ---------------------------------------------------------------------------------------
+                    case CommandType.SQL:
+                        break;
+                }
+            }
+
+            return reply;
         }
     }
 }

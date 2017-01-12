@@ -7,10 +7,36 @@ using System.Threading.Tasks;
 namespace Systek.Net
 {
     /// <summary>
+    /// Defines what type of command is to be executed
+    /// </summary>
+    public enum CommandType
+    {
+        /// <summary>
+        /// A windows console command; ie, the kind executed from the command prompt.
+        /// </summary>
+        CONSOLE = 1,
+
+        /// <summary>
+        /// A Powershell command
+        /// </summary>
+        POWERSHELL = 2,
+
+        /// <summary>
+        /// A SQL command
+        /// </summary>
+        SQL = 3
+    }
+
+    /// <summary>
     /// An instruction sent from one machine to another.
     /// </summary>
     public interface ICommand
     {
+        /// <summary>
+        /// Gets the type of the command.
+        /// </summary>
+        CommandType CmdType { get; }
+
         /// <summary>
         /// The position in the queue of commands to be run within the CommandSet.
         /// </summary>

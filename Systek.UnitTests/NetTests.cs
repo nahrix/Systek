@@ -37,9 +37,9 @@ namespace Systek.UnitTests
             Finished = false;
 
             // Mock Message to be passed from agent to server
-            ICommand command1 = new Command(1, "test command");
-            ICommand command2 = new Command(2, "test command 2");
-            ICommand command3 = new Command(3, "1234");
+            ICommand command1 = new Command(CommandType.CONSOLE, 1, "test command");
+            ICommand command2 = new Command(CommandType.CONSOLE, 2, "test command 2");
+            ICommand command3 = new Command(CommandType.CONSOLE, 3, "ipconfig", new List<string> { "badflag1" });
 
             ICommandSet set = new CommandSet(1, 3);
             set.AddCommand(command1);

@@ -14,6 +14,11 @@ namespace Systek.Net
     public class Command : ICommand
     {
         /// <summary>
+        /// Gets the type of the command.
+        /// </summary>
+        public CommandType CmdType { get; private set; }
+
+        /// <summary>
         /// The position in the queue of commands to be run within the CommandSet.
         /// </summary>
         public int Sequence { get; private set; }
@@ -32,11 +37,13 @@ namespace Systek.Net
         /// <summary>
         /// Initializes a new instance of the <see cref="Command" /> class.
         /// </summary>
+        /// <param name="cmdType">Type of the command.</param>
         /// <param name="seq">The sequence number of this command.</param>
         /// <param name="cmd">The command to be executed.</param>
         /// <param name="param">The parameters for the command, if any.</param>
-        public Command(int seq, string cmd, List<string> param = null)
+        public Command(CommandType cmdType, int seq, string cmd, List<string> param = null)
         {
+            CmdType = cmdType;
             Sequence = seq;
             Cmd = cmd;
 
