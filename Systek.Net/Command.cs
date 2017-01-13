@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Systek.Utility;
 
 namespace Systek.Net
 {
@@ -31,7 +33,17 @@ namespace Systek.Net
         /// <summary>
         /// The parameters for the command to be executed, if any.
         /// </summary>
-        public List<string> Parameters { get; private set; }
+        public Dictionary<string, string> Parameters { get; private set; }
+
+        /// <summary>
+        /// Gets or sets the status of the command.
+        /// </summary>
+        public CommandStatus Status { get; set; }
+
+        /// <summary>
+        /// Gets or sets the output returned after running the command.
+        /// </summary>
+        public List<string> Output { get; set; }
 
 
         /// <summary>
@@ -40,22 +52,15 @@ namespace Systek.Net
         /// <param name="cmdType">Type of the command.</param>
         /// <param name="seq">The sequence number of this command.</param>
         /// <param name="cmd">The command to be executed.</param>
-        /// <param name="param">The parameters for the command, if any.</param>
-        public Command(CommandType cmdType, int seq, string cmd, List<string> param = null)
+        /// <param name="parameters">The parameters of the command, if any.</param>
+        public Command(CommandType cmdType, int seq, string cmd, Dictionary<string, string> parameters = null)
         {
             CmdType = cmdType;
             Sequence = seq;
             Cmd = cmd;
-
-            if (param != null)
-            {
-                Parameters = new List<string>();
-
-                foreach (string value in param)
-                {
-                    Parameters.Add(value);
-                }
-            }
+            Parameters = parameters;
+            Status = CommandStatus.NOT_EXECUTED;
+            Output = new List<string>();
         }
 
         /// <summary>
@@ -76,7 +81,8 @@ namespace Systek.Net
             Command test = (Command)other;
 
             // Comparison of primitives
-            if ((Sequence != test.Sequence) || (Cmd != test.Cmd) || !Parameters.SequenceEqual(test.Parameters))
+            if ((Sequence != test.Sequence) || (Cmd != test.Cmd) || !Parameters.DictionaryEqual<string, string>(test.Parameters)
+                || Status != test.Status || !Output.SequenceEqual(test.Output))
             {
                 return false;
             }

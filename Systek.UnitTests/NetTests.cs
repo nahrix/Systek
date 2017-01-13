@@ -36,10 +36,13 @@ namespace Systek.UnitTests
             // Flag will be true when all execution is complete, and Asserts are ready to be evaluated
             Finished = false;
 
+            Dictionary<string, string> parameters = new Dictionary<string, string>();
+            parameters.Add("badflag1", null);
+
             // Mock Message to be passed from agent to server
-            ICommand command1 = new Command(CommandType.CONSOLE, 1, "badcommand");
+            ICommand command1 = new Command(CommandType.POWERSHELL, 1, "Get-ChildItems c:\\");
             ICommand command2 = new Command(CommandType.CONSOLE, 2, "ipconfig");
-            ICommand command3 = new Command(CommandType.CONSOLE, 3, "ipconfig", new List<string> { "badflag1" });
+            ICommand command3 = new Command(CommandType.CONSOLE, 3, "ipconfig", parameters);
 
             ICommandSet set = new CommandSet(1, 3);
             set.AddCommand(command1);
@@ -153,7 +156,7 @@ namespace Systek.UnitTests
             Server.IMachine agentMachine = Server.ConnectionManager.GetInstance().GetMachine(3);
             agentMachine.NetConnection.Send(TestMsg);
 
-            Thread.Sleep(5000);
+            Thread.Sleep(10000);
 
             agent.Stop();
             server.Stop();

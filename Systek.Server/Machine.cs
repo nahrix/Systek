@@ -292,32 +292,25 @@ namespace Systek.Server
                             NetConnection.Dispose();
                             return;
 
-                        // TODO:  Handle each FAIL case
+                        // Handle a failed CommandSet.  A failed CommandSet is defined as a CommandSet
+                        // in which any one or more of its commands have failed.
                         case MessageType.FAIL:
-                            if (msg.Msg != null)
+                            if (msg.CmdSet != null && msg.CmdSet.Count() > 0)
                             {
-                                for (int i = 0; i < msg.Msg.Count; i++)
-                                {
-                                    if (_VerboseLogging)
-                                    {
-                                        Console.WriteLine("Failed command " + i + ": " + msg.Msg[i]);
-                                    }
-                                    _Log?.TblSystemLog(Type.ERROR, AreaType.SERVER_MESSAGE_HANDLER, MachineID, msg.Msg[i]);
-                                }
+                                _Log?.TblSystemLog(Type.ERROR, AreaType.SERVER_MESSAGE_HANDLER, MachineID,
+                                    "CommandSet " + msg.CmdSetId + " has failed.");
+                                _LogCommandExecution(msg);
                             }
                             break;
 
+                        // Handle a successful CommandSet.  A successful CommandSet is defined as a CommandSet
+                        // in which every one of its commands executed successfully
                         case MessageType.SUCCESS:
-                            if (msg.Msg != null)
+                            if (msg.CmdSet != null && msg.CmdSet.Count() > 0)
                             {
-                                for (int i = 0; i < msg.Msg.Count; i++)
-                                {
-                                    if (_VerboseLogging)
-                                    {
-                                        Console.WriteLine("Processed command " + i + ": " + msg.Msg[i]);
-                                        _Log?.TblSystemLog(Type.INFO, AreaType.SERVER_MESSAGE_HANDLER, MachineID, msg.Msg[i]);
-                                    }
-                                }
+                                _Log?.TblSystemLog(Type.INFO, AreaType.SERVER_MESSAGE_HANDLER, MachineID,
+                                    "CommandSet " + msg.CmdSetId + " executed.");
+                                _LogCommandExecution(msg);
                             }
                             break;
 
@@ -357,6 +350,39 @@ namespace Systek.Server
             {
                 _Log?.TblSystemLog(Type.ERROR, AreaType.SERVER_MACHINE, MachineID, "Error while processing a message from the agent.\n\n" + e.Message);
                 NetConnection.Close();
+            }
+        }
+
+        /// <summary>
+        /// Handles how replies to commands are to be recorded for further use.
+        /// </summary>
+        /// <param name="msg">The reply to the COMMAND message, with all the output from the executed commands.</param>
+        private void _LogCommandExecution(Message msg)
+        {
+            foreach (ICommand cmd in msg.CmdSet)
+            {
+                foreach (string output in cmd.Output)
+                {
+                    if (cmd.Status == CommandStatus.SUCCCESS)
+                    {
+                        if (_VerboseLogging)
+                        {
+                            Console.WriteLine("Executed command " + cmd.Sequence + ": " + output);
+                        }
+                        _Log?.TblSystemLog(Type.INFO, AreaType.SERVER_MESSAGE_HANDLER, MachineID, "CommandSet " + msg.CmdSetId
+                        + ", Command " + cmd.Sequence + ": " + output);
+                    }
+                    else
+                    {
+                        if (_VerboseLogging)
+                        {
+                            Console.WriteLine("Failed command " + cmd.Sequence + ": " + output);
+                        }
+                        _Log?.TblSystemLog(Type.ERROR, AreaType.SERVER_MESSAGE_HANDLER, MachineID, "CommandSet " + msg.CmdSetId
+                        + ", Command " + cmd.Sequence + ": " + output);
+                    }
+
+                }
             }
         }
     }

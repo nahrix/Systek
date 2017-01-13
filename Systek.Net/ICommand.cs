@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -28,6 +29,27 @@ namespace Systek.Net
     }
 
     /// <summary>
+    /// Defines the current status of the command
+    /// </summary>
+    public enum CommandStatus
+    {
+        /// <summary>
+        /// The command executed successfully
+        /// </summary>
+        SUCCCESS = 1,
+
+        /// <summary>
+        /// The command failed during execution
+        /// </summary>
+        FAIL = 2,
+
+        /// <summary>
+        /// The command has not been executed yet
+        /// </summary>
+        NOT_EXECUTED = 3
+    }
+
+    /// <summary>
     /// An instruction sent from one machine to another.
     /// </summary>
     public interface ICommand
@@ -50,6 +72,16 @@ namespace Systek.Net
         /// <summary>
         /// The parameters for the command to be executed, if any.
         /// </summary>
-        List<string> Parameters { get; }
+        Dictionary<string, string> Parameters { get; }
+
+        /// <summary>
+        /// Gets or sets the status of the command.
+        /// </summary>
+        CommandStatus Status { get; set; }
+
+        /// <summary>
+        /// Gets or sets the output returned after running the command.
+        /// </summary>
+        List<string> Output { get; set; }
     }
 }

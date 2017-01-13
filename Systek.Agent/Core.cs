@@ -2,9 +2,11 @@
 using Systek.Utility;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Configuration;
 using System.Diagnostics;
 using System.Linq;
+using System.Management.Automation;
 using System.Net;
 using System.Net.Sockets;
 using System.ServiceProcess;
@@ -273,6 +275,7 @@ namespace Systek.Agent
                     // Execute a set of commands, defined by CommandSet.  Single commands are treated as
                     // a CommandSet of size 1.
                     case MessageType.COMMAND:
+                        reply.CmdSet = msg.CmdSet;
                         reply = _ExecuteCommands(msg, reply);
                         break;
                     
@@ -322,8 +325,7 @@ namespace Systek.Agent
                 return reply;
             }
 
-            reply.Msg = new List<string>();
-
+            int i = 0;
             foreach (ICommand cmd in msg.CmdSet)
             {
                 switch (cmd.CmdType)
@@ -342,33 +344,93 @@ namespace Systek.Agent
 
                         if (cmd.Parameters != null)
                         {
-                            string paramString = "/" + string.Join(" /", cmd.Parameters.ToArray());
+                            string paramString = "";
+                            foreach (KeyValuePair<string, string> parameter in cmd.Parameters)
+                            {
+                                paramString += "/" + parameter.Key + " " + parameter.Value;
+                            }
+
                             p.StartInfo.Arguments = paramString;
                         }
 
-                        string output;
+                        string consoleOutput;
 
                         // Try to execute the command, and record its success or failure
                         try
                         {
                             p.Start();
-                            reply.Type = MessageType.SUCCESS;
-                            output = p.StandardOutput.ReadToEnd();
+                            consoleOutput = p.StandardOutput.ReadToEnd();
                             p.WaitForExit();
+
+                            if (reply.Type != MessageType.FAIL)
+                            {
+                                reply.Type = MessageType.SUCCESS;
+                            }
+                            reply.CmdSet.Commands[i].Status = CommandStatus.SUCCCESS;
                         }
                         catch (Exception e)
                         {
                             reply.Type = MessageType.FAIL;
-                            output = e.Message;
+                            reply.CmdSet.Commands[i].Status = CommandStatus.FAIL;
+                            consoleOutput = e.Message;
                         }
 
-                        reply.Msg.Add(output);
+                        reply.CmdSet.Commands[i].Output.Add(consoleOutput);
                         break;
 
                     // ---------------------------------------------------------------------------------------
                     // Process Powershell commands -----------------------------------------------------------
                     // ---------------------------------------------------------------------------------------
                     case CommandType.POWERSHELL:
+                        using (PowerShell powershellInstance = PowerShell.Create())
+                        {
+                            try
+                            {
+                                if (cmd.Parameters != null)
+                                {
+                                    powershellInstance.AddParameters(cmd.Parameters);
+                                }
+
+                                powershellInstance.AddScript(cmd.Cmd);
+
+                                Collection<PSObject> PSOutput = powershellInstance.Invoke();
+
+                                // Get the output of the successful execution
+                                foreach (PSObject outputItem in PSOutput)
+                                {
+                                    if (outputItem != null)
+                                    {
+                                        reply.Msg.Add(outputItem.ToString());
+
+                                        if (reply.Type != MessageType.FAIL)
+                                        {
+                                            reply.Type = MessageType.SUCCESS;
+                                        }
+                                        reply.CmdSet.Commands[i].Status = CommandStatus.SUCCCESS;
+                                    }
+                                }
+
+                                // Get any error output
+                                if (powershellInstance.Streams.Error.Count > 0)
+                                {
+                                    reply.Type = MessageType.FAIL;
+                                    reply.CmdSet.Commands[i].Status = CommandStatus.FAIL;
+
+                                    foreach (ErrorRecord error in powershellInstance.Streams.Error)
+                                    {
+                                        reply.CmdSet.Commands[i].Output.Add(error.ToString());
+                                    }
+                                }
+                            }
+                            catch (Exception e)
+                            {
+                                reply.Type = MessageType.FAIL;
+                                reply.CmdSet.Commands[i].Status = CommandStatus.FAIL;
+                                reply.CmdSet.Commands[i].Output.Add(e.Message);
+                            }
+                            
+                        }
+
                         break;
 
                     // ---------------------------------------------------------------------------------------
@@ -377,6 +439,8 @@ namespace Systek.Agent
                     case CommandType.SQL:
                         break;
                 }
+
+                i++;
             }
 
             return reply;
